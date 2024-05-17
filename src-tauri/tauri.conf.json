@@ -7,7 +7,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "soccer_event_tagger",
+    "productName": "Soccer Event Tagger",
     "version": "0.0.0"
   },
   "tauri": {
@@ -28,9 +28,9 @@
     },
     "windows": [
       {
-        "title": "soccer_event_tagger",
-        "width": 800,
-        "height": 600
+        "title": "Soccer Event Tagger",
+        "width": 1440,
+        "height": 900
       }
     ],
     "security": {
@@ -39,7 +39,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "soccer.event.tagger",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
