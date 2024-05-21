@@ -1,14 +1,6 @@
+use super::{convertFileSrc, invoke};
 use leptos::*;
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke(cmd: &str) -> JsValue;
-
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    fn convertFileSrc(path: &str) -> JsValue;
-}
+use types::Dummy;
 
 const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[130px] text-xs text-black hover:text-white";
 
@@ -21,13 +13,14 @@ pub fn MenuBar(menu_bar: NodeRef<html::Div>) -> impl IntoView {
     let get_file_path = move |ev: ev::MouseEvent| {
         ev.prevent_default();
         spawn_local(async move {
-            let res = invoke("open").await.as_string().unwrap();
-            if let Some(res) = res.strip_prefix("\"") {
-                let res = res.strip_suffix("\"").unwrap();
-                let resolved_path = convertFileSrc(res).as_string().unwrap();
-                logging::log!("resolved path: {:?}", resolved_path);
-                set_video_src.set(Some(resolved_path));
-            }
+            let args = serde_wasm_bindgen::to_value(&Dummy {
+                content: "dummy".to_string(),
+            })
+            .unwrap();
+            let res = invoke("open", args).await.as_string().unwrap();
+            let resolved_path = convertFileSrc(&res).as_string().unwrap();
+            logging::log!("resolved path: {:?}", resolved_path);
+            set_video_src.set(Some(resolved_path));
         });
     };
 
