@@ -1,6 +1,7 @@
-use super::invoke;
+use super::{convertFileSrc, invoke};
 use leptos::*;
 use types::Dummy;
+use wasm_bindgen::UnwrapThrowExt;
 
 const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[130px] text-xs text-black hover:text-white";
 
@@ -8,6 +9,7 @@ const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-6
 pub fn MenuBar(menu_bar: NodeRef<html::Div>) -> impl IntoView {
     let set_video_src = expect_context::<WriteSignal<Option<String>>>();
     let show_menu = expect_context::<ReadSignal<bool>>();
+    // let video_player = expect_context::<NodeRef<html::Video>>();
 
     // pls refer to this documentation: https://tauri.app/v1/api/js/tauri/#convertfilesrc
     let get_file_path = move |ev: ev::MouseEvent| {
@@ -17,8 +19,18 @@ pub fn MenuBar(menu_bar: NodeRef<html::Div>) -> impl IntoView {
                 content: "dummy".to_string(),
             })
             .unwrap();
-            let resolved_path = invoke("open", args).await.as_string().unwrap();
+            let path_protocol = invoke("open", args).await;
+            let (path, protocol): (String, String) =
+                serde_wasm_bindgen::from_value(path_protocol).unwrap_throw();
+            let resolved_path = convertFileSrc(path, protocol).as_string().unwrap();
+
             logging::log!("resolved path: {:?}", resolved_path);
+
+            // create_effect(move |_| {
+            //     let source = document().create_element("source").unwrap();
+            //     source.set_attribute("src", resolved_path.as_str()).unwrap();
+            //     video_player.get().unwrap().append_child(&source).unwrap();
+            // });
             set_video_src.set(Some(resolved_path));
         });
     };
