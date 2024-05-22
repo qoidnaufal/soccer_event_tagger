@@ -11,9 +11,6 @@ use types::{Event, Payload, Point, TaggedEvent};
 extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
     pub async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    pub fn convertFileSrc(path: &str) -> JsValue;
 }
 
 #[component]
@@ -117,46 +114,20 @@ pub fn App() -> impl IntoView {
                             outcome: "Out of Play".to_string(),
                         },
                         // --- goal kick
-                        "pgks" => Event::Pass {
+                        "gks" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Goalkick".to_string(),
                             outcome: "Success".to_string(),
                         },
-                        "pgki" => Event::Pass {
+                        "gki" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Goalkick".to_string(),
                             outcome: "Intercepted".to_string(),
                         },
-                        "pgko" => Event::Pass {
+                        "gko" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Goalkick".to_string(),
                             outcome: "Out of Play".to_string(),
-                        },
-                        "pgkclr" => Event::Pass {
-                            name: "Pass".to_string(),
-                            pass_type: "Goalkick".to_string(),
-                            outcome: "Clearance".to_string(),
-                        },
-                        // --- goalkeeper throw
-                        "trgks" => Event::Pass {
-                            name: "Pass".to_string(),
-                            pass_type: "Goalkeeper Throw".to_string(),
-                            outcome: "Success".to_string(),
-                        },
-                        "trgki" => Event::Pass {
-                            name: "Pass".to_string(),
-                            pass_type: "Goalkeeper Throw".to_string(),
-                            outcome: "Intercepted".to_string(),
-                        },
-                        "trgko" => Event::Pass {
-                            name: "Pass".to_string(),
-                            pass_type: "Goalkeeper Throw".to_string(),
-                            outcome: "Out of Play".to_string(),
-                        },
-                        "trgkclr" => Event::Pass {
-                            name: "Pass".to_string(),
-                            pass_type: "Goalkeeper Throw".to_string(),
-                            outcome: "Clearance".to_string(),
                         },
                         // --- shot
                         "son" => Event::Shot {
@@ -234,114 +205,104 @@ pub fn App() -> impl IntoView {
                             outcome: "Blocked".to_string(),
                         },
                         // --- throw
-                        "trs" => Event::Pass {
+                        "tis" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Throw In".to_string(),
                             outcome: "Success".to_string(),
                         },
-                        "tri" => Event::Pass {
+                        "tii" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Throw In".to_string(),
                             outcome: "Intercepted".to_string(),
                         },
-                        "tro" => Event::Pass {
+                        "tio" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Throw In".to_string(),
                             outcome: "Out of Play".to_string(),
                         },
                         // --- Direct cornerkick
-                        "dcks" => Event::Pass {
+                        "ckds" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Direct Cornerkick".to_string(),
                             outcome: "Success".to_string(),
                         },
-                        "dcki" => Event::Pass {
+                        "ckdi" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Direct Cornerkick".to_string(),
                             outcome: "Intercepted".to_string(),
                         },
-                        "dckc" => Event::Pass {
+                        "ckdc" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Direct Cornerkick".to_string(),
                             outcome: "Claimed".to_string(),
                         },
-                        "dcko" => Event::Pass {
+                        "ckdo" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Direct Cornerkick".to_string(),
                             outcome: "Out of Play".to_string(),
                         },
-                        "dckgg" => Event::Shot {
+                        "cksg" => Event::Shot {
                             name: "Shot".to_string(),
                             shot_type: "Direct Cornerkick".to_string(),
                             outcome: "Goal".to_string(),
                         },
-                        "dckgon" => Event::Shot {
+                        "ckson" => Event::Shot {
                             name: "Shot".to_string(),
                             shot_type: "Direct Cornerkick".to_string(),
                             outcome: "On Target".to_string(),
                         },
-                        "dckclr" => Event::Pass {
-                            name: "Pass".to_string(),
-                            pass_type: "Cornerkick".to_string(),
-                            outcome: "Clearance".to_string(),
-                        },
                         // --- Short cornerkick
-                        "scks" => Event::Pass {
+                        "ckps" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Short Cornerkick".to_string(),
                             outcome: "Success".to_string(),
                         },
-                        "scki" => Event::Pass {
+                        "ckpi" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Short Cornerkick".to_string(),
                             outcome: "Intercepted".to_string(),
                         },
-                        "scko" => Event::Pass {
+                        "ckpo" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Short Cornerkick".to_string(),
                             outcome: "Out of Play".to_string(),
                         },
                         // --- Direct freekick
-                        "dfkon" => Event::Shot {
+                        "fkon" => Event::Shot {
                             name: "Shot".to_string(),
                             shot_type: "Freekick".to_string(),
                             outcome: "On Target".to_string(),
                         },
-                        "dfkof" => Event::Shot {
+                        "fkof" => Event::Shot {
                             name: "Shot".to_string(),
                             shot_type: "Freekick".to_string(),
                             outcome: "Off Target".to_string(),
                         },
-                        "dfkb" => Event::Shot {
+                        "fkb" => Event::Shot {
                             name: "Shot".to_string(),
                             shot_type: "Freekick".to_string(),
                             outcome: "Blocked".to_string(),
                         },
                         // --- Indirect freekick
-                        "ifkps" => Event::Pass {
+                        "fkps" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Freekick".to_string(),
                             outcome: "Success".to_string(),
                         },
-                        "ifkpi" => Event::Pass {
+                        "fkpi" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Freekick".to_string(),
                             outcome: "Intercepted".to_string(),
                         },
-                        "ifkpo" => Event::Pass {
+                        "fkpo" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Freekick".to_string(),
                             outcome: "Out of Play".to_string(),
                         },
-                        "ifkpc" => Event::Pass {
+                        "fkpc" => Event::Pass {
                             name: "Pass".to_string(),
                             pass_type: "Freekick".to_string(),
                             outcome: "Claimed".to_string(),
-                        },
-                        "ifkpclr" => Event::Pass {
-                            name: "Pass".to_string(),
-                            pass_type: "Freekick".to_string(),
-                            outcome: "Clearance".to_string(),
                         },
                         // --- tackle
                         "tw" => Event::Tackle {
@@ -365,7 +326,7 @@ pub fn App() -> impl IntoView {
                             name: "Intercept".to_string(),
                             event_source: "Cornerkick".to_string(),
                         },
-                        "itr" => Event::Intercept {
+                        "iti" => Event::Intercept {
                             name: "Intercept".to_string(),
                             event_source: "Throw In".to_string(),
                         },
@@ -382,6 +343,10 @@ pub fn App() -> impl IntoView {
                             name: "Clearance".to_string(),
                             event_source: "Cornerkick".to_string(),
                         },
+                        "clrti" => Event::Clearance {
+                            name: "Clearance".to_string(),
+                            event_source: "Throw In".to_string(),
+                        },
                         // --- block
                         "bs" => Event::Block {
                             name: "Block".to_string(),
@@ -390,6 +355,10 @@ pub fn App() -> impl IntoView {
                         "bp" => Event::Block {
                             name: "Block".to_string(),
                             event_source: "Pass".to_string(),
+                        },
+                        "bcr" => Event::Block {
+                            name: "Block".to_string(),
+                            event_source: "Crossing".to_string(),
                         },
                         // --- pressure
                         "prop" => Event::Pressure {
@@ -429,7 +398,7 @@ pub fn App() -> impl IntoView {
                             name: "Save".to_string(),
                             event_source: "Cornerkick".to_string(),
                         },
-                        "svtr" => Event::Save {
+                        "svti" => Event::Save {
                             name: "Save".to_string(),
                             event_source: "Throw In".to_string(),
                         },
@@ -450,6 +419,10 @@ pub fn App() -> impl IntoView {
                             name: "Catch".to_string(),
                             event_source: "Cornerkick".to_string(),
                         },
+                        "ctti" => Event::Catch {
+                            name: "Catch".to_string(),
+                            event_source: "Throw In".to_string(),
+                        },
                         // --- other events
                         "f" => Event::Other {
                             name: "Foul".to_string(),
@@ -460,8 +433,17 @@ pub fn App() -> impl IntoView {
                         "rc" => Event::Other {
                             name: "Red Card".to_string(),
                         },
+                        "eofh" => Event::Other {
+                            name: "End of First Half".to_string(),
+                        },
+                        "eosh" => Event::Other {
+                            name: "End of Second Half".to_string(),
+                        },
+                        "eom" => Event::Other {
+                            name: "End of Match".to_string(),
+                        },
                         _ => Event::Other {
-                            name: "No Event".to_string(),
+                            name: "Unregistered".to_string(),
                         },
                     };
 

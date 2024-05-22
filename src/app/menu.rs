@@ -1,4 +1,4 @@
-use super::{convertFileSrc, invoke};
+use super::invoke;
 use leptos::*;
 use types::Dummy;
 
@@ -17,8 +17,7 @@ pub fn MenuBar(menu_bar: NodeRef<html::Div>) -> impl IntoView {
                 content: "dummy".to_string(),
             })
             .unwrap();
-            let res = invoke("open", args).await.as_string().unwrap();
-            let resolved_path = convertFileSrc(&res).as_string().unwrap();
+            let resolved_path = invoke("open", args).await.as_string().unwrap();
             logging::log!("resolved path: {:?}", resolved_path);
             set_video_src.set(Some(resolved_path));
         });
