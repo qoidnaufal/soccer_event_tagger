@@ -3,6 +3,8 @@ use std::io::{Read, Seek, SeekFrom, Write};
 use std::sync::{Arc, Mutex};
 use tauri::http::{header, status::StatusCode, HttpRange, Request, Response, ResponseBuilder, Uri};
 
+const MAX_LEN: u64 = 4000 * 1024;
+
 pub fn get_stream_response(
     request: &Request,
     boundary_id: &Arc<Mutex<i32>>,
@@ -22,7 +24,7 @@ pub fn get_stream_response(
 
     let mut resp = ResponseBuilder::new().mimetype("video/mp4");
     let http_response = if let Some(range_header) = request.headers().get("range") {
-        log::info!("range header: {:?}", range_header);
+        // log::info!("range header: {:?}", range_header);
         let not_satisfiable = || {
             ResponseBuilder::new()
                 .status(StatusCode::RANGE_NOT_SATISFIABLE)
@@ -30,16 +32,14 @@ pub fn get_stream_response(
                 .body(vec![])
         };
 
-        let ranges = if let Ok(ranges) = HttpRange::parse(range_header.to_str()?, len) {
-            ranges
+        let ranges = if let Ok(http_range) = HttpRange::parse(range_header.to_str()?, len) {
+            http_range
                 .iter()
                 .map(|r| (r.start, r.start + r.length - 1))
                 .collect::<Vec<_>>()
         } else {
             return Ok(not_satisfiable()?);
         };
-
-        const MAX_LEN: u64 = 1000 * 1024;
 
         if ranges.len() == 1 {
             let &(start, mut end) = ranges.first().unwrap();

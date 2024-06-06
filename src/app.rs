@@ -4,6 +4,7 @@ use wasm_bindgen::prelude::*;
 
 mod menu;
 mod pitch;
+mod video;
 
 use types::{Event, Payload, Point, TaggedEvent};
 
@@ -24,10 +25,10 @@ pub fn App() -> impl IntoView {
     let (tagged_event, set_tagged_event) = create_signal(TaggedEvent::new());
     let (event_buffer, set_event_buffer) = create_signal(String::new());
 
-    let video_player = create_node_ref::<html::Video>();
+    let video_player_node_ref = create_node_ref::<html::Video>();
 
     window_event_listener(ev::keydown, move |ev| {
-        let video_player = video_player.get().unwrap();
+        let video_player = video_player_node_ref.get().unwrap();
         match ev.key().as_str() {
             // --- playback control
             " " => {
@@ -41,7 +42,7 @@ pub fn App() -> impl IntoView {
                 let current_playback_rate = video_player.playback_rate();
                 video_player.set_playback_rate(current_playback_rate + 0.25);
             }
-            "_" => {
+            "-" => {
                 let current_playback_rate = video_player.playback_rate();
                 video_player.set_playback_rate(current_playback_rate - 0.25);
             }
@@ -164,7 +165,6 @@ pub fn App() -> impl IntoView {
 
     provide_context(show_menu);
     provide_context(set_video_src);
-    // provide_context(video_player);
 
     view! {
         <main class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row">
@@ -187,35 +187,51 @@ pub fn App() -> impl IntoView {
             <div id="event-tagger" class="flex flex-col px-[10px]">
                 <div class="relative flex flex-row w-fit h-fit">
                     <pitch::Pitch set_coordinate/>
-                    <video
-                        src=move || video_src.get().unwrap_or_default()
-                        _ref=video_player
-                        controls
-                        width="1020"
-                        class="pointer-events-none"
-                    />
-                    //     <source
-                    //         // src=move || video_src.get().unwrap_or_default()
-                    //         type="video/mp4"
-                    //     />
-                    // </video>
+                    <video::VideoPlayer video_src video_player_node_ref/>
+                </div>
+                <div>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td class="text-xs w-[130px]">"location buffer (S / E)"</td>
+                                <td class="text-xs">{ move || coordinate.get().x }" "{ move || coordinate.get().y }</td>
+                            </tr>
+                            <tr>
+                                <td class="text-xs w-[130px]">"event args buffer (R)"</td>
+                                <td class="text-xs">{ move || event_buffer.get() }</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-xs text-left w-[120px]">"time start (S)"</th>
+                                <th scope="col" class="text-xs text-left w-[120px]">"location start (S)"</th>
+                                <th scope="col" class="text-xs text-left w-[120px]">"time end (E)"</th>
+                                <th scope="col" class="text-xs text-left w-[120px]">"location end (E)"</th>
+                                <th scope="col" class="text-xs text-left w-[120px]">"team name (R)"</th>
+                                <th scope="col" class="text-xs text-left w-[120px]">"player name (R)"</th>
+                                <th scope="col" class="text-xs text-left w-[200px]">"event (R)"</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-xs">{ move || format!("{:.3}", tagged_event.get().time_start) }</td>
+                                <td class="text-xs">"x1: "{ move || tagged_event.get().loc_start.x }", y1: "{ move || tagged_event.get().loc_start.y }</td>
+                                <td class="text-xs">{ move || format!("{:.3}", tagged_event.get().time_end) }</td>
+                                <td class="text-xs">"x2: "{ move || tagged_event.get().loc_end.x }", y2: "{ move || tagged_event.get().loc_end.y }</td>
+                                <td class="text-xs">{ move || tagged_event.get().team_name }</td>
+                                <td class="text-xs">{ move || tagged_event.get().player_name }</td>
+                                <td class="text-xs">{move || tagged_event.get().event.to_string() }</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div>"TODO: team sheet"</div>
                 <div>"TODO: shortcut info"</div>
             </div>
             <div id="data-view" class="flex flex-col shrink-0">
-                <p class="text-xs">"TAGGED EVENT"</p>
-                // <p class="text-xs">"active buffer(press \"p\" / \"e\" to toggle): "{ move || format!("{:?}", buffer.get()) }</p>
-                <p class="text-xs">"coordinate buffer (press \"S\" / \"E\" to register): "{ move || coordinate.get().x }" "{ move || coordinate.get().y }</p>
-                <p class="text-xs">"event buffer (press \"R\" to register): "{ move || event_buffer.get() }</p>
-                <p class="text-xs">"time start (press \"S\" to register): "{ move || format!("{:.3}", tagged_event.get().time_start) }</p>
-                <p class="text-xs">"player name: "{ move || tagged_event.get().player_name }</p>
-                <p class="text-xs">"team name: "{ move || tagged_event.get().team_name }</p>
-                <p class="text-xs">"x1: "{ move || tagged_event.get().loc_start.x }", y1: "{ move || tagged_event.get().loc_start.y }</p>
-                <p class="text-xs">"event name: "{move || tagged_event.get().event.to_string() }</p>
-                <p class="text-xs">"time end (press \"E\" to register): "{ move || format!("{:.3}", tagged_event.get().time_end) }</p>
-                <p class="text-xs">"x2: "{ move || tagged_event.get().loc_end.x }", y2: "{ move || tagged_event.get().loc_end.y }</p>
-                // <p>"video time: "{ move || (time.get() / 60.0).floor() }":"{ move || (time.get() % 60.0).floor() }</p>
+                <p class="text-xs">"TAGGED EVENT => TODO: tables"</p>
             </div>
         </main>
     }

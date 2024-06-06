@@ -637,8 +637,16 @@ video {
   height: fit-content;
 }
 
+.w-\[120px\] {
+  width: 120px;
+}
+
 .w-\[130px\] {
   width: 130px;
+}
+
+.w-\[200px\] {
+  width: 200px;
 }
 
 .w-fit {
@@ -721,6 +729,10 @@ video {
 .px-\[10px\] {
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.text-left {
+  text-align: left;
 }
 
 .text-xs {
