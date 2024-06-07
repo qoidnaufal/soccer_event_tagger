@@ -8,12 +8,26 @@ mod stream;
 use std::sync::{Arc, Mutex};
 use tauri::{GlobalShortcutManager, Manager};
 
-#[tauri::command]
-fn ctrl_p(app_handle: tauri::AppHandle) -> tauri::Result<()> {
+fn op() {
+    let maybe_path = rfd::FileDialog::new().pick_file();
+
+    if let Some(path) = maybe_path {
+        log::info!("{:?}", path);
+    }
+}
+
+fn ctrl_o(app_handle: tauri::AppHandle) -> tauri::Result<()> {
     app_handle
         .global_shortcut_manager()
-        .register("CTRL + I", move || log::info!("CTRL + I is pressed"))
+        .register("CTRL + O", move || op())
         .map_err(|err| tauri::Error::Runtime(err))
+}
+
+fn ctrl_i(app_handle: tauri::AppHandle) -> tauri::Result<()> {
+    app_handle
+        .global_shortcut_manager()
+        .register("CTRL + I", move || log::info!("CTRL + I"))
+        .map_err(tauri::Error::Runtime)
 }
 
 fn main() -> tauri::Result<()> {
@@ -22,14 +36,15 @@ fn main() -> tauri::Result<()> {
     let boundary_id = Arc::new(Mutex::new(0));
 
     tauri::Builder::default()
-        .register_uri_scheme_protocol("stream", move |_app_handle, request| {
+        .register_uri_scheme_protocol("stream", move |_, request| {
             stream::get_stream_response(request, &boundary_id)
         })
         .setup(|app| {
             let app_handle = app.app_handle();
-            ctrl_p(app_handle)?;
+            ctrl_o(app_handle.clone())?;
+            ctrl_i(app_handle)?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![file::open, ctrl_p, data::register])
+        .invoke_handler(tauri::generate_handler![file::open, data::register])
         .run(tauri::generate_context!())
 }

@@ -9,7 +9,6 @@ const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-6
 pub fn MenuBar(menu_bar: NodeRef<html::Div>) -> impl IntoView {
     let set_video_src = expect_context::<WriteSignal<Option<String>>>();
     let show_menu = expect_context::<ReadSignal<bool>>();
-    // let video_player = expect_context::<NodeRef<html::Video>>();
 
     // pls refer to this documentation: https://tauri.app/v1/api/js/tauri/#convertfilesrc
     let get_file_path = move |ev: ev::MouseEvent| {
@@ -26,11 +25,6 @@ pub fn MenuBar(menu_bar: NodeRef<html::Div>) -> impl IntoView {
 
             logging::log!("resolved path: {:?}", resolved_path);
 
-            // create_effect(move |_| {
-            //     let source = document().create_element("source").unwrap();
-            //     source.set_attribute("src", resolved_path.as_str()).unwrap();
-            //     video_player.get().unwrap().append_child(&source).unwrap();
-            // });
             set_video_src.set(Some(resolved_path));
         });
     };

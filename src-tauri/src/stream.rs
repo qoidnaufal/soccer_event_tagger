@@ -9,6 +9,8 @@ pub fn get_stream_response(
     request: &Request,
     boundary_id: &Arc<Mutex<i32>>,
 ) -> Result<Response, Box<dyn std::error::Error>> {
+    // log::info!("req: {:?}", request);
+
     let uri = request.uri().parse::<Uri>().unwrap();
     let path = percent_decode(uri.path().as_bytes())
         .decode_utf8_lossy()

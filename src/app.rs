@@ -1,5 +1,4 @@
 use leptos::*;
-use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 
 mod menu;
@@ -54,7 +53,7 @@ pub fn App() -> impl IntoView {
             "Backspace" => {
                 set_event_buffer.update(|e| {
                     if !e.is_empty() {
-                        let _ = e.pop();
+                        e.pop();
                     }
                 });
             }
@@ -81,10 +80,10 @@ pub fn App() -> impl IntoView {
                         .collect::<String>();
                     let event = Event::from_event_args(event_args.as_str());
 
-                    set_tagged_event.update(|evt| {
-                        evt.player_name = number;
-                        evt.team_name = team;
-                        evt.event = event;
+                    set_tagged_event.update(|tag| {
+                        tag.player_name = number;
+                        tag.team_name = team;
+                        tag.event = event;
                     });
 
                     set_event_buffer.set(String::new());
@@ -95,16 +94,16 @@ pub fn App() -> impl IntoView {
                 if !video_player.paused() {
                     let _ = video_player.pause();
                 }
-                set_tagged_event.update(|evt| evt.time_start = video_player.current_time());
-                set_tagged_event.update(|evt| evt.loc_start = coordinate.get());
+                set_tagged_event.update(|tag| tag.time_start = video_player.current_time());
+                set_tagged_event.update(|tag| tag.loc_start = coordinate.get());
                 set_coordinate.set(Point::new());
             }
             "E" => {
                 if !video_player.paused() {
                     let _ = video_player.pause();
                 }
-                set_tagged_event.update(|evt| evt.time_end = video_player.current_time());
-                set_tagged_event.update(|evt| evt.loc_end = coordinate.get());
+                set_tagged_event.update(|tag| tag.time_end = video_player.current_time());
+                set_tagged_event.update(|tag| tag.loc_end = coordinate.get());
                 set_coordinate.set(Point::new());
             }
             // --- event outcome
@@ -116,7 +115,7 @@ pub fn App() -> impl IntoView {
                     let payload = Payload {
                         payload: tagged_event.clone(),
                     };
-                    let args = to_value(&payload).unwrap();
+                    let args = serde_wasm_bindgen::to_value(&payload).unwrap();
                     let _ = invoke("register", args).await;
 
                     set_tagged_event.set(TaggedEvent::new());

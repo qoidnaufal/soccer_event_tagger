@@ -4,9 +4,9 @@ mod event;
 mod point;
 mod tagged_event;
 
-pub type Event = event::Event;
-pub type TaggedEvent = tagged_event::TaggedEvent;
-pub type Point = point::Point;
+pub use event::Event;
+pub use point::Point;
+pub use tagged_event::TaggedEvent;
 
 #[derive(Serialize, Deserialize)]
 pub struct Dummy {
