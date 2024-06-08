@@ -49,7 +49,8 @@ fn main() -> tauri::Result<()> {
         .invoke_handler(tauri::generate_handler![
             file::open,
             data::register,
-            data::delete
+            data::get_all,
+            data::delete,
         ])
         .run(tauri::generate_context!())
 }

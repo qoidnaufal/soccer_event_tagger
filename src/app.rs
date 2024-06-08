@@ -20,14 +20,18 @@ extern "C" {
 #[component]
 pub fn App() -> impl IntoView {
     let (video_src, set_video_src) = create_signal::<Option<String>>(None);
-    let (coordinate, set_coordinate) = create_signal(Point::new());
+    let (coordinate, set_coordinate) = create_signal(Point::default());
     let (show_menu, set_show_menu) = create_signal(false);
-    let (tagged_event, set_tagged_event) = create_signal(TaggedEvent::new());
+    let (tagged_event, set_tagged_event) = create_signal(TaggedEvent::default());
     let (event_buffer, set_event_buffer) = create_signal(String::new());
-
-    let (data, set_data) = create_signal::<Vec<TaggedEvent>>(Vec::new());
+    let (team_buffer, set_team_buffer) = create_signal(String::new());
+    let (player_buffer, set_player_buffer) = create_signal(String::new());
+    let (action_buffer, set_action_buffer) = create_signal(Event::default());
+    // let (data, set_data) = create_signal::<Vec<TaggedEvent>>(Vec::new());
 
     let video_player_node_ref = create_node_ref::<html::Video>();
+
+    let register_action = create_action(|payload: &JsValue| invoke("register", payload.clone()));
 
     window_event_listener(ev::keydown, move |ev| {
         let video_player = video_player_node_ref.get().unwrap();
@@ -60,38 +64,6 @@ pub fn App() -> impl IntoView {
                     }
                 });
             }
-            "R" => {
-                if !event_buffer.get().is_empty() {
-                    let args = event_buffer.get();
-                    let number = args
-                        .chars()
-                        .into_iter()
-                        .filter(|c| c.to_string().parse::<i32>().is_ok())
-                        .collect::<String>();
-                    // .parse::<i32>()
-                    // .unwrap_or_default();
-                    let team = match args.chars().next().unwrap() {
-                        'a' => "Away".to_string(),
-                        'h' => "Home".to_string(),
-                        _ => "".to_string(),
-                    };
-                    let event_args = args
-                        .chars()
-                        .into_iter()
-                        .filter(|c| c.to_string().parse::<i32>().is_err())
-                        .skip(1)
-                        .collect::<String>();
-                    let event = Event::from_event_args(event_args.as_str());
-
-                    set_tagged_event.update(|tag| {
-                        tag.player_name = number;
-                        tag.team_name = team;
-                        tag.event = event;
-                    });
-
-                    set_event_buffer.set(String::new());
-                }
-            }
             // --- start & end time of the event
             "S" => {
                 if !video_player.paused() {
@@ -99,7 +71,7 @@ pub fn App() -> impl IntoView {
                 }
                 set_tagged_event.update(|tag| tag.time_start = video_player.current_time());
                 set_tagged_event.update(|tag| tag.loc_start = coordinate.get());
-                set_coordinate.set(Point::new());
+                set_coordinate.set(Point::default());
             }
             "E" => {
                 if !video_player.paused() {
@@ -107,36 +79,53 @@ pub fn App() -> impl IntoView {
                 }
                 set_tagged_event.update(|tag| tag.time_end = video_player.current_time());
                 set_tagged_event.update(|tag| tag.loc_end = coordinate.get());
-                set_coordinate.set(Point::new());
+                set_coordinate.set(Point::default());
             }
             // --- event outcome
             "Enter" => {
-                // logging::log!("tagged event: {:?}", tagged_event.get());
                 // --- dump the data to the table
-                spawn_local(async move {
-                    set_tagged_event.update(|tag| {
-                        let uuid = tag.time_start.to_string();
-                        // let uuid = uuid::Uuid::now_v7().as_simple().to_string();
-                        tag.uuid = uuid;
-                    });
-                    let tagged_event = tagged_event.get_untracked();
-                    let payload = Payload {
-                        payload: tagged_event.clone(),
-                    };
-                    let args = serde_wasm_bindgen::to_value(&payload).unwrap();
-                    let registered_event = invoke("register", args).await;
-
-                    let output =
-                        serde_wasm_bindgen::from_value::<Vec<types::TaggedEvent>>(registered_event)
-                            .unwrap();
-
-                    set_data.update(|d| *d = output);
-
-                    set_tagged_event.set(TaggedEvent::new());
+                set_tagged_event.update(|tag| {
+                    let uuid = (tag.time_start * 1000.) as u64;
+                    tag.uuid = uuid;
+                    tag.player_name = player_buffer.get_untracked();
+                    tag.team_name = team_buffer.get_untracked();
+                    tag.event = action_buffer.get_untracked();
                 });
+                let tagged_event = tagged_event.get_untracked();
+                let payload = Payload {
+                    payload: tagged_event.clone(),
+                };
+                let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
+
+                register_action.dispatch(payload);
+
+                set_tagged_event.set(TaggedEvent::default());
+                set_event_buffer.set(String::new());
             }
             o if ("0"..="9").contains(&o) || ("a"..="z").contains(&o) => {
                 set_event_buffer.update(|e| e.push_str(o));
+                let args = event_buffer.get();
+                let number = args
+                    .chars()
+                    .into_iter()
+                    .filter(|c| c.to_string().parse::<i32>().is_ok())
+                    .collect::<String>()
+                    .parse::<i32>()
+                    .unwrap_or_default();
+                set_player_buffer.update(|p| *p = number.to_string());
+                let team = match args.chars().nth(0).unwrap() {
+                    'a' => "Away".to_string(),
+                    'h' => "Home".to_string(),
+                    _ => "".to_string(),
+                };
+                set_team_buffer.update(|t| *t = team);
+                let event_args = args
+                    .chars()
+                    .into_iter()
+                    .filter(|c| c.to_string().parse::<i32>().is_err())
+                    .skip(1)
+                    .collect::<String>();
+                set_action_buffer.update(|a| *a = Event::from_event_args(event_args.as_str()));
             }
             "ArrowRight" => {
                 let current_time = video_player.current_time();
@@ -216,22 +205,22 @@ pub fn App() -> impl IntoView {
                             <td class="text-xs w-[200px]">"time & location buffer (S / E) "{ move || coordinate.get().x }" "{ move || coordinate.get().y }</td>
                             <td class="text-xs flex flex-row">
                                 <p>{ move || format!("{:.3}", tagged_event.get().time_start) }"-"</p>
-                                <p>{ move || tagged_event.get().loc_start.x }" "{ move || tagged_event.get().loc_start.y }"-"</p>
+                                <p>{ move || tagged_event.get().loc_start.to_string() }"-"</p>
                                 <p>{ move || format!("{:.3}", tagged_event.get().time_end) }"-"</p>
-                                <p>{ move || tagged_event.get().loc_end.x }" "{ move || tagged_event.get().loc_end.y }</p>
+                                <p>{ move || tagged_event.get().loc_end.to_string() }</p>
                             </td>
                         </tr>
                         <tr>
                             <td class="text-xs w-[200px]">"event args buffer (R) "{ move || event_buffer.get() }</td>
                             <td class="text-xs flex flex-row">
-                                <p>{ move || tagged_event.get().team_name }"-"</p>
-                                <p>{ move || tagged_event.get().player_name }"-"</p>
-                                <p>{ move || tagged_event.get().event.to_string() }</p>
+                                <p class="text-xs">{ move || team_buffer.get() }</p>
+                                <p class="text-xs">{ move || player_buffer.get() }</p>
+                                <p class="text-xs">{ move || action_buffer.get().to_string() }</p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <table_data::TableData data set_data video_player_node_ref/>
+                <table_data::TableData video_player_node_ref register_action/>
             </div>
         </main>
     }

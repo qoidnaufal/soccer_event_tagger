@@ -6,7 +6,7 @@ use super::{Event, Point};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaggedEvent {
-    pub uuid: String,
+    pub uuid: u64,
     pub time_start: f64,
     pub player_name: String,
     pub team_name: String,
@@ -19,8 +19,6 @@ pub struct TaggedEvent {
 impl PartialEq for TaggedEvent {
     fn eq(&self, other: &Self) -> bool {
         self.uuid == other.uuid
-            && self.loc_start == other.loc_start
-            && self.player_name == other.player_name
     }
 }
 
@@ -47,41 +45,14 @@ impl Hash for TaggedEvent {
 impl Default for TaggedEvent {
     fn default() -> Self {
         Self {
-            uuid: String::new(),
+            uuid: 0,
             time_start: 0.,
             player_name: String::new(),
             team_name: String::new(),
-            loc_start: Point::new(),
-            event: Event::Other {
-                name: String::new(),
-            },
+            loc_start: Point::default(),
+            event: Event::default(),
             time_end: 0.,
-            loc_end: Point::new(),
-        }
-    }
-}
-
-impl TaggedEvent {
-    pub fn new() -> Self {
-        let uuid = "".to_string();
-        let time_start = 0.0;
-        let player_name = "".to_string();
-        let team_name = "".to_string();
-        let loc_start = Point::new();
-        let event = Event::Other {
-            name: "No Event".to_string(),
-        };
-        let time_end = 0.0;
-        let loc_end = Point::new();
-        Self {
-            uuid,
-            time_start,
-            player_name,
-            team_name,
-            loc_start,
-            event,
-            time_end,
-            loc_end,
+            loc_end: Point::default(),
         }
     }
 }

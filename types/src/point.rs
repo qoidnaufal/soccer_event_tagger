@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -6,9 +8,9 @@ pub struct Point {
     pub y: Option<i32>,
 }
 
-impl PartialEq for Point {
-    fn eq(&self, other: &Self) -> bool {
-        self.x.as_ref().unwrap() == other.x.as_ref().unwrap()
+impl Display for Point {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "x: {:?}, y: {:?}", self.x, self.y)
     }
 }
 
@@ -21,12 +23,6 @@ impl Default for Point {
 }
 
 impl Point {
-    pub fn new() -> Self {
-        let x = None;
-        let y = None;
-        Self { x, y }
-    }
-
     pub fn reset(&mut self) {
         self.x = None;
         self.y = None;
