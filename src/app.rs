@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::*;
 
 mod menu;
 mod pitch;
+mod table_data;
 mod video;
 
 use types::{Event, Payload, Point, TaggedEvent};
@@ -23,6 +24,8 @@ pub fn App() -> impl IntoView {
     let (show_menu, set_show_menu) = create_signal(false);
     let (tagged_event, set_tagged_event) = create_signal(TaggedEvent::new());
     let (event_buffer, set_event_buffer) = create_signal(String::new());
+
+    let (data, set_data) = create_signal::<Vec<TaggedEvent>>(Vec::new());
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
@@ -108,15 +111,26 @@ pub fn App() -> impl IntoView {
             }
             // --- event outcome
             "Enter" => {
-                logging::log!("tagged event: {:?}", tagged_event.get());
+                // logging::log!("tagged event: {:?}", tagged_event.get());
                 // --- dump the data to the table
                 spawn_local(async move {
+                    set_tagged_event.update(|tag| {
+                        let uuid = tag.time_start.to_string();
+                        // let uuid = uuid::Uuid::now_v7().as_simple().to_string();
+                        tag.uuid = uuid;
+                    });
                     let tagged_event = tagged_event.get_untracked();
                     let payload = Payload {
                         payload: tagged_event.clone(),
                     };
                     let args = serde_wasm_bindgen::to_value(&payload).unwrap();
-                    let _ = invoke("register", args).await;
+                    let registered_event = invoke("register", args).await;
+
+                    let output =
+                        serde_wasm_bindgen::from_value::<Vec<types::TaggedEvent>>(registered_event)
+                            .unwrap();
+
+                    set_data.update(|d| *d = output);
 
                     set_tagged_event.set(TaggedEvent::new());
                 });
@@ -146,8 +160,8 @@ pub fn App() -> impl IntoView {
     let menu_bar = create_node_ref::<html::Div>();
 
     window_event_listener(ev::click, move |ev| {
-        if let Some(menu_bar) = menu_bar.get() {
-            if menu_bar.is_mounted()
+        if let Some(menu) = menu_bar.get() {
+            if menu.is_mounted()
                 && !ev
                     .target()
                     .unwrap()
@@ -155,7 +169,7 @@ pub fn App() -> impl IntoView {
                     .ok()
                     .as_ref()
                     .unwrap()
-                    .contains(Some(&menu_bar))
+                    .contains(Some(&menu))
             {
                 set_show_menu.set(false);
             }
@@ -166,71 +180,58 @@ pub fn App() -> impl IntoView {
     provide_context(set_video_src);
 
     view! {
-        <main class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row">
-            <div>
-                <Show when=move || show_menu.get() == false
-                    fallback=|| view! {
-                        <button
-                            class="rotate-90 border-none bg-slate-600 hover:bg-slate-400 px-2 size-[30px] rounded-t-lg text-white">
-                            "X"
-                        </button>
-                    }>
-                    <button
-                        on:click=toggle_menu
-                        class="rotate-90 border-none bg-slate-600 hover:bg-slate-400 px-2 size-[30px] rounded-t-lg text-white">
-                        "|||"
-                    </button>
-                </Show>
-            </div>
-            <menu::MenuBar menu_bar/>
-            <div id="event-tagger" class="flex flex-col px-[10px]">
-                <div class="relative flex flex-row w-fit h-fit">
-                    <pitch::Pitch set_coordinate/>
-                    <video::VideoPlayer video_src video_player_node_ref/>
-                </div>
+        <main class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col">
+            <div class="flex flex-row">
                 <div>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td class="text-xs w-[130px]">"location buffer (S / E)"</td>
-                                <td class="text-xs">{ move || coordinate.get().x }" "{ move || coordinate.get().y }</td>
-                            </tr>
-                            <tr>
-                                <td class="text-xs w-[130px]">"event args buffer (R)"</td>
-                                <td class="text-xs">{ move || event_buffer.get() }</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th scope="col" class="text-xs text-left w-[120px]">"time start (S)"</th>
-                                <th scope="col" class="text-xs text-left w-[120px]">"location start (S)"</th>
-                                <th scope="col" class="text-xs text-left w-[120px]">"time end (E)"</th>
-                                <th scope="col" class="text-xs text-left w-[120px]">"location end (E)"</th>
-                                <th scope="col" class="text-xs text-left w-[120px]">"team name (R)"</th>
-                                <th scope="col" class="text-xs text-left w-[120px]">"player name (R)"</th>
-                                <th scope="col" class="text-xs text-left w-[200px]">"event (R)"</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-xs">{ move || format!("{:.3}", tagged_event.get().time_start) }</td>
-                                <td class="text-xs">"x1: "{ move || tagged_event.get().loc_start.x }", y1: "{ move || tagged_event.get().loc_start.y }</td>
-                                <td class="text-xs">{ move || format!("{:.3}", tagged_event.get().time_end) }</td>
-                                <td class="text-xs">"x2: "{ move || tagged_event.get().loc_end.x }", y2: "{ move || tagged_event.get().loc_end.y }</td>
-                                <td class="text-xs">{ move || tagged_event.get().team_name }</td>
-                                <td class="text-xs">{ move || tagged_event.get().player_name }</td>
-                                <td class="text-xs">{move || tagged_event.get().event.to_string() }</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <Show when=move || show_menu.get() == false
+                        fallback=|| view! {
+                            <button
+                                class="rotate-90 border-none bg-slate-600 hover:bg-slate-400 px-2 size-[30px] rounded-t-lg text-white">
+                                "X"
+                            </button>
+                        }>
+                        <button
+                            on:click=toggle_menu
+                            class="rotate-90 border-none bg-slate-600 hover:bg-slate-400 px-2 size-[30px] rounded-t-lg text-white">
+                            "|||"
+                        </button>
+                    </Show>
                 </div>
-                <div>"TODO: team sheet"</div>
-                <div>"TODO: shortcut info"</div>
+                <menu::MenuBar menu_bar/>
+                <div id="event-tagger" class="flex flex-col px-[10px]">
+                    <div class="relative flex flex-row w-fit h-fit">
+                        <pitch::Pitch set_coordinate/>
+                        <video::VideoPlayer video_src video_player_node_ref/>
+                    </div>
+                </div>
+                <div id="info" class="flex flex-col shrink-0">
+                    <div class="text-xs">"TODO: team sheet"</div>
+                    <div class="text-xs">"TODO: shortcut info"</div>
+                </div>
             </div>
-            <div id="data-view" class="flex flex-col shrink-0">
-                <p class="text-xs">"TAGGED EVENT => TODO: tables"</p>
+            <div class="flex flex-col px-[40px]">
+                <table class="max-w-[1000px]">
+                    <tbody>
+                        <tr>
+                            <td class="text-xs w-[200px]">"time & location buffer (S / E) "{ move || coordinate.get().x }" "{ move || coordinate.get().y }</td>
+                            <td class="text-xs flex flex-row">
+                                <p>{ move || format!("{:.3}", tagged_event.get().time_start) }"-"</p>
+                                <p>{ move || tagged_event.get().loc_start.x }" "{ move || tagged_event.get().loc_start.y }"-"</p>
+                                <p>{ move || format!("{:.3}", tagged_event.get().time_end) }"-"</p>
+                                <p>{ move || tagged_event.get().loc_end.x }" "{ move || tagged_event.get().loc_end.y }</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-xs w-[200px]">"event args buffer (R) "{ move || event_buffer.get() }</td>
+                            <td class="text-xs flex flex-row">
+                                <p>{ move || tagged_event.get().team_name }"-"</p>
+                                <p>{ move || tagged_event.get().player_name }"-"</p>
+                                <p>{ move || tagged_event.get().event.to_string() }</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table_data::TableData data set_data video_player_node_ref/>
             </div>
         </main>
     }

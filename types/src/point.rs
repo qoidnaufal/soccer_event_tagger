@@ -6,6 +6,20 @@ pub struct Point {
     pub y: Option<i32>,
 }
 
+impl PartialEq for Point {
+    fn eq(&self, other: &Self) -> bool {
+        self.x.as_ref().unwrap() == other.x.as_ref().unwrap()
+    }
+}
+
+impl Default for Point {
+    fn default() -> Self {
+        let x = None;
+        let y = None;
+        Self { x, y }
+    }
+}
+
 impl Point {
     pub fn new() -> Self {
         let x = None;

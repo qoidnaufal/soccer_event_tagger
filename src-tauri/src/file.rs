@@ -1,5 +1,5 @@
 #[tauri::command]
-pub fn open(_content: String) -> (String, String) {
+pub fn open() -> (String, String) {
     let maybe_path = rfd::FileDialog::new().pick_file();
     if let Some(path) = maybe_path {
         let path_to_resolve = path.to_str().unwrap();

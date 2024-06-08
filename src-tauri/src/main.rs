@@ -36,6 +36,7 @@ fn main() -> tauri::Result<()> {
     let boundary_id = Arc::new(Mutex::new(0));
 
     tauri::Builder::default()
+        .manage(types::Database::default())
         .register_uri_scheme_protocol("stream", move |_, request| {
             stream::get_stream_response(request, &boundary_id)
         })
@@ -45,6 +46,10 @@ fn main() -> tauri::Result<()> {
             ctrl_i(app_handle)?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![file::open, data::register])
+        .invoke_handler(tauri::generate_handler![
+            file::open,
+            data::register,
+            data::delete
+        ])
         .run(tauri::generate_context!())
 }

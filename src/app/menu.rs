@@ -1,6 +1,5 @@
 use super::{convertFileSrc, invoke};
 use leptos::*;
-use types::Dummy;
 use wasm_bindgen::UnwrapThrowExt;
 
 const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[130px] text-xs text-black hover:text-white";
@@ -14,11 +13,7 @@ pub fn MenuBar(menu_bar: NodeRef<html::Div>) -> impl IntoView {
     let get_file_path = move |ev: ev::MouseEvent| {
         ev.prevent_default();
         spawn_local(async move {
-            let args = serde_wasm_bindgen::to_value(&Dummy {
-                content: "dummy".to_string(),
-            })
-            .unwrap();
-            let path_protocol = invoke("open", args).await;
+            let path_protocol = invoke("open", wasm_bindgen::JsValue::null()).await;
             let (path, protocol): (String, String) =
                 serde_wasm_bindgen::from_value(path_protocol).unwrap_throw();
             let resolved_path = convertFileSrc(path, protocol).as_string().unwrap();
@@ -30,7 +25,7 @@ pub fn MenuBar(menu_bar: NodeRef<html::Div>) -> impl IntoView {
     };
 
     view! {
-        <Show when=move || show_menu.get()>
+        <Show when=move || show_menu.get() == true>
             <div
                 _ref=menu_bar
                 class="block absolute z-20 left-[35px] top-[10px] flex flex-col rounded-xl bg-slate-800/[.85] p-[10px] w-fit space-y-[10px] ease-in-out duration-300">
