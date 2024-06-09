@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod data;
+mod db;
 mod file;
 mod stream;
 
@@ -16,18 +16,12 @@ fn op() {
     }
 }
 
-fn ctrl_o(app_handle: tauri::AppHandle) -> tauri::Result<()> {
+fn ctrl_o(app: &mut tauri::App) -> tauri::Result<()> {
+    let app_handle = app.app_handle();
     app_handle
         .global_shortcut_manager()
         .register("CTRL + O", move || op())
         .map_err(|err| tauri::Error::Runtime(err))
-}
-
-fn ctrl_i(app_handle: tauri::AppHandle) -> tauri::Result<()> {
-    app_handle
-        .global_shortcut_manager()
-        .register("CTRL + I", move || log::info!("CTRL + I"))
-        .map_err(tauri::Error::Runtime)
 }
 
 fn main() -> tauri::Result<()> {
@@ -36,21 +30,19 @@ fn main() -> tauri::Result<()> {
     let boundary_id = Arc::new(Mutex::new(0));
 
     tauri::Builder::default()
-        .manage(types::Database::default())
         .register_uri_scheme_protocol("stream", move |_, request| {
             stream::get_stream_response(request, &boundary_id)
         })
         .setup(|app| {
-            let app_handle = app.app_handle();
-            ctrl_o(app_handle.clone())?;
-            ctrl_i(app_handle)?;
+            db::Database::init(app)?;
+            ctrl_o(app)?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             file::open,
-            data::register,
-            data::get_all,
-            data::delete,
+            db::logic::insert_data,
+            db::logic::get_all_data,
+            db::logic::delete_by_id,
         ])
         .run(tauri::generate_context!())
 }

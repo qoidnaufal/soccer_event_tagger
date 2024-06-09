@@ -618,6 +618,22 @@ video {
   display: table;
 }
 
+.table-cell {
+  display: table-cell;
+}
+
+.table-header-group {
+  display: table-header-group;
+}
+
+.table-row-group {
+  display: table-row-group;
+}
+
+.table-row {
+  display: table-row;
+}
+
 .size-\[30px\] {
   width: 30px;
   height: 30px;
@@ -666,6 +682,10 @@ video {
   width: fit-content;
 }
 
+.w-full {
+  width: 100%;
+}
+
 .max-w-\[1000px\] {
   max-width: 1000px;
 }
@@ -697,8 +717,8 @@ video {
   margin-bottom: calc(10px * var(--tw-space-y-reverse));
 }
 
-.overflow-auto {
-  overflow: auto;
+.overflow-y-scroll {
+  overflow-y: scroll;
 }
 
 .rounded-full {

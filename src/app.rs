@@ -31,7 +31,7 @@ pub fn App() -> impl IntoView {
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
-    let register_action = create_action(|payload: &JsValue| invoke("register", payload.clone()));
+    let register_action = create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
 
     window_event_listener(ev::keydown, move |ev| {
         let video_player = video_player_node_ref.get().unwrap();
@@ -85,8 +85,6 @@ pub fn App() -> impl IntoView {
             "Enter" => {
                 // --- dump the data to the table
                 set_tagged_event.update(|tag| {
-                    let uuid = (tag.time_start * 1000.) as u64;
-                    tag.uuid = uuid;
                     tag.player_name = player_buffer.get_untracked();
                     tag.team_name = team_buffer.get_untracked();
                     tag.event = action_buffer.get_untracked();
@@ -211,7 +209,7 @@ pub fn App() -> impl IntoView {
                             </td>
                         </tr>
                         <tr>
-                            <td class="text-xs w-[200px]">"event args buffer (R) "{ move || event_buffer.get() }</td>
+                            <td class="text-xs w-[200px]">"event args buffer "{ move || event_buffer.get() }</td>
                             <td class="text-xs flex flex-row">
                                 <p class="text-xs">{ move || team_buffer.get() }</p>
                                 <p class="text-xs">{ move || player_buffer.get() }</p>

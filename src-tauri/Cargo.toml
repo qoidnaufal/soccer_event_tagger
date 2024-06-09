@@ -14,12 +14,10 @@ tauri-build = { version = "1", features = [] }
 types = { path = "../types" }
 tauri = { version = "1", features = [ "api-all"] }
 serde.workspace = true
-serde_json = "1"
 rfd = "0.14.1"
 env_logger = "0.11.3"
 log = "0.4.21"
-surrealdb = { version = "1.5.0", features = ["kv-rocksdb", "sql2"] }
-futures = "0.3.30"
+surrealdb = { version = "1.5.0", features = ["kv-rocksdb", "sql2", "kv-mem"] }
 percent-encoding = "2.3.1"
 
 [features]

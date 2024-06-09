@@ -1,12 +1,10 @@
-use std::hash::Hash;
-
 use serde::{Deserialize, Serialize};
 
 use super::{Event, Point};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaggedEvent {
-    pub uuid: u64,
+    pub uuid: String,
     pub time_start: f64,
     pub player_name: String,
     pub team_name: String,
@@ -36,16 +34,10 @@ impl PartialOrd for TaggedEvent {
     }
 }
 
-impl Hash for TaggedEvent {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.uuid.hash(state)
-    }
-}
-
 impl Default for TaggedEvent {
     fn default() -> Self {
         Self {
-            uuid: 0,
+            uuid: String::new(),
             time_start: 0.,
             player_name: String::new(),
             team_name: String::new(),
@@ -54,5 +46,11 @@ impl Default for TaggedEvent {
             time_end: 0.,
             loc_end: Point::default(),
         }
+    }
+}
+
+impl TaggedEvent {
+    pub fn assign_uuid(&mut self) {
+        self.uuid = uuid::Uuid::now_v7().as_simple().to_string();
     }
 }

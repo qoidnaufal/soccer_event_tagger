@@ -1,9 +1,5 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
-
 use serde::{Deserialize, Serialize};
+use thiserror::Error as ThisError;
 
 mod event;
 mod point;
@@ -18,14 +14,8 @@ pub struct Payload<T: Clone + 'static> {
     pub payload: T,
 }
 
-pub struct Database {
-    pub db: Arc<Mutex<HashMap<u64, TaggedEvent>>>,
-}
-
-impl Default for Database {
-    fn default() -> Self {
-        Self {
-            db: Arc::new(Mutex::new(HashMap::new())),
-        }
-    }
+#[derive(Debug, Clone, Serialize, Deserialize, ThisError)]
+pub enum AppError {
+    #[error("Database Error: {0}")]
+    DatabaseError(String),
 }

@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 serde.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
