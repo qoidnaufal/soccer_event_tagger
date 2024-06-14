@@ -13,13 +13,13 @@ async fn get_data() -> Result<Vec<TaggedEvent>, AppError> {
 #[component]
 pub fn TableData(
     video_player_node_ref: NodeRef<html::Video>,
-    register_action: Action<JsValue, JsValue>,
+    register_event_action: Action<JsValue, JsValue>,
 ) -> impl IntoView {
     let delete_action = create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
     let data_resource = create_resource(
         move || {
             (
-                register_action.version().get(),
+                register_event_action.version().get(),
                 delete_action.version().get(),
             )
         },

@@ -21,6 +21,11 @@ extern "C" {
 
 #[component]
 pub fn App() -> impl IntoView {
+    let register_action =
+        create_action(|payload: &JsValue| invoke("register_match_info", payload.clone()));
+
+    provide_context(register_action);
+
     view! {
         <Router fallback=|| view! { <p>"Error"</p> }.into_view()>
             <main class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col">

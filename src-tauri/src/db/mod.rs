@@ -6,7 +6,7 @@ use surrealdb::{
 use tauri::{async_runtime::Mutex, Manager};
 
 pub mod event_register;
-pub mod player_register;
+pub mod match_register;
 
 pub struct Database {
     pub db: Arc<Mutex<Surreal<Db>>>,

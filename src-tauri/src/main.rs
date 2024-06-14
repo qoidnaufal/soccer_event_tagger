@@ -43,10 +43,11 @@ fn main() -> tauri::Result<()> {
             db::event_register::get_all_data,
             db::event_register::delete_by_id,
             db::event_register::delete_all_records,
-            db::player_register::register_match_info,
-            db::player_register::get_all_player_by_team_name,
-            db::player_register::get_player_by_query,
-            db::player_register::delete_player_by_info,
+            db::match_register::register_match_info,
+            db::match_register::get_match_info,
+            db::match_register::get_all_player_by_team_name,
+            db::match_register::get_player_by_query,
+            db::match_register::delete_player_by_info,
         ])
         .run(tauri::generate_context!())
 }

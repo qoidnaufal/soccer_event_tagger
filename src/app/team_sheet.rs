@@ -1,34 +1,34 @@
-use super::invoke;
 use leptos::*;
-use types::{AppError, Payload, TeamInfo};
-
-async fn get_player_list(team_state: String) -> Result<TeamInfo, AppError> {
-    let payload = Payload {
-        payload: team_state.clone(),
-    };
-    let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
-    let team_info = invoke("get_all_player_by_team_name", payload).await;
-    let team_info = serde_wasm_bindgen::from_value::<Option<TeamInfo>>(team_info)
-        .unwrap_or(None)
-        .unwrap_or_default();
-
-    Ok(team_info)
-}
+use types::{AppError, MatchInfo, TeamInfo};
+use wasm_bindgen::JsValue;
 
 #[component]
-pub fn TeamSheet(team_state: String) -> impl IntoView {
-    let team_resource = create_resource(|| (), move |_| get_player_list(team_state.clone()));
+pub fn TeamSheet(
+    match_info_resource: Resource<JsValue, Result<MatchInfo, AppError>>,
+    team_state: String,
+) -> impl IntoView {
+    let team_state = create_rw_signal(team_state).read_only();
     view! {
-        <div class="flex flex-col p-2 text-xs w-[150px]">
+        <div class="flex flex-col p-2 text-xs w-[170px]">
             <Transition
                 fallback=move || view! { <p>"Loading..."</p> }
             >
             { move || {
+                let team_info = create_memo(move |_| {
+                    match_info_resource.and_then(|m| {
+                        match team_state.get().as_str() {
+                            "Home" => m.team_home.clone(),
+                            "Away" => m.team_away.clone(),
+                            _ => TeamInfo::default()
+                        }
+                    }).unwrap_or(Ok(TeamInfo::default())).unwrap_or_default()
+                });
+
                 view! {
-                    <p>{ move || team_resource.get().unwrap_or(Ok(TeamInfo::default())).unwrap_or_default().team_name }</p>
+                    <p class="text-white mb-1 font-bold">{ move || team_info.get().team_name }</p>
                     <ol>
                         <For
-                            each=move || team_resource.get().unwrap_or(Ok(TeamInfo::default())).unwrap_or_default().players
+                            each=move || team_info.get().players
                             key=|player_info| player_info.number.clone()
                             children=move |player_info| {
                                 view! {

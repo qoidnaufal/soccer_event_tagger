@@ -3,7 +3,18 @@ use super::{invoke, menu, pitch, table_data, team_sheet, video};
 use leptos::*;
 use wasm_bindgen::prelude::*;
 
-use types::{Event, Payload, Point, TaggedEvent};
+use types::{AppError, Event, MatchInfo, Payload, Point, TaggedEvent};
+
+async fn get_match_info(match_id: JsValue) -> Result<MatchInfo, AppError> {
+    logging::log!("match id: {:?}", match_id);
+    let match_id = serde_wasm_bindgen::from_value::<String>(match_id).unwrap_or_default();
+    let match_id = Payload { payload: match_id };
+    let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
+    let match_info = invoke("get_match_info", match_id).await;
+    let match_info = serde_wasm_bindgen::from_value::<MatchInfo>(match_info).unwrap_or_default();
+
+    Ok(match_info)
+}
 
 #[component]
 pub fn EventTagger() -> impl IntoView {
@@ -18,7 +29,14 @@ pub fn EventTagger() -> impl IntoView {
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
-    let register_action = create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
+    let register_event_action =
+        create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
+    let register_match_info_action = expect_context::<Action<JsValue, JsValue>>();
+
+    let match_info_resource = create_resource(
+        move || register_match_info_action.value().get().unwrap_or_default(),
+        get_match_info,
+    );
 
     let shortcuts = window_event_listener(ev::keydown, move |ev| {
         ev.prevent_default();
@@ -96,7 +114,7 @@ pub fn EventTagger() -> impl IntoView {
                 };
                 let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
 
-                register_action.dispatch(payload);
+                register_event_action.dispatch(payload);
 
                 set_tagged_event.set(TaggedEvent::default());
                 set_event_buffer.set(String::new());
@@ -187,16 +205,25 @@ pub fn EventTagger() -> impl IntoView {
                     </Show>
                 </div>
                 <menu::MenuBar menu_bar_node_ref/>
-                <div id="video_container" class="flex flex-col px-[10px]">
+                <div id="video_container" class="flex flex-col w-fit px-[10px] shrink-0">
                     <div class="relative flex flex-row w-fit h-fit">
                         <pitch::Pitch set_coordinate/>
                         <video::VideoPlayer video_src video_player_node_ref/>
                     </div>
                 </div>
-                <div id="info" class="flex flex-col shrink-0">
+                <div id="info" class="flex flex-col shrink-0 items-center w-[350px] bg-slate-800/[.65] p-2 rounded-lg">
+                    <div
+                        on:click=move |_| {
+                            let navigate = leptos_router::use_navigate();
+                            navigate("/team_sheet", Default::default());
+                        }
+                        class="text-xs rounded-full bg-lime-400 w-full flex flex-row justify-center h-fit px-2 py-1 hover:cursor-pointer hover:bg-indigo-600 hover:text-white"
+                    >
+                        "Teamsheet"
+                    </div>
                     <div class="flex flex-row">
-                        <team_sheet::TeamSheet team_state="Home".to_string()/>
-                        <team_sheet::TeamSheet team_state="Away".to_string()/>
+                        <team_sheet::TeamSheet match_info_resource team_state="Home".to_string()/>
+                        <team_sheet::TeamSheet match_info_resource team_state="Away".to_string()/>
                     </div>
                 </div>
             </div>
@@ -224,7 +251,7 @@ pub fn EventTagger() -> impl IntoView {
                         </tbody>
                     </table>
                 </div>
-                <table_data::TableData video_player_node_ref register_action/>
+                <table_data::TableData video_player_node_ref register_event_action/>
             </div>
         </div>
     }

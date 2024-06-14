@@ -1,31 +1,60 @@
 use super::Database;
 use tauri::State;
-use types::{AppError, MatchInfo, Payload, PlayerInfo, PlayerQuery, TeamInfo};
+use types::{AppError, MatchInfo, PlayerInfo, PlayerQuery, TeamInfo};
 
 #[tauri::command]
 pub async fn register_match_info(
     mut payload: MatchInfo,
     state: State<'_, Database>,
-) -> Result<(), AppError> {
+) -> Result<String, AppError> {
     payload.assign_id();
     let db = state.db.lock().await;
 
     match db
         .create::<Option<MatchInfo>>(("match_info", &payload.match_id))
-        .content(payload)
+        .content(payload.clone())
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
         Ok(created) => {
             if let Some(match_info) = created {
-                log::info!("Registered: {:?}", match_info);
+                log::info!("Registered match: {:?}", match_info.match_id);
+                Ok(match_info.match_id)
+            } else {
+                let response = format!(
+                    "Failed to register match info: match id {} already exist",
+                    payload.match_id
+                );
+                Err(AppError::DatabaseError(response))
             }
-            Ok(())
         }
         Err(err) => {
-            log::error!("Failed to register player: {}", err);
+            log::error!("Failed to register match info: {}", err);
             Err(err)
         }
+    }
+}
+
+#[tauri::command]
+pub async fn get_match_info(
+    payload: String,
+    state: State<'_, Database>,
+) -> Result<Option<MatchInfo>, AppError> {
+    let db = state.db.lock().await;
+
+    match db
+        .query("SELECT * FROM match_info WHERE match_id = $match_id")
+        .bind(("match_id", &payload))
+        .await
+        .map_err(|err| AppError::DatabaseError(err.to_string()))
+    {
+        Ok(mut res) => {
+            let match_info = res
+                .take(0)
+                .map_err(|err| AppError::DatabaseError(err.to_string()));
+            match_info
+        }
+        Err(err) => Err(err),
     }
 }
 
@@ -36,22 +65,15 @@ pub async fn get_all_player_by_team_name(
 ) -> Result<Option<TeamInfo>, AppError> {
     let db = state.db.lock().await;
 
-    let team_state = match payload.as_str() {
-        "Home" => "team_home",
-        "Away" => "team_away",
-        _ => "*",
-    };
-
     match db
-        .query("SELECT * FROM match_info")
-        // .bind(("team_state", team_state))
-        // .bind(("team_name", &payload))
+        .query("SELECT * FROM match_info WHERE team_name = $team_name")
+        .bind(("team_name", &payload))
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
         Ok(mut n) => {
             let team_info = n
-                .take::<Option<TeamInfo>>(team_state)
+                .take::<Option<TeamInfo>>(0)
                 .map_err(|err| AppError::DatabaseError(err.to_string()));
             team_info
         }
@@ -66,7 +88,7 @@ pub async fn get_player_by_query(
 ) -> Result<Option<PlayerInfo>, AppError> {
     let db = state.db.lock().await;
 
-    db.select::<Option<PlayerInfo>>((&payload.team_name, payload.number))
+    db.select::<Option<PlayerInfo>>(("match_info", payload.number))
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
 }

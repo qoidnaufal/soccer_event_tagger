@@ -1,4 +1,3 @@
-use super::invoke;
 use leptos::*;
 use leptos_router::A;
 use types::{MatchInfo, Payload, PlayerInfo};
@@ -10,8 +9,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
     let input_home_ref = create_node_ref::<html::Div>();
     let input_away_ref = create_node_ref::<html::Div>();
 
-    let register_action =
-        create_action(|payload: &JsValue| invoke("register_match_info", payload.clone()));
+    let register_match_info_action = expect_context::<Action<JsValue, JsValue>>();
 
     let register = move |ev: ev::SubmitEvent| {
         ev.prevent_default();
@@ -21,9 +19,9 @@ pub fn RegisterMatchInfo() -> impl IntoView {
             .inner_text()
             .trim()
             .to_string();
-        // .collect::<String>();
         let player_list_home = player_list_home
             .split(',')
+            .filter(|s| !s.is_empty())
             .map(|s| {
                 let mut token = s.split(')');
                 let number = token.next().unwrap().trim().to_string();
@@ -41,9 +39,9 @@ pub fn RegisterMatchInfo() -> impl IntoView {
             .inner_text()
             .trim()
             .to_string();
-        // .collect::<String>();
         let player_list_away = player_list_away
             .split(',')
+            .filter(|s| !s.is_empty())
             .map(|s| {
                 let mut token = s.split(')');
                 let number = token.next().unwrap().trim().to_string();
@@ -61,12 +59,11 @@ pub fn RegisterMatchInfo() -> impl IntoView {
         });
 
         let payload = match_info.get_untracked();
-        logging::log!("{:?}", payload);
         let payload = Payload {
             payload: payload.clone(),
         };
         let payload = serde_wasm_bindgen::to_value(&payload).unwrap_throw();
-        register_action.dispatch(payload);
+        register_match_info_action.dispatch(payload);
 
         set_match_info.set(MatchInfo::default());
     };
@@ -79,8 +76,20 @@ pub fn RegisterMatchInfo() -> impl IntoView {
         }
     };
 
+    let submit_button_ref = create_node_ref::<html::Button>();
+
+    create_effect(move |_| {
+        submit_button_ref.on_load(|b| {
+            if b.inner_text() != "Submit" {
+                b.set_inner_text("Submit");
+            }
+        });
+    });
+
     view! {
-        <div class="block m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row">
+        <div
+            class="block m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
+        >
             <div>
                 <A href="/">
                     <button
@@ -110,6 +119,9 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 class="border focus:outline-none pl-1 mb-2 h-[30px] rounded-md"
                                 type="text"
                                 autocomplete="off"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                spellcheck="false"
                                 placeholder="Team name..."
                                 on:change=move |ev| {
                                     ev.prevent_default();
@@ -126,6 +138,9 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 aria-multiline="true"
                                 contenteditable="true"
                                 autocomplete="off"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                spellcheck="false"
                                 _ref=input_home_ref
                                 class="grow border h-[200px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
                             >
@@ -139,6 +154,9 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 class="border focus:outline-none pl-1 mb-2 h-[30px] rounded-md"
                                 type="text"
                                 autocomplete="off"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                spellcheck="false"
                                 placeholder="Team name..."
                                 on:change=move |ev| {
                                     ev.prevent_default();
@@ -154,16 +172,24 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 aria-multiline="true"
                                 contenteditable="true"
                                 autocomplete="off"
+                                autocorrect="off"
+                                autocapitalize="off"
+                                spellcheck="false"
                                 _ref=input_away_ref
                                 class="grow border h-[200px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
                             >
                             </div>
                         </div>
                     </div>
-                    <input
+                    <button
+                        _ref=submit_button_ref
                         class="bg-lime-400 hover:bg-indigo-600 rounded-full hover:cursor-pointer text-xs text-black hover:text-white w-[150px] h-[30px] self-center"
                         type="submit"
-                    />
+                    >
+                        { move || if register_match_info_action.value().get().is_some() {
+                            "Success"
+                        } else { "Submit" } }
+                    </button>
                 </form>
             </div>
         </div>
