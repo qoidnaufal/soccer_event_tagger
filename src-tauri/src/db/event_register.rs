@@ -17,7 +17,9 @@ pub async fn insert_data<R: Runtime>(
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
         Ok(inserted) => {
-            log::info!("Inserted: {:?}", inserted);
+            if let Some(data) = inserted {
+                log::info!("Inserted: {:?}", data.uuid);
+            }
             Ok(())
         }
         Err(err) => {
@@ -48,12 +50,34 @@ pub async fn delete_by_id(
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
-        Ok(_) => {
-            log::info!("Deleted record: {:?}", payload);
+        Ok(deleted) => {
+            if let Some(data) = deleted {
+                log::info!("Deleted record: {:?}", data.uuid);
+            }
             Ok(())
         }
         Err(err) => {
             log::error!("Failed to delete record: {}", err);
+            Err(err)
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn delete_all_records(state: State<'_, Database>) -> Result<(), AppError> {
+    let db = state.db.lock().await;
+
+    match db
+        .delete::<Vec<TaggedEvent>>("tagged_events")
+        .await
+        .map_err(|err| AppError::DatabaseError(err.to_string()))
+    {
+        Ok(deleted) => {
+            log::info!("Cleaned {} database records", deleted.len());
+            Ok(())
+        }
+        Err(err) => {
+            log::error!("Failed to clear the database: {}", err);
             Err(err)
         }
     }

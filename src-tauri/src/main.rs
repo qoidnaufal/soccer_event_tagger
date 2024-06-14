@@ -2,7 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod db;
-mod file;
 mod stream;
 
 use std::sync::{Arc, Mutex};
@@ -20,7 +19,7 @@ fn ctrl_o(app: &mut tauri::App) -> tauri::Result<()> {
     let app_handle = app.app_handle();
     app_handle
         .global_shortcut_manager()
-        .register("CTRL + O", move || op())
+        .register("CTRL + O", op)
         .map_err(|err| tauri::Error::Runtime(err))
 }
 
@@ -39,10 +38,15 @@ fn main() -> tauri::Result<()> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            file::open,
-            db::logic::insert_data,
-            db::logic::get_all_data,
-            db::logic::delete_by_id,
+            stream::open,
+            db::event_register::insert_data,
+            db::event_register::get_all_data,
+            db::event_register::delete_by_id,
+            db::event_register::delete_all_records,
+            db::player_register::register_match_info,
+            db::player_register::get_all_player_by_team_name,
+            db::player_register::get_player_by_query,
+            db::player_register::delete_player_by_info,
         ])
         .run(tauri::generate_context!())
 }

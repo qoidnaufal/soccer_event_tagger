@@ -2,19 +2,21 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error as ThisError;
 
 mod event;
+mod match_info;
 mod point;
 mod tagged_event;
 
 pub use event::Event;
+pub use match_info::{MatchInfo, PlayerInfo, PlayerQuery, TeamInfo};
 pub use point::Point;
 pub use tagged_event::TaggedEvent;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Payload<T: Clone + 'static> {
     pub payload: T,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, ThisError)]
+#[derive(Debug, Clone, Serialize, Deserialize, ThisError, Eq, PartialEq)]
 pub enum AppError {
     #[error("Database Error: {0}")]
     DatabaseError(String),

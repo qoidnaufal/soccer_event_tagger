@@ -1,60 +1,54 @@
 use serde::{Deserialize, Serialize};
 
+#[rustfmt::skip]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum EventOutcome {
+    Other { name: String },
+    PassOutcome { outcome: String, team_name: Option<String>, receiver: Option<String> }
+}
+
+impl Default for EventOutcome {
+    fn default() -> Self {
+        Self::Other {
+            name: "Unregistered".to_string(),
+        }
+    }
+}
+
+impl std::fmt::Display for EventOutcome {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl EventOutcome {
+    fn from_args(args: &str) -> Self {
+        match args {
+            _ => Self::Other {
+                name: "Unregistered".to_string(),
+            },
+        }
+    }
+}
+
+#[rustfmt::skip]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Event {
-    Other {
-        name: String,
-    },
-    Shot {
-        name: String,
-        shot_type: String,
-        outcome: String,
-    },
-    Pass {
-        name: String,
-        pass_type: String,
-        outcome: String,
-    },
-    Dribble {
-        name: String,
-        outcome: String,
-    },
-    Tackle {
-        name: String,
-        outcome: String,
-    },
-    Intercept {
-        name: String,
-        event_source: String,
-    },
-    Recovery {
-        name: String,
-    },
-    Duel {
-        name: String,
-        duel_type: String,
-        outcome: String,
-    },
-    Clearance {
-        name: String,
-        event_source: String,
-    },
-    Block {
-        name: String,
-        event_source: String,
-    },
-    Pressure {
-        name: String,
-        outcome: String,
-    },
-    Save {
-        name: String,
-        event_source: String,
-    },
-    Catch {
-        name: String,
-        event_source: String,
-    },
+    Other { name: String, },
+    Shot { name: String, shot_type: String, outcome: String, },
+    Pass { name: String, pass_type: String, outcome: EventOutcome, },
+    Dribble { name: String, outcome: String, },
+    LostBall { name: String, },
+    Recovery { name: String, },
+    Foul { name: String, },
+    Tackle { name: String, outcome: String, },
+    Intercept { name: String, event_source: String, },
+    Duel { name: String, duel_type: String, outcome: String, },
+    Clearance { name: String, event_source: String, },
+    Block { name: String, event_source: String, },
+    Pressure { name: String, },
+    Save { name: String, event_source: String, },
+    Catch { name: String, event_source: String, },
 }
 
 impl Default for Event {
@@ -75,6 +69,26 @@ impl Event {
     #[rustfmt::skip]
     pub fn from_event_args(args: &str) -> Self {
         match args {
+            n if n.contains(|c: char| c.is_numeric()) => Self::Other { name: n.to_string() },
+            o => match o {
+                // --- shot
+                "son" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "On target".to_string() },
+                "sof" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "Off target".to_string() },
+                "sb" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "Blocked".to_string() },
+                "sg" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "Goal".to_string() },
+                // --- penalty
+                "pkon" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty".to_string(), outcome: "On target".to_string() },
+                "pkof" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty".to_string(), outcome: "Off target".to_string() },
+                "pkg" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty".to_string(), outcome: "Goal".to_string() },
+                // --- carry
+                "drp" => Self::Dribble { name: "Dribble".to_string(), outcome: "Pass".to_string() },
+                "drs" => Self::Dribble { name: "Dribble".to_string(), outcome: "Shot".to_string() },
+                "drt" => Self::Dribble { name: "Dribble".to_string(), outcome: "Tackled".to_string() },
+                "drl" => Self::Dribble { name: "Dribble".to_string(), outcome: "Lost ball".to_string() },
+                _ => Self::Other { name: "Unregistered".to_string() }
+            }
+        }
+        /* match args {
             // --- kick off
             "kos" => Self::Pass { name: "Pass".to_string(), pass_type: "Kick Off".to_string(), outcome: "Success".to_string() },
             "koo" => Self::Pass { name: "Pass".to_string(), pass_type: "Kick Off".to_string(), outcome: "Out of Play".to_string() },
@@ -116,8 +130,7 @@ impl Event {
             "ckdi" => Self::Pass { name: "Pass".to_string(), pass_type: "Direct Cornerkick".to_string(), outcome: "Intercepted".to_string() },
             "ckdc" => Self::Pass { name: "Pass".to_string(), pass_type: "Direct Cornerkick".to_string(), outcome: "Claimed".to_string() },
             "ckdo" => Self::Pass { name: "Pass".to_string(), pass_type: "Direct Cornerkick".to_string(), outcome: "Out of Play".to_string() },
-            "cksg" => Self::Shot { name: "Shot".to_string(), shot_type: "Direct Cornerkick".to_string(), outcome: "Goal".to_string() },
-            "ckson" => Self::Shot { name: "Shot".to_string(), shot_type: "Direct Cornerkick".to_string(), outcome: "On Target".to_string() },
+            "ckg" => Self::Shot { name: "Shot".to_string(), shot_type: "Direct Cornerkick".to_string(), outcome: "Goal".to_string() },
             // --- Short cornerkick
             "ckps" => Self::Pass { name: "Pass".to_string(), pass_type: "Short Cornerkick".to_string(), outcome: "Success".to_string() },
             "ckpi" => Self::Pass { name: "Pass".to_string(), pass_type: "Short Cornerkick".to_string(), outcome: "Intercepted".to_string() },
@@ -156,11 +169,7 @@ impl Event {
             "bp" => Self::Block { name: "Block".to_string(), event_source: "Pass".to_string() },
             "bcr" => Self::Block { name: "Block".to_string(), event_source: "Crossing".to_string() },
             // --- pressure
-            "prop" => Self::Pressure { name: "Pressure".to_string(), outcome: "Opponent Pass".to_string() },
-            "prod" => Self::Pressure { name: "Pressure".to_string(), outcome: "Opponent Dribble".to_string() },
-            "prtw" => Self::Pressure { name: "Pressure".to_string(), outcome: "Tackle Won".to_string() },
-            "prtl" => Self::Pressure { name: "Pressure".to_string(), outcome: "Tackle Lost".to_string() },
-            "probl" => Self::Pressure { name: "Pressure".to_string(), outcome: "Opponent Ball Lost".to_string() },
+            "prop" => Self::Pressure { name: "Pressure".to_string() },
             // --- goalkeeper save
             "svs" => Self::Save { name: "Save".to_string(), event_source: "Shot".to_string() },
             "svp" => Self::Save { name: "Save".to_string(), event_source: "Penalty".to_string() },
@@ -182,6 +191,6 @@ impl Event {
             "eom" => Self::Other { name: "End of Match".to_string() },
             _ => Self::Other { name: "Unregistered".to_string(),
             },
-        }
+        } */
     }
 }

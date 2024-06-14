@@ -4,6 +4,7 @@ use super::{Event, Point};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaggedEvent {
+    pub match_info: String,
     pub uuid: String,
     pub time_start: f64,
     pub player_name: String,
@@ -37,6 +38,7 @@ impl PartialOrd for TaggedEvent {
 impl Default for TaggedEvent {
     fn default() -> Self {
         Self {
+            match_info: String::new(),
             uuid: String::new(),
             time_start: 0.,
             player_name: String::new(),
@@ -51,6 +53,12 @@ impl Default for TaggedEvent {
 
 impl TaggedEvent {
     pub fn assign_uuid(&mut self) {
-        self.uuid = uuid::Uuid::now_v7().as_simple().to_string();
+        let uuid = uuid::Uuid::now_v7().as_simple().to_string();
+        let uuid = format!(
+            "{}{}",
+            ((self.time_start * 10000.) as usize).to_string(),
+            uuid
+        );
+        self.uuid = uuid;
     }
 }

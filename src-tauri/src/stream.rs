@@ -5,12 +5,21 @@ use tauri::http::{header, status::StatusCode, HttpRange, Request, Response, Resp
 
 const MAX_LEN: u64 = 4000 * 1024;
 
+#[tauri::command]
+pub fn open() -> (String, String) {
+    let maybe_path = rfd::FileDialog::new().pick_file();
+    if let Some(path) = maybe_path {
+        let path_to_resolve = path.to_str().unwrap();
+        (path_to_resolve.to_string(), "stream".to_string())
+    } else {
+        (String::new(), String::new())
+    }
+}
+
 pub fn get_stream_response(
     request: &Request,
     boundary_id: &Arc<Mutex<i32>>,
 ) -> Result<Response, Box<dyn std::error::Error>> {
-    // log::info!("req: {:?}", request);
-
     let uri = request.uri().parse::<Uri>().unwrap();
     let path = percent_decode(uri.path().as_bytes())
         .decode_utf8_lossy()
