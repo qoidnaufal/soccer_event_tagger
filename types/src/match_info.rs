@@ -37,6 +37,12 @@ pub struct PlayerInfo {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MatchInfoQuery {
+    pub match_id: String,
+    pub team_state: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayerQuery {
     pub match_id: String,
     pub team_name: String,

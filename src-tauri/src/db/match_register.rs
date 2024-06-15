@@ -59,21 +59,27 @@ pub async fn get_match_info(
 }
 
 #[tauri::command]
-pub async fn get_all_player_by_team_name(
-    payload: String,
+pub async fn get_team_info_by_query(
+    payload: types::MatchInfoQuery,
     state: State<'_, Database>,
 ) -> Result<Option<TeamInfo>, AppError> {
     let db = state.db.lock().await;
 
+    let team_state = match payload.team_state.as_str() {
+        "Home" => "team_home",
+        "Away" => "team_away",
+        _ => "neutral",
+    };
+
     match db
-        .query("SELECT * FROM match_info WHERE team_name = $team_name")
-        .bind(("team_name", &payload))
+        .query("SELECT * FROM match_info WHERE match_id = $match_id")
+        .bind(("match_id", &payload.match_id))
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
         Ok(mut n) => {
             let team_info = n
-                .take::<Option<TeamInfo>>(0)
+                .take::<Option<TeamInfo>>(team_state)
                 .map_err(|err| AppError::DatabaseError(err.to_string()));
             team_info
         }

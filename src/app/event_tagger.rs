@@ -6,7 +6,6 @@ use wasm_bindgen::prelude::*;
 use types::{AppError, Event, MatchInfo, Payload, Point, TaggedEvent};
 
 async fn get_match_info(match_id: JsValue) -> Result<MatchInfo, AppError> {
-    logging::log!("match id: {:?}", match_id);
     let match_id = serde_wasm_bindgen::from_value::<String>(match_id).unwrap_or_default();
     let match_id = Payload { payload: match_id };
     let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
@@ -37,6 +36,25 @@ pub fn EventTagger() -> impl IntoView {
         move || register_match_info_action.value().get().unwrap_or_default(),
         get_match_info,
     );
+
+    let team_info_action =
+        create_action(|payload: &JsValue| invoke("get_team_info_by_query", payload.clone()));
+
+    // create_effect(move |_| {
+    //     if let Some(val) = register_match_info_action.value().get() {
+    //         let match_id = serde_wasm_bindgen::from_value::<String>(val).unwrap_or_default();
+    //         let payload = Payload {
+    //             payload: types::MatchInfoQuery {
+    //                 match_id,
+    //                 team_state: "Away".to_string(),
+    //             },
+    //         };
+    //         let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
+    //         team_info.dispatch(payload);
+
+    //         logging::log!("team info: {:?}", team_info.value().get());
+    //     }
+    // });
 
     let shortcuts = window_event_listener(ev::keydown, move |ev| {
         ev.prevent_default();
@@ -135,10 +153,7 @@ pub fn EventTagger() -> impl IntoView {
                 // .parse::<i32>()
                 // .unwrap_or_default();
 
-                // --- later use number to query the player name
-                set_player_buffer.update(|p| *p = number);
-
-                let team = match args
+                let team_state = match args
                     .split('/')
                     .take(1)
                     .collect::<String>()
@@ -151,7 +166,48 @@ pub fn EventTagger() -> impl IntoView {
                     "h" => "Home".to_string(),
                     _ => "Unregistered".to_string(),
                 };
-                set_team_buffer.update(|t| *t = team);
+
+                let match_id = register_match_info_action.value().get().unwrap_or_default();
+                let match_id =
+                    serde_wasm_bindgen::from_value::<String>(match_id).unwrap_or_default();
+                logging::log!("match id: {}", match_id);
+                let payload = Payload {
+                    payload: types::MatchInfoQuery {
+                        match_id,
+                        team_state: team_state.clone(),
+                    },
+                };
+                let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+                team_info_action.dispatch(payload);
+                let team_info = team_info_action.value().get().unwrap_or_default();
+                let team_info = serde_wasm_bindgen::from_value::<types::TeamInfo>(team_info)
+                    .unwrap_or_default();
+                logging::log!("team info: {:?}", team_info);
+
+                set_player_buffer.update(|p| {
+                    let player_name = if let Some(player_info) = team_info
+                        .players
+                        .iter()
+                        .filter(|p| p.number == number)
+                        .map(|p| p)
+                        .collect::<Vec<_>>()
+                        .get(0)
+                    {
+                        player_info.player_name.clone()
+                    } else {
+                        number
+                    };
+
+                    *p = player_name;
+                });
+                set_team_buffer.update(|t| {
+                    let team_name = if !team_info.team_name.is_empty() {
+                        team_info.team_name
+                    } else {
+                        team_state
+                    };
+                    *t = team_name;
+                });
 
                 let event_args = args.split('/').skip(1).collect::<String>();
 
@@ -243,8 +299,8 @@ pub fn EventTagger() -> impl IntoView {
                             <tr>
                                 <td class="text-xs w-[200px]">"event args buffer: "{ move || event_buffer.get() }</td>
                                 <td class="text-xs flex flex-row">
-                                    <p class="text-xs">{ move || team_buffer.get() }</p>
-                                    <p class="text-xs">{ move || player_buffer.get() }</p>
+                                    <p class="text-xs">{ move || team_buffer.get() }"__"</p>
+                                    <p class="text-xs">{ move || player_buffer.get() }"__"</p>
                                     <p class="text-xs">{ move || action_buffer.get().to_string() }</p>
                                 </td>
                             </tr>
