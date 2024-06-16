@@ -10,7 +10,16 @@ pub struct Point {
 
 impl Display for Point {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "x: {:?}, y: {:?}", self.x, self.y)
+        write!(
+            f,
+            "{}{}",
+            self.x
+                .map(|n| format!("x: {}, ", n))
+                .unwrap_or("-".to_string()),
+            self.y
+                .map(|n| format!("y: {}", n))
+                .unwrap_or("-".to_string())
+        )
     }
 }
 

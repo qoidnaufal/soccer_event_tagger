@@ -27,7 +27,7 @@ pub fn TableData(
     );
 
     view! {
-        <div class="w-full">
+        <div class="w-full mt-1">
             <Transition fallback=move || {
                 view! { <p>"loading..."</p> }
             }>
@@ -138,25 +138,5 @@ pub fn TableData(
                 }}
             </Transition>
         </div>
-    }
-}
-
-#[component]
-fn DummyData() -> impl IntoView {
-    view! {
-        { move || (0..1000).into_iter().map(|i| {
-            view! {
-                <tr class="w-full h-[30px] py-2 odd:bg-slate-200 even:bg-white">
-                    <td id={move || i.to_string()} class="text-xs">{ move || i }</td>
-                    <td id={move || i.to_string()} class="text-xs">{ move || i }</td>
-                    <td id={move || i.to_string()} class="text-xs">{ move || i }</td>
-                    <td id={move || i.to_string()} class="text-xs">{ move || i }</td>
-                    <td id={move || i.to_string()} class="text-xs">{ move || i }</td>
-                    <td id={move || i.to_string()} class="text-xs">{ move || i }</td>
-                    <td id={move || i.to_string()} class="text-xs">{ move || i }</td>
-                    <td id={move || i.to_string()} class="text-xs">{ move || i }</td>
-                </tr>
-            }
-        }).collect_view()}
     }
 }

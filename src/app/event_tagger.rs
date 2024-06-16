@@ -3,14 +3,21 @@ use super::{invoke, menu, pitch, table_data, team_sheet, video};
 use leptos::*;
 use wasm_bindgen::prelude::*;
 
-use types::{AppError, Event, MatchInfo, Payload, Point, TaggedEvent};
+use types::{AppError, Event, MatchInfo, Payload, Point, TaggedEvent, TeamInfoQuery};
 
-async fn get_match_info(match_id: JsValue) -> Result<MatchInfo, AppError> {
-    let match_id = serde_wasm_bindgen::from_value::<String>(match_id).unwrap_or_default();
+async fn get_match_info_by_match_id(match_id: String) -> Result<MatchInfo, AppError> {
     let match_id = Payload { payload: match_id };
     let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
-    let match_info = invoke("get_match_info", match_id).await;
+    let match_info = invoke("get_match_info_by_match_id", match_id).await;
     let match_info = serde_wasm_bindgen::from_value::<MatchInfo>(match_info).unwrap_or_default();
+
+    Ok(match_info)
+}
+
+async fn get_all_match_info() -> Result<Vec<MatchInfo>, AppError> {
+    let match_info = invoke("get_all_match_info", JsValue::null()).await;
+    let match_info =
+        serde_wasm_bindgen::from_value::<Vec<MatchInfo>>(match_info).unwrap_or_default();
 
     Ok(match_info)
 }
@@ -25,6 +32,7 @@ pub fn EventTagger() -> impl IntoView {
     let (team_buffer, set_team_buffer) = create_signal(String::new());
     let (player_buffer, set_player_buffer) = create_signal(String::new());
     let (action_buffer, set_action_buffer) = create_signal(Event::default());
+    let (match_id, set_match_id) = create_signal(String::new());
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
@@ -32,29 +40,15 @@ pub fn EventTagger() -> impl IntoView {
         create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
     let register_match_info_action = expect_context::<Action<JsValue, JsValue>>();
 
+    let team_info_resource = create_resource(move || match_id.get(), get_match_info_by_match_id);
+
     let match_info_resource = create_resource(
-        move || register_match_info_action.value().get().unwrap_or_default(),
-        get_match_info,
+        move || register_match_info_action.version().get(),
+        move |_| get_all_match_info(),
     );
 
     let team_info_action =
         create_action(|payload: &JsValue| invoke("get_team_info_by_query", payload.clone()));
-
-    // create_effect(move |_| {
-    //     if let Some(val) = register_match_info_action.value().get() {
-    //         let match_id = serde_wasm_bindgen::from_value::<String>(val).unwrap_or_default();
-    //         let payload = Payload {
-    //             payload: types::MatchInfoQuery {
-    //                 match_id,
-    //                 team_state: "Away".to_string(),
-    //             },
-    //         };
-    //         let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
-    //         team_info.dispatch(payload);
-
-    //         logging::log!("team info: {:?}", team_info.value().get());
-    //     }
-    // });
 
     let shortcuts = window_event_listener(ev::keydown, move |ev| {
         ev.prevent_default();
@@ -125,6 +119,7 @@ pub fn EventTagger() -> impl IntoView {
                     tag.player_name = player_buffer.get_untracked();
                     tag.team_name = team_buffer.get_untracked();
                     tag.event = action_buffer.get_untracked();
+                    tag.match_id = match_id.get_untracked();
                 });
                 let tagged_event = tagged_event.get_untracked();
                 let payload = Payload {
@@ -138,7 +133,6 @@ pub fn EventTagger() -> impl IntoView {
                 set_event_buffer.set(String::new());
             }
             b if ("0"..="9").contains(&b) || ("a"..="z").contains(&b) || b == "/" => {
-                // --- these stuffs aren't that expensive, right? right? right?
                 set_event_buffer.update(|e| e.push_str(b));
 
                 let args = event_buffer.get();
@@ -150,8 +144,6 @@ pub fn EventTagger() -> impl IntoView {
                     .chars()
                     .filter(|c| c.is_numeric())
                     .collect::<String>();
-                // .parse::<i32>()
-                // .unwrap_or_default();
 
                 let team_state = match args
                     .split('/')
@@ -167,12 +159,9 @@ pub fn EventTagger() -> impl IntoView {
                     _ => "Unregistered".to_string(),
                 };
 
-                let match_id = register_match_info_action.value().get().unwrap_or_default();
-                let match_id =
-                    serde_wasm_bindgen::from_value::<String>(match_id).unwrap_or_default();
-                logging::log!("match id: {}", match_id);
+                let match_id = match_id.get_untracked();
                 let payload = Payload {
-                    payload: types::MatchInfoQuery {
+                    payload: TeamInfoQuery {
                         match_id,
                         team_state: team_state.clone(),
                     },
@@ -182,7 +171,6 @@ pub fn EventTagger() -> impl IntoView {
                 let team_info = team_info_action.value().get().unwrap_or_default();
                 let team_info = serde_wasm_bindgen::from_value::<types::TeamInfo>(team_info)
                     .unwrap_or_default();
-                logging::log!("team info: {:?}", team_info);
 
                 set_player_buffer.update(|p| {
                     let player_name = if let Some(player_info) = team_info
@@ -221,8 +209,8 @@ pub fn EventTagger() -> impl IntoView {
                 let current_time = video_player.current_time();
                 let _ = video_player.fast_seek(current_time - 0.2);
             }
-            rest => {
-                logging::log!("unregistered key: {}", rest);
+            unregistered_key => {
+                logging::log!("unregistered key: {}", unregistered_key);
             }
         }
     });
@@ -268,23 +256,15 @@ pub fn EventTagger() -> impl IntoView {
                     </div>
                 </div>
                 <div id="info" class="flex flex-col shrink-0 items-center w-[350px] bg-slate-800/[.65] p-2 rounded-lg">
-                    <div
-                        on:click=move |_| {
-                            let navigate = leptos_router::use_navigate();
-                            navigate("/team_sheet", Default::default());
-                        }
-                        class="text-xs rounded-full bg-lime-400 w-full flex flex-row justify-center h-fit px-2 py-1 hover:cursor-pointer hover:bg-indigo-600 hover:text-white"
-                    >
-                        "Teamsheet"
-                    </div>
+                    <team_sheet::SelectTeamSheet match_info_resource set_match_id/>
                     <div class="flex flex-row">
-                        <team_sheet::TeamSheet match_info_resource team_state="Home".to_string()/>
-                        <team_sheet::TeamSheet match_info_resource team_state="Away".to_string()/>
+                        <team_sheet::TeamSheet team_info_resource team_state="Home".to_string()/>
+                        <team_sheet::TeamSheet team_info_resource team_state="Away".to_string()/>
                     </div>
                 </div>
             </div>
             <div class="flex flex-col px-[40px]">
-                <div class="w-full">
+                <div class="w-full bg-slate-200 rounded-lg px-2 py-1 mt-1">
                     <table class="table-fixed w-full">
                         <tbody>
                             <tr>

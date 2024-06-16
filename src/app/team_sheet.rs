@@ -1,10 +1,46 @@
 use leptos::*;
 use types::{AppError, MatchInfo, TeamInfo};
-use wasm_bindgen::JsValue;
+
+#[component]
+pub fn SelectTeamSheet(
+    match_info_resource: Resource<usize, Result<Vec<MatchInfo>, AppError>>,
+    set_match_id: WriteSignal<String>,
+) -> impl IntoView {
+    view! {
+        <select class="text-xs w-full" on:change=move |ev| set_match_id.set(event_target_value(&ev))>
+            <option value="">"Select team sheet.."</option>
+            <Transition>
+                {move || {
+                    let match_info = create_memo(move |_| {
+                        match_info_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
+                    });
+
+                    view! {
+                        <For
+                            each=move || match_info.get()
+                            key=|match_info| match_info.match_id.clone()
+                            children=move |match_info| {
+                                let match_info = create_rw_signal(match_info).read_only();
+
+                                view! {
+                                    <option value=move || match_info.get().match_id>
+                                        { move || match_info.get().match_date } ": "
+                                        { move || match_info.get().team_home.team_name } " vs "
+                                        { move || match_info.get().team_away.team_name }
+                                    </option>
+                                }
+                            }
+                        />
+                    }
+                }}
+            </Transition>
+        </select>
+    }
+}
 
 #[component]
 pub fn TeamSheet(
-    match_info_resource: Resource<JsValue, Result<MatchInfo, AppError>>,
+    team_info_resource: Resource<String, Result<MatchInfo, AppError>>,
     team_state: String,
 ) -> impl IntoView {
     let team_state = create_rw_signal(team_state).read_only();
@@ -15,7 +51,7 @@ pub fn TeamSheet(
             >
             { move || {
                 let team_info = create_memo(move |_| {
-                    match_info_resource.and_then(|m| {
+                    team_info_resource.and_then(|m| {
                         match team_state.get().as_str() {
                             "Home" => m.team_home.clone(),
                             "Away" => m.team_away.clone(),
@@ -32,7 +68,10 @@ pub fn TeamSheet(
                             key=|player_info| player_info.number.clone()
                             children=move |player_info| {
                                 view! {
-                                    <li class="even:bg-slate-200 odd:bg-white">{move || player_info.number.clone() }". "{ move || player_info.player_name.clone() }</li>
+                                    <li class="even:bg-slate-200 odd:bg-white">
+                                        {move || player_info.number.clone() }". "
+                                        { move || player_info.player_name.clone() }
+                                    </li>
                                 }
                             }
                         />

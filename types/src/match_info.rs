@@ -1,11 +1,17 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, Eq)]
 pub struct MatchInfo {
     pub match_date: String,
     pub match_id: String,
     pub team_home: TeamInfo,
     pub team_away: TeamInfo,
+}
+
+impl PartialEq for MatchInfo {
+    fn eq(&self, other: &Self) -> bool {
+        self.match_id == other.match_id
+    }
 }
 
 impl MatchInfo {
@@ -37,7 +43,7 @@ pub struct PlayerInfo {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MatchInfoQuery {
+pub struct TeamInfoQuery {
     pub match_id: String,
     pub team_state: String,
 }

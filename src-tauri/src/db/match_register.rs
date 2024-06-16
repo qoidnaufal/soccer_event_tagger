@@ -1,6 +1,6 @@
 use super::Database;
 use tauri::State;
-use types::{AppError, MatchInfo, PlayerInfo, PlayerQuery, TeamInfo};
+use types::{AppError, MatchInfo, TeamInfo, TeamInfoQuery};
 
 #[tauri::command]
 pub async fn register_match_info(
@@ -36,7 +36,16 @@ pub async fn register_match_info(
 }
 
 #[tauri::command]
-pub async fn get_match_info(
+pub async fn get_all_match_info(state: State<'_, Database>) -> Result<Vec<MatchInfo>, AppError> {
+    let db = state.db.lock().await;
+
+    db.select::<Vec<MatchInfo>>("match_info")
+        .await
+        .map_err(|err| AppError::DatabaseError(err.to_string()))
+}
+
+#[tauri::command]
+pub async fn get_match_info_by_match_id(
     payload: String,
     state: State<'_, Database>,
 ) -> Result<Option<MatchInfo>, AppError> {
@@ -60,7 +69,7 @@ pub async fn get_match_info(
 
 #[tauri::command]
 pub async fn get_team_info_by_query(
-    payload: types::MatchInfoQuery,
+    payload: TeamInfoQuery,
     state: State<'_, Database>,
 ) -> Result<Option<TeamInfo>, AppError> {
     let db = state.db.lock().await;
@@ -84,43 +93,5 @@ pub async fn get_team_info_by_query(
             team_info
         }
         Err(err) => Err(err),
-    }
-}
-
-#[tauri::command]
-pub async fn get_player_by_query(
-    payload: PlayerQuery,
-    state: State<'_, Database>,
-) -> Result<Option<PlayerInfo>, AppError> {
-    let db = state.db.lock().await;
-
-    db.select::<Option<PlayerInfo>>(("match_info", payload.number))
-        .await
-        .map_err(|err| AppError::DatabaseError(err.to_string()))
-}
-
-#[tauri::command]
-pub async fn delete_player_by_info(
-    payload: PlayerInfo,
-    state: State<'_, Database>,
-) -> Result<(), AppError> {
-    let db = state.db.lock().await;
-
-    match db
-        .delete::<Option<PlayerInfo>>((&payload.team_name, payload.number))
-        .await
-        .map_err(|err| AppError::DatabaseError(err.to_string()))
-    {
-        Ok(deleted) => {
-            if let Some(player) = deleted {
-                log::info!("Deleted player: {:?}", player);
-            }
-
-            Ok(())
-        }
-        Err(err) => {
-            log::error!("Failed to delete player: {}", err);
-            Err(err)
-        }
     }
 }

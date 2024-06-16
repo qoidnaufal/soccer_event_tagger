@@ -4,7 +4,7 @@ use super::{Event, Point};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaggedEvent {
-    pub match_info: String,
+    pub match_id: String,
     pub uuid: String,
     pub time_start: f64,
     pub player_name: String,
@@ -38,7 +38,7 @@ impl PartialOrd for TaggedEvent {
 impl Default for TaggedEvent {
     fn default() -> Self {
         Self {
-            match_info: String::new(),
+            match_id: String::new(),
             uuid: String::new(),
             time_start: 0.,
             player_name: String::new(),

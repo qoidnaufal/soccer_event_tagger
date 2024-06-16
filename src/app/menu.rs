@@ -17,7 +17,6 @@ pub fn MenuBar(menu_bar_node_ref: NodeRef<html::Div>) -> impl IntoView {
             let path_protocol = invoke("open", wasm_bindgen::JsValue::null()).await;
             let (path, protocol): (String, String) =
                 serde_wasm_bindgen::from_value(path_protocol).unwrap_throw();
-            // let resolved_path = convertFileSrc(path, protocol).as_string().unwrap();
             let resolved_path = format!("{}://localhost/{}", protocol, path);
 
             logging::log!("resolved path: {:?}", resolved_path);

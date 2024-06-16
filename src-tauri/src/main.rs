@@ -5,23 +5,6 @@ mod db;
 mod stream;
 
 use std::sync::{Arc, Mutex};
-use tauri::{GlobalShortcutManager, Manager};
-
-fn op() {
-    let maybe_path = rfd::FileDialog::new().pick_file();
-
-    if let Some(path) = maybe_path {
-        log::info!("{:?}", path);
-    }
-}
-
-fn ctrl_o(app: &mut tauri::App) -> tauri::Result<()> {
-    let app_handle = app.app_handle();
-    app_handle
-        .global_shortcut_manager()
-        .register("CTRL + O", op)
-        .map_err(|err| tauri::Error::Runtime(err))
-}
 
 fn main() -> tauri::Result<()> {
     env_logger::init();
@@ -34,7 +17,6 @@ fn main() -> tauri::Result<()> {
         })
         .setup(|app| {
             db::Database::init(app)?;
-            ctrl_o(app)?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -44,10 +26,9 @@ fn main() -> tauri::Result<()> {
             db::event_register::delete_by_id,
             db::event_register::delete_all_records,
             db::match_register::register_match_info,
-            db::match_register::get_match_info,
+            db::match_register::get_all_match_info,
+            db::match_register::get_match_info_by_match_id,
             db::match_register::get_team_info_by_query,
-            db::match_register::get_player_by_query,
-            db::match_register::delete_player_by_info,
         ])
         .run(tauri::generate_context!())
 }
