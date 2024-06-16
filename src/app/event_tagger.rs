@@ -3,7 +3,7 @@ use super::{invoke, menu, pitch, table_data, team_sheet, video};
 use leptos::*;
 use wasm_bindgen::prelude::*;
 
-use types::{AppError, Event, MatchInfo, Payload, Point, TaggedEvent, TeamInfoQuery};
+use types::{AppError, Event, MatchInfo, Payload, Point, TaggedEvent, TeamInfo, TeamInfoQuery};
 
 async fn get_match_info_by_match_id(match_id: String) -> Result<MatchInfo, AppError> {
     let match_id = Payload { payload: match_id };
@@ -70,12 +70,20 @@ pub fn EventTagger() -> impl IntoView {
                 let current_playback_rate = video_player.playback_rate();
                 video_player.set_playback_rate(current_playback_rate - 0.25);
             }
+            "ArrowRight" => {
+                let current_time = video_player.current_time();
+                let _ = video_player.fast_seek(current_time + 0.2);
+            }
+            "ArrowLeft" => {
+                let current_time = video_player.current_time();
+                let _ = video_player.fast_seek(current_time - 0.2);
+            }
             num if ev.ctrl_key() && ("1"..="2").contains(&num) => {
                 let rate = num.parse::<f64>().unwrap();
                 video_player.set_playback_rate(rate);
             }
             // --- open video
-            o if ev.ctrl_key() && o == "o" => {
+            open if ev.ctrl_key() && open == "o" => {
                 spawn_local(async move {
                     let path_protocol = invoke("open", wasm_bindgen::JsValue::null()).await;
                     let (path, protocol): (String, String) =
@@ -132,8 +140,8 @@ pub fn EventTagger() -> impl IntoView {
                 set_tagged_event.set(TaggedEvent::default());
                 set_event_buffer.set(String::new());
             }
-            b if ("0"..="9").contains(&b) || ("a"..="z").contains(&b) || b == "/" => {
-                set_event_buffer.update(|e| e.push_str(b));
+            keys if ("0"..="9").contains(&keys) || ("a"..="z").contains(&keys) || keys == "/" => {
+                set_event_buffer.update(|e| e.push_str(keys));
 
                 let args = event_buffer.get();
 
@@ -159,18 +167,17 @@ pub fn EventTagger() -> impl IntoView {
                     _ => "Unregistered".to_string(),
                 };
 
-                let match_id = match_id.get_untracked();
                 let payload = Payload {
                     payload: TeamInfoQuery {
-                        match_id,
+                        match_id: match_id.get_untracked(),
                         team_state: team_state.clone(),
                     },
                 };
                 let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
                 team_info_action.dispatch(payload);
                 let team_info = team_info_action.value().get().unwrap_or_default();
-                let team_info = serde_wasm_bindgen::from_value::<types::TeamInfo>(team_info)
-                    .unwrap_or_default();
+                let team_info =
+                    serde_wasm_bindgen::from_value::<TeamInfo>(team_info).unwrap_or_default();
 
                 set_player_buffer.update(|p| {
                     let player_name = if let Some(player_info) = team_info
@@ -197,20 +204,68 @@ pub fn EventTagger() -> impl IntoView {
                     *t = team_name;
                 });
 
-                let event_args = args.split('/').skip(1).collect::<String>();
+                let event_args = args
+                    .split('/')
+                    .skip(1)
+                    .map(|a| a.to_string())
+                    .collect::<Vec<String>>();
 
-                set_action_buffer.update(|a| *a = Event::from_event_args(event_args.as_str()));
+                let (team_outcome, player_outcome) = if let Some(evt_arg) = event_args.get(1) {
+                    let num = evt_arg
+                        .chars()
+                        .filter(|c| c.is_numeric())
+                        .collect::<String>();
+                    let t_state = match evt_arg
+                        .chars()
+                        .filter(|c| !c.is_numeric())
+                        .collect::<String>()
+                        .as_str()
+                    {
+                        "h" => "Home".to_string(),
+                        "a" => "Away".to_string(),
+                        _ => "Unregistered".to_string(),
+                    };
+                    let payload = Payload {
+                        payload: TeamInfoQuery {
+                            match_id: match_id.get_untracked(),
+                            team_state: t_state.clone(),
+                        },
+                    };
+                    let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+                    team_info_action.dispatch(payload);
+                    let team_info = team_info_action.value().get().unwrap_or_default();
+                    let team_info =
+                        serde_wasm_bindgen::from_value::<TeamInfo>(team_info).unwrap_or_default();
+                    let player_outcome = if let Some(player_info) = team_info
+                        .players
+                        .iter()
+                        .filter(|p| p.number == num)
+                        .map(|p| p)
+                        .collect::<Vec<_>>()
+                        .get(0)
+                    {
+                        player_info.player_name.clone()
+                    } else {
+                        num
+                    };
+                    let team_outcome = if !team_info.team_name.is_empty() {
+                        team_info.team_name
+                    } else {
+                        t_state
+                    };
+                    (Some(team_outcome), Some(player_outcome))
+                } else {
+                    (None, None)
+                };
+
+                let event_args = event_args.get(0).unwrap_or(&"".to_string()).clone();
+
+                set_action_buffer.update(|a| {
+                    *a = Event::from_event_args(event_args.as_str(), team_outcome, player_outcome)
+                });
             }
-            "ArrowRight" => {
-                let current_time = video_player.current_time();
-                let _ = video_player.fast_seek(current_time + 0.2);
-            }
-            "ArrowLeft" => {
-                let current_time = video_player.current_time();
-                let _ = video_player.fast_seek(current_time - 0.2);
-            }
-            unregistered_key => {
-                logging::log!("unregistered key: {}", unregistered_key);
+            _unregistered_key => {
+                logging::log!("unregistered key: {}", _unregistered_key);
             }
         }
     });
