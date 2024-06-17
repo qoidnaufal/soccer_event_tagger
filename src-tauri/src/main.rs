@@ -23,6 +23,7 @@ fn main() -> tauri::Result<()> {
             stream::open,
             db::event_register::insert_data,
             db::event_register::get_all_data,
+            db::event_register::get_match_events_from_match_id,
             db::event_register::delete_by_id,
             db::event_register::delete_all_records,
             db::match_register::register_match_info,

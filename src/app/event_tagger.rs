@@ -323,7 +323,12 @@ pub fn EventTagger() -> impl IntoView {
                     <table class="table-fixed w-full">
                         <tbody>
                             <tr>
-                                <td class="text-xs w-[200px]">"time & loc buffer (S / E): "{ move || coordinate.get().x }" "{ move || coordinate.get().y }</td>
+                                <td class="text-xs w-[200px]">
+                                    "time & loc buffer (S / E): "
+                                    { move || coordinate.get().x }
+                                    " "
+                                    { move || coordinate.get().y }
+                                </td>
                                 <td class="text-xs flex flex-row">
                                     <p>"S: "{ move || format!("{:.3}", tagged_event.get().time_start) }"--"</p>
                                     <p>{ move || tagged_event.get().loc_start.to_string() }"-->"</p>
@@ -342,7 +347,7 @@ pub fn EventTagger() -> impl IntoView {
                         </tbody>
                     </table>
                 </div>
-                <table_data::TableData video_player_node_ref register_event_action/>
+                <table_data::TableData video_player_node_ref register_event_action match_id/>
             </div>
         </div>
     }

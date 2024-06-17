@@ -1,10 +1,12 @@
 use super::invoke;
 use leptos::*;
-use types::{AppError, TaggedEvent};
+use types::{AppError, Payload, TaggedEvent};
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
-async fn get_data() -> Result<Vec<TaggedEvent>, AppError> {
-    let data = invoke("get_all_data", JsValue::null()).await;
+async fn get_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
+    let payload = Payload { payload: match_id };
+    let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+    let data = invoke("get_match_events_from_match_id", payload).await;
     let vec_data = serde_wasm_bindgen::from_value::<Vec<TaggedEvent>>(data).unwrap_or(Vec::new());
 
     Ok(vec_data)
@@ -14,6 +16,7 @@ async fn get_data() -> Result<Vec<TaggedEvent>, AppError> {
 pub fn TableData(
     video_player_node_ref: NodeRef<html::Video>,
     register_event_action: Action<JsValue, JsValue>,
+    match_id: ReadSignal<String>,
 ) -> impl IntoView {
     let delete_action = create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
     let data_resource = create_resource(
@@ -21,9 +24,10 @@ pub fn TableData(
             (
                 register_event_action.version().get(),
                 delete_action.version().get(),
+                match_id.get(),
             )
         },
-        |_| get_data(),
+        move |_| get_data(match_id.get_untracked()),
     );
 
     view! {
@@ -43,22 +47,22 @@ pub fn TableData(
                                         <th scope="col" class="text-xs text-left w-[30px]">
                                             "time start"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[80px]">
+                                        <th scope="col" class="text-xs text-left w-[30px]">
                                             "location start"
                                         </th>
                                         <th scope="col" class="text-xs text-left w-[30px]">
                                             "time end"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[80px]">
+                                        <th scope="col" class="text-xs text-left w-[30px]">
                                             "location end"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[80px]">
+                                        <th scope="col" class="text-xs text-left w-[50px]">
                                             "team name"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[80px]">
+                                        <th scope="col" class="text-xs text-left w-[50px]">
                                             "player name"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[160px]">
+                                        <th scope="col" class="text-xs text-left w-[180px]">
                                             "event"
                                         </th>
                                     </tr>
@@ -108,23 +112,23 @@ pub fn TableData(
                                                         {move || (event.get().time_start / 60.) as u8} ":"
                                                         {move || (event.get().time_start % 60.) as u8}
                                                     </td>
-                                                    <td class="text-xs w-[80px]">
+                                                    <td class="text-xs w-[30px]">
                                                         {move || event.get().loc_start.to_string()}
                                                     </td>
                                                     <td class="text-xs w-[30px]">
                                                         {move || (event.get().time_end / 60.) as u8} ":"
                                                         {move || (event.get().time_end % 60.) as u8}
                                                     </td>
-                                                    <td class="text-xs w-[80px]">
+                                                    <td class="text-xs w-[30px]">
                                                         {move || event.get().loc_end.to_string()}
                                                     </td>
-                                                    <td class="text-xs w-[80px]">
+                                                    <td class="text-xs w-[50px]">
                                                         {move || event.get().team_name}
                                                     </td>
-                                                    <td class="text-xs w-[80px]">
+                                                    <td class="text-xs w-[50px]">
                                                         {move || event.get().player_name}
                                                     </td>
-                                                    <td class="text-xs w-[160px]">
+                                                    <td class="text-xs w-[180px]">
                                                         {move || event.get().event.to_string()}
                                                     </td>
                                                 </tr>

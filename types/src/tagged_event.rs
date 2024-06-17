@@ -7,12 +7,12 @@ pub struct TaggedEvent {
     pub match_id: String,
     pub uuid: String,
     pub time_start: f64,
-    pub player_name: String,
-    pub team_name: String,
     pub loc_start: Point,
-    pub event: Event,
     pub time_end: f64,
     pub loc_end: Point,
+    pub player_name: String,
+    pub team_name: String,
+    pub event: Event,
 }
 
 impl PartialEq for TaggedEvent {

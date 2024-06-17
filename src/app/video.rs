@@ -12,7 +12,7 @@ pub fn VideoPlayer(
                 _ref=video_player_node_ref
                 controls
                 width="1000"
-                class="pointer-events-none"
+                // class="pointer-events-none"
             />
         </div>
     }

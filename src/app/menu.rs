@@ -34,7 +34,7 @@ pub fn MenuBar(menu_bar_node_ref: NodeRef<html::Div>) -> impl IntoView {
                 <OpenVideo get_file_path/>
                 <RegisterMatchInfo/>
                 <SaveFile/>
-                <Settings/>
+                <ShortcutsInfo/>
             </div>
         </Show>
     }
@@ -75,10 +75,16 @@ pub fn SaveFile() -> impl IntoView {
 }
 
 #[component]
-pub fn Settings() -> impl IntoView {
+pub fn ShortcutsInfo() -> impl IntoView {
+    let navigate = move |_: ev::MouseEvent| {
+        let nav = leptos_router::use_navigate();
+        nav("shortcuts", Default::default());
+    };
+
     view! {
         <button
+            on:click=navigate
             class=STYLE
-        >"Settings"</button>
+        >"Shortcuts Info"</button>
     }
 }

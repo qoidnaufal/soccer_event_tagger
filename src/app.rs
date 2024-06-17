@@ -6,6 +6,7 @@ pub mod event_tagger;
 pub mod menu;
 pub mod pitch;
 pub mod register_match_info;
+pub mod shortcuts;
 pub mod table_data;
 pub mod team_sheet;
 pub mod video;
@@ -32,6 +33,7 @@ pub fn App() -> impl IntoView {
                 <Routes>
                     <Route path="/" view=event_tagger::EventTagger/>
                     <Route path="/team_sheet" view=register_match_info::RegisterMatchInfo/>
+                    <Route path="/shortcuts" view=shortcuts::Shortcuts/>
                 </Routes>
             </main>
         </Router>

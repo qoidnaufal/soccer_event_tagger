@@ -25,10 +25,6 @@ impl std::fmt::Display for EventOutcome {
 impl EventOutcome {
     fn from_args(event_args: &str, team_outcome: Option<String>, player_outcome: Option<String>) -> Self {
         match event_args {
-            // --- kickoff
-            "kos" => Self::PassOutcome { outcome: "Success".to_string(), team: team_outcome, player: player_outcome, },
-            "koo" => Self::PassOutcome { outcome: "Out of Play".to_string(), team: team_outcome, player: player_outcome, },
-            "koi" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
             // --- pass
             "ps" => Self::PassOutcome { outcome: "Success".to_string(), team: team_outcome, player: player_outcome, },
             "pi" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
@@ -40,21 +36,27 @@ impl EventOutcome {
             "cri" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
             "crc" => Self::PassOutcome { outcome: "Catched".to_string(), team: team_outcome, player: player_outcome, },
             "crb" => Self::PassOutcome { outcome: "Blocked".to_string(), team: team_outcome, player: player_outcome, },
+            "cro" => Self::PassOutcome { outcome: "Out of Play".to_string(), team: team_outcome, player: player_outcome, },
             // --- throw
             "tis" => Self::PassOutcome { outcome: "Success".to_string(), team: team_outcome, player: player_outcome, },
             "tii" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
             "tic" => Self::PassOutcome { outcome: "Catched".to_string(), team: team_outcome, player: player_outcome, },
             "tio" => Self::PassOutcome { outcome: "Out of Play".to_string(), team: team_outcome, player: player_outcome, },
-            // --- cornerkick
+            // --- corner kick
             "cks" => Self::PassOutcome { outcome: "Success".to_string(), team: team_outcome, player: player_outcome, },
             "cki" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
             "ckc" => Self::PassOutcome { outcome: "Catched".to_string(), team: team_outcome, player: player_outcome, },
             "cko" => Self::PassOutcome { outcome: "Out of Play".to_string(), team: team_outcome, player: player_outcome, },
-            // --- freekick
+            // --- free kick
             "fkps" => Self::PassOutcome { outcome: "Success".to_string(), team: team_outcome, player: player_outcome, },
             "fkpi" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
             "fkpo" => Self::PassOutcome { outcome: "Out of Play".to_string(), team: team_outcome, player: player_outcome, },
             "fkpc" => Self::PassOutcome { outcome: "Catched".to_string(), team: team_outcome, player: player_outcome, },
+            // --- penalty kick
+            "pkps" => Self::PassOutcome { outcome: "Success".to_string(), team: team_outcome, player: player_outcome, },
+            "pkpi" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
+            "pkpo" => Self::PassOutcome { outcome: "Out of Play".to_string(), team: team_outcome, player: player_outcome, },
+            "pkpc" => Self::PassOutcome { outcome: "Catched".to_string(), team: team_outcome, player: player_outcome, },
             // --- unregistered
             _ => Self::Other { name: "Unregistered".to_string(), },
         }
@@ -81,6 +83,7 @@ pub enum Event {
     Catch { name: String, event_source: String, },
     Play { name: String, position: String, },
     Subs { name: String, team: Option<String>, subs_in: Option<String> },
+    TimeMarker { name: String, }
 }
 
 impl Default for Event {
@@ -101,10 +104,6 @@ impl Event {
     #[rustfmt::skip]
     pub fn from_event_args(event_args: &str, team_args: Option<String>, player_args: Option<String>) -> Self {
         match event_args {
-            // --- kick off
-            "kos" => Self::Pass { name: "Pass".to_string(), pass_type: "Kick Off".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "koo" => Self::Pass { name: "Pass".to_string(), pass_type: "Kick Off".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "koi" => Self::Pass { name: "Pass".to_string(), pass_type: "Kick Off".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             // --- pass
             "ps" => Self::Pass { name: "Pass".to_string(), pass_type: "Open Play".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "pi" => Self::Pass { name: "Pass".to_string(), pass_type: "Open Play".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
@@ -112,18 +111,23 @@ impl Event {
             "po" => Self::Pass { name: "Pass".to_string(), pass_type: "Open Play".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "pc" => Self::Pass { name: "Pass".to_string(), pass_type: "Open Play".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             // --- goal kick
-            "gks" => Self::Pass { name: "Pass".to_string(), pass_type: "Goalkick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "gki" => Self::Pass { name: "Pass".to_string(), pass_type: "Goalkick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "gko" => Self::Pass { name: "Pass".to_string(), pass_type: "Goalkick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "gks" => Self::Pass { name: "Pass".to_string(), pass_type: "Goal Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "gki" => Self::Pass { name: "Pass".to_string(), pass_type: "Goal Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "gko" => Self::Pass { name: "Pass".to_string(), pass_type: "Goal Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             // --- shot
             "son" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "On target".to_string() },
             "sof" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "Off target".to_string() },
             "sb" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "Blocked".to_string() },
             "sg" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "Goal".to_string() },
-            // --- penalty
-            "pkon" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty".to_string(), outcome: "On target".to_string() },
-            "pkof" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty".to_string(), outcome: "Off target".to_string() },
-            "pkg" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty".to_string(), outcome: "Goal".to_string() },
+            // --- penalty kick pass
+            "pkps" => Self::Pass { name: "Pass".to_string(), pass_type: "Penalty Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "pkpi" => Self::Pass { name: "Pass".to_string(), pass_type: "Penalty Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "pkpo" => Self::Pass { name: "Pass".to_string(), pass_type: "Penalty Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "pkpc" => Self::Pass { name: "Pass".to_string(), pass_type: "Penalty Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            // --- penalty kick shot
+            "pkon" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty Kick".to_string(), outcome: "On target".to_string() },
+            "pkof" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty Kick".to_string(), outcome: "Off target".to_string() },
+            "pkg" => Self::Shot { name: "Shot".to_string(), shot_type: "Penalty Kick".to_string(), outcome: "Goal".to_string() },
             // --- carry
             "drp" => Self::Dribble { name: "Dribble".to_string(), outcome: "Pass".to_string() },
             "drs" => Self::Dribble { name: "Dribble".to_string(), outcome: "Shot".to_string() },
@@ -134,26 +138,27 @@ impl Event {
             "cri" => Self::Pass { name: "Pass".to_string(), pass_type: "Cross".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "crc" => Self::Pass { name: "Pass".to_string(), pass_type: "Cross".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "crb" => Self::Pass { name: "Pass".to_string(), pass_type: "Cross".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "cro" => Self::Pass { name: "Pass".to_string(), pass_type: "Cross".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             // --- throw
             "tis" => Self::Pass { name: "Pass".to_string(), pass_type: "Throw In".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "tii" => Self::Pass { name: "Pass".to_string(), pass_type: "Throw In".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "tic" => Self::Pass { name: "Pass".to_string(), pass_type: "Throw In".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "tio" => Self::Pass { name: "Pass".to_string(), pass_type: "Throw In".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            // --- cornerkick
-            "cks" => Self::Pass { name: "Pass".to_string(), pass_type: "Cornerkick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "cki" => Self::Pass { name: "Pass".to_string(), pass_type: "Cornerkick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "ckc" => Self::Pass { name: "Pass".to_string(), pass_type: "Cornerkick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "cko" => Self::Pass { name: "Pass".to_string(), pass_type: "Cornerkick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "ckg" => Self::Shot { name: "Shot".to_string(), shot_type: "Cornerkick".to_string(), outcome: "Goal".to_string() },
-            // --- Direct freekick
-            "fkon" => Self::Shot { name: "Shot".to_string(), shot_type: "Freekick".to_string(), outcome: "On Target".to_string() },
-            "fkof" => Self::Shot { name: "Shot".to_string(), shot_type: "Freekick".to_string(), outcome: "Off Target".to_string() },
-            "fkb" => Self::Shot { name: "Shot".to_string(), shot_type: "Freekick".to_string(), outcome: "Blocked".to_string() },
-            // --- Indirect freekick
-            "fkps" => Self::Pass { name: "Pass".to_string(), pass_type: "Freekick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "fkpi" => Self::Pass { name: "Pass".to_string(), pass_type: "Freekick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "fkpo" => Self::Pass { name: "Pass".to_string(), pass_type: "Freekick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
-            "fkpc" => Self::Pass { name: "Pass".to_string(), pass_type: "Freekick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            // --- corner kick
+            "cks" => Self::Pass { name: "Pass".to_string(), pass_type: "Corner Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "cki" => Self::Pass { name: "Pass".to_string(), pass_type: "Corner Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "ckc" => Self::Pass { name: "Pass".to_string(), pass_type: "Corner Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "cko" => Self::Pass { name: "Pass".to_string(), pass_type: "Corner Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "ckg" => Self::Shot { name: "Shot".to_string(), shot_type: "Corner Kick".to_string(), outcome: "Goal".to_string() },
+            // --- direct free kick
+            "fkon" => Self::Shot { name: "Shot".to_string(), shot_type: "Free Kick".to_string(), outcome: "On Target".to_string() },
+            "fkof" => Self::Shot { name: "Shot".to_string(), shot_type: "Free Kick".to_string(), outcome: "Off Target".to_string() },
+            "fkb" => Self::Shot { name: "Shot".to_string(), shot_type: "Free Kick".to_string(), outcome: "Blocked".to_string() },
+            // --- indirect free kick
+            "fkps" => Self::Pass { name: "Pass".to_string(), pass_type: "Free Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "fkpi" => Self::Pass { name: "Pass".to_string(), pass_type: "Free Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "fkpo" => Self::Pass { name: "Pass".to_string(), pass_type: "Free Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "fkpc" => Self::Pass { name: "Pass".to_string(), pass_type: "Free Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             // --- recovery
             "r" => Self::Recovery { name: "Recovery".to_string() },
             // --- lost ball
@@ -197,6 +202,16 @@ impl Event {
             "gcfk" => Self::Catch { name: "Catch".to_string(), event_source: "Freekick".to_string() },
             "gcck" => Self::Catch { name: "Catch".to_string(), event_source: "Cornerkick".to_string() },
             "gcti" => Self::Catch { name: "Catch".to_string(), event_source: "Throw In".to_string() },
+            // --- time marker
+            "kofh" => Self::TimeMarker { name: "Kick Off First Half".to_string() },
+            "kosh" => Self::TimeMarker { name: "Kick Off Second Half".to_string() },
+            "koefh" => Self::TimeMarker { name: "Kick Off Extra Time First Half".to_string() },
+            "koesh" => Self::TimeMarker { name: "Kick Off Extra Time Second Half".to_string() },
+            "eofh" => Self::TimeMarker { name: "End of First Half".to_string() },
+            "eosh" => Self::TimeMarker { name: "End of Second Half".to_string() },
+            "eoefh" => Self::TimeMarker { name: "End of Extra Time First Half".to_string() },
+            "eoesh" => Self::TimeMarker { name: "End of Extra Time Second Half".to_string() },
+            "eom" => Self::TimeMarker { name: "End of Match".to_string() },
             // --- play
             "startgk" => Self::Play { name: "Start".to_string(), position: "GK".to_string() },
             "startrfb" => Self::Play { name: "Start".to_string(), position: "RFB".to_string() },
@@ -219,10 +234,8 @@ impl Event {
             "subs" => Self::Subs { name: "Subs".to_string(), team: team_args, subs_in: player_args },
             // --- other events
             "yc" => Self::Other { name: "Yellow Card".to_string() },
+            "syc" => Self::Other { name: "Second Yellow Card".to_string() },
             "rc" => Self::Other { name: "Red Card".to_string() },
-            "eofh" => Self::Other { name: "End of First Half".to_string() },
-            "eosh" => Self::Other { name: "End of Second Half".to_string() },
-            "eom" => Self::Other { name: "End of Match".to_string() },
             _ => Self::Other { name: "Unregistered".to_string(),
             },
         }
