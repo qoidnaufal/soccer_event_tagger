@@ -54,7 +54,7 @@ pub fn TableData(
                             <table class="table-fixed w-full">
                                 <thead class="w-full">
                                     <tr class="w-full">
-                                        <th scope="col" class="text-xs text-left w-[20px]">
+                                        <th scope="col" class="text-xs text-left w-[15px]">
                                             <button
                                                 on:click=delete_all
                                                 class="hover:text-red-600 text-xs"
@@ -62,26 +62,41 @@ pub fn TableData(
                                                 "DEL"
                                             </button>
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class="text-xs text-left w-[20px]">
                                             "time start"
                                         </th>
                                         <th scope="col" class="text-xs text-left w-[30px]">
                                             "location start"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class="text-xs text-left w-[20px]">
                                             "time end"
                                         </th>
                                         <th scope="col" class="text-xs text-left w-[30px]">
                                             "location end"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[50px]">
+                                        <th scope="col" class="text-xs text-left w-[30px]">
                                             "team name"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[50px]">
+                                        <th scope="col" class="text-xs text-left w-[30px]">
                                             "player name"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[180px]">
-                                            "event"
+                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                            "event name"
+                                        </th>
+                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                            "event type"
+                                        </th>
+                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                            "event source"
+                                        </th>
+                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                            "outcome"
+                                        </th>
+                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                            "team end"
+                                        </th>
+                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                            "player end"
                                         </th>
                                     </tr>
                                 </thead>
@@ -118,7 +133,7 @@ pub fn TableData(
                                                     on:click=seek
                                                     class="w-full h-fit py-2 odd:bg-slate-200 even:bg-white hover:bg-green-300"
                                                 >
-                                                    <td class="w-[20px]">
+                                                    <td class="w-[15px]">
                                                         <button
                                                             on:click=delete
                                                             class="bg-blue-300 hover:bg-red-600 rounded-md w-fit p-2 text-xs z-10"
@@ -126,28 +141,45 @@ pub fn TableData(
                                                             "del"
                                                         </button>
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class="text-xs w-[20px]">
                                                         {move || format!("{:02}", (event.get().time_start / 60.) as u8)} ":"
                                                         {move || format!("{:02}", (event.get().time_start % 60.) as u8)}
                                                     </td>
                                                     <td class="text-xs w-[30px]">
-                                                        {move || event.get().loc_start.to_string()}
+                                                        "x: "{move || event.get().x_start.unwrap_or_default()}
+                                                        ", y: "{move || event.get().y_start.unwrap_or_default()}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class="text-xs w-[20px]">
                                                         {move || format!("{:02}", (event.get().time_end / 60.) as u8)} ":"
                                                         {move || format!("{:02}", (event.get().time_end % 60.) as u8)}
                                                     </td>
                                                     <td class="text-xs w-[30px]">
-                                                        {move || event.get().loc_end.to_string()}
+                                                        "x: "{move || event.get().x_end.unwrap_or_default()}
+                                                        ", y: "{move || event.get().y_end.unwrap_or_default()}
                                                     </td>
-                                                    <td class="text-xs w-[50px]">
+                                                    <td class="text-xs w-[30px]">
                                                         {move || event.get().team_name}
                                                     </td>
-                                                    <td class="text-xs w-[50px]">
+                                                    <td class="text-xs w-[30px]">
                                                         {move || event.get().player_name}
                                                     </td>
-                                                    <td class="text-xs w-[180px]">
-                                                        {move || event.get().event.to_string()}
+                                                    <td class="text-xs w-[30px]">
+                                                        {move || event.get().event_name}
+                                                    </td>
+                                                    <td class="text-xs w-[30px]">
+                                                        {move || event.get().event_type}
+                                                    </td>
+                                                    <td class="text-xs w-[30px]">
+                                                        {move || event.get().event_source}
+                                                    </td>
+                                                    <td class="text-xs w-[30px]">
+                                                        {move || event.get().outcome}
+                                                    </td>
+                                                    <td class="text-xs w-[30px]">
+                                                        {move || event.get().team_end}
+                                                    </td>
+                                                    <td class="text-xs w-[30px]">
+                                                        {move || event.get().player_end}
                                                     </td>
                                                 </tr>
                                             }

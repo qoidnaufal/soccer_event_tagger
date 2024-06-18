@@ -3,9 +3,7 @@ use super::{invoke, menu, pitch, table_data, team_sheet, video};
 use leptos::*;
 use wasm_bindgen::prelude::*;
 
-use types::{
-    AppError, Event, MatchData, MatchInfo, Payload, Point, TaggedEvent, TeamInfo, TeamInfoQuery,
-};
+use types::{AppError, MatchData, MatchInfo, Payload, Point, TaggedEvent, TeamInfo, TeamInfoQuery};
 
 async fn get_match_info_by_match_id(match_id: String) -> Result<MatchInfo, AppError> {
     logging::log!("{}", match_id);
@@ -34,13 +32,13 @@ pub fn EventTagger() -> impl IntoView {
     let (event_buffer, set_event_buffer) = create_signal(String::new());
     let (team_buffer, set_team_buffer) = create_signal(String::new());
     let (player_buffer, set_player_buffer) = create_signal(String::new());
-    let (action_buffer, set_action_buffer) = create_signal(Event::default());
     let (match_data, set_match_data) = create_signal(MatchData::default());
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
     let register_event_action =
         create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
+
     let register_match_info_action = expect_context::<Action<JsValue, JsValue>>();
 
     let team_info_resource = create_resource(
@@ -54,6 +52,9 @@ pub fn EventTagger() -> impl IntoView {
     );
 
     let team_info_action =
+        create_action(|payload: &JsValue| invoke("get_team_info_by_query", payload.clone()));
+
+    let team_end_action =
         create_action(|payload: &JsValue| invoke("get_team_info_by_query", payload.clone()));
 
     let shortcuts = window_event_listener(ev::keydown, move |ev| {
@@ -114,16 +115,22 @@ pub fn EventTagger() -> impl IntoView {
                 if !video_player.paused() {
                     let _ = video_player.pause();
                 }
-                set_tagged_event.update(|tag| tag.time_start = video_player.current_time());
-                set_tagged_event.update(|tag| tag.loc_start = coordinate.get());
+                set_tagged_event.update(|tag| {
+                    tag.time_start = video_player.current_time();
+                    tag.x_start = coordinate.get_untracked().x;
+                    tag.y_start = coordinate.get_untracked().y;
+                });
                 set_coordinate.set(Point::default());
             }
             "E" => {
                 if !video_player.paused() {
                     let _ = video_player.pause();
                 }
-                set_tagged_event.update(|tag| tag.time_end = video_player.current_time());
-                set_tagged_event.update(|tag| tag.loc_end = coordinate.get());
+                set_tagged_event.update(|tag| {
+                    tag.time_end = video_player.current_time();
+                    tag.x_end = coordinate.get_untracked().x;
+                    tag.y_end = coordinate.get_untracked().y;
+                });
                 set_coordinate.set(Point::default());
             }
             // --- event outcome
@@ -132,19 +139,17 @@ pub fn EventTagger() -> impl IntoView {
                 set_tagged_event.update(|tag| {
                     tag.player_name = player_buffer.get_untracked();
                     tag.team_name = team_buffer.get_untracked();
-                    tag.event = action_buffer.get_untracked();
                     tag.match_id = match_data.get_untracked().match_id;
                     tag.match_teams = format!(
                         "{} vs {}",
                         match_data.get_untracked().team_home,
                         match_data.get_untracked().team_away
                     );
-                    tag.opponent_team =
-                        if team_buffer.get_untracked() == match_data.get_untracked().team_home {
-                            match_data.get_untracked().team_away
-                        } else {
-                            match_data.get_untracked().team_home
-                        };
+                    tag.opponent_team = if tag.team_name == match_data.get_untracked().team_home {
+                        match_data.get_untracked().team_away
+                    } else {
+                        match_data.get_untracked().team_home
+                    };
                 });
                 let tagged_event = tagged_event.get_untracked();
                 let payload = Payload {
@@ -156,6 +161,8 @@ pub fn EventTagger() -> impl IntoView {
 
                 set_tagged_event.set(TaggedEvent::default());
                 set_event_buffer.set(String::new());
+                set_team_buffer.set(String::new());
+                set_player_buffer.set(String::new());
             }
             keys if ("0"..="9").contains(&keys) || ("a"..="z").contains(&keys) || keys == "/" => {
                 set_event_buffer.update(|e| e.push_str(keys));
@@ -249,23 +256,23 @@ pub fn EventTagger() -> impl IntoView {
                         },
                     };
                     let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
-                    team_info_action.dispatch(payload);
-                    let team_info = team_info_action.value().get().unwrap_or_default();
-                    let team_info =
-                        serde_wasm_bindgen::from_value::<TeamInfo>(team_info).unwrap_or_default();
-                    let player_outcome = if let Some(player_info) = team_info
+                    team_end_action.dispatch(payload);
+                    let team_end = team_end_action.value().get().unwrap_or_default();
+                    let team_end =
+                        serde_wasm_bindgen::from_value::<TeamInfo>(team_end).unwrap_or_default();
+                    let player_outcome = if let Some(player_end) = team_end
                         .players
                         .iter()
                         .filter(|p| p.number == num)
                         .collect::<Vec<_>>()
                         .get(0)
                     {
-                        player_info.player_name.clone()
+                        player_end.player_name.clone()
                     } else {
                         num
                     };
-                    let team_outcome = if !team_info.team_name.is_empty() {
-                        team_info.team_name
+                    let team_outcome = if !team_end.team_name.is_empty() {
+                        team_end.team_name
                     } else {
                         t_state
                     };
@@ -276,8 +283,8 @@ pub fn EventTagger() -> impl IntoView {
 
                 let event_args = event_args.get(0).unwrap_or(&"".to_string()).clone();
 
-                set_action_buffer.update(|a| {
-                    *a = Event::from_event_args(event_args.as_str(), team_outcome, player_outcome)
+                set_tagged_event.update(|t| {
+                    t.assign_event_from_args(event_args.as_str(), team_outcome, player_outcome);
                 });
             }
             _unregistered_key => {
@@ -347,17 +354,22 @@ pub fn EventTagger() -> impl IntoView {
                                 </td>
                                 <td class="text-xs flex flex-row">
                                     <p>"S: "{ move || format!("{:.3}", tagged_event.get().time_start) }"--"</p>
-                                    <p>{ move || tagged_event.get().loc_start.to_string() }"-->"</p>
+                                    <p>"x: "{ move || tagged_event.get().x_start }", y: "{ move || tagged_event.get().y_start }"-->"</p>
                                     <p>"E: "{ move || format!("{:.3}", tagged_event.get().time_end) }"--"</p>
-                                    <p>{ move || tagged_event.get().loc_end.to_string() }</p>
+                                    <p>"x: "{ move || tagged_event.get().x_end }", y: "{ move || tagged_event.get().y_end }</p>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="text-xs w-[200px]">"event args buffer: "{ move || event_buffer.get() }</td>
                                 <td class="text-xs flex flex-row">
-                                    <p class="text-xs">{ move || team_buffer.get() }"__"</p>
-                                    <p class="text-xs">{ move || player_buffer.get() }"__"</p>
-                                    <p class="text-xs">{ move || action_buffer.get().to_string() }</p>
+                                    <p class="text-xs">{ move || team_buffer.get() }"_"</p>
+                                    <p class="text-xs">{ move || player_buffer.get() }"_"</p>
+                                    <p class="text-xs">{ move || tagged_event.get().event_name }"_"</p>
+                                    <p class="text-xs">{ move || tagged_event.get().event_type }"_"</p>
+                                    <p class="text-xs">{ move || tagged_event.get().event_source }"_"</p>
+                                    <p class="text-xs">{ move || tagged_event.get().outcome }"_"</p>
+                                    <p class="text-xs">{ move || tagged_event.get().team_end }"_"</p>
+                                    <p class="text-xs">{ move || tagged_event.get().player_end }</p>
                                 </td>
                             </tr>
                         </tbody>

@@ -71,7 +71,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
     let handle_focus = move |ev: ev::FocusEvent| {
         ev.prevent_default();
         let input = input_home_ref.get().unwrap();
-        if input.inner_text().as_str() == "example: 1) Toldo, 2) D. Alves, ..." {
+        if input.inner_text().as_str() == "Use \")\" after the number, and \",\" to separate each players. Example: 1) Toldo, 2) D. Alves, ..." {
             input_home_ref.get().unwrap().set_inner_text("");
         }
     };
@@ -99,20 +99,23 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                     </button>
                 </A>
             </div>
-            <div class="bg-slate-600 p-4 rounded-lg block m-auto right-0 left-0 top-0 bottom-0 w-[600px]">
+            <div class="bg-slate-600 p-4 rounded-lg block m-auto right-0 left-0 top-0 bottom-0 w-[800px] h-[500px]">
                 <form
                     on:submit=register
                     class="flex flex-col content-normal"
                     autocomplete="off"
                 >
+                    <div class="text-xs self-center text-white mb-1">
+                        "Pick match date & time: "
+                    </div>
                     <input
                         required
                         on:change=move |ev| set_match_info.update(|m| m.match_date = event_target_value(&ev))
                         type="datetime-local"
                         class="rounded-full h-[30px] w-[150px] mb-2 text-xs justify-center self-center"
                     />
-                    <div class="flex flex-row mb-2 justify-evenly text-xs">
-                        <div class="flex flex-col w-[240px] my-1">
+                    <div class="flex flex-row mb-4 justify-evenly text-xs">
+                        <div class="flex flex-col w-[330px] my-1">
                             <p class="mb-2 text-white">"Home Team"</p>
                             <input
                                 required
@@ -142,12 +145,12 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 autocapitalize="off"
                                 spellcheck="false"
                                 _ref=input_home_ref
-                                class="grow border h-[200px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
+                                class="grow border h-[270px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
                             >
-                                "example: 1) Toldo, 2) D. Alves, ..."
+                                "Use \")\" after the number, and \",\" to separate each players. Example: 1) Toldo, 2) D. Alves, ..."
                             </div>
                         </div>
-                        <div class="flex flex-col w-[240px] my-1">
+                        <div class="flex flex-col w-[330px] my-1">
                             <p class="mb-2 text-white">"Away Team"</p>
                             <input
                                 required
@@ -176,7 +179,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 autocapitalize="off"
                                 spellcheck="false"
                                 _ref=input_away_ref
-                                class="grow border h-[200px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
+                                class="grow border h-[270px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
                             >
                             </div>
                         </div>
