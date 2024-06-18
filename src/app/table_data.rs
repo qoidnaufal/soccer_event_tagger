@@ -109,7 +109,7 @@ pub fn TableData(
                                 <tbody class="w-full">
                                     <For
                                         each=move || data_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
-                                        key=|event| ((event.time_start * 10000.) as usize, event.uuid.clone())
+                                        key=|event| ((event.time_start * 10000.) as usize, event.event_id)
                                         children=move |event| {
                                             let event = create_rw_signal(event).read_only();
                                             let video = video_player_node_ref.get().unwrap();
@@ -119,7 +119,7 @@ pub fn TableData(
                                             };
                                             let delete = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
-                                                let to_delete = event.get_untracked();
+                                                let to_delete = event.get_untracked().event_id;
                                                 let payload = types::Payload {
                                                     payload: to_delete,
                                                 };

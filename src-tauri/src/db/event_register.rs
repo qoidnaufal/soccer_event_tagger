@@ -4,21 +4,22 @@ use tauri::State;
 use types::{AppError, TaggedEvent};
 
 #[tauri::command]
-pub async fn insert_data(
-    mut payload: TaggedEvent,
-    state: State<'_, Database>,
-) -> Result<(), AppError> {
-    payload.assign_uuid();
+pub async fn insert_data(payload: TaggedEvent, state: State<'_, Database>) -> Result<(), AppError> {
     let db = state.db.lock().await;
     match db
-        .create::<Option<TaggedEvent>>(("tagged_events", &payload.uuid))
+        .create::<Option<TaggedEvent>>(("tagged_events", payload.event_id))
         .content(payload)
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
         Ok(inserted) => {
             if let Some(data) = inserted {
-                log::info!("[INS]: {:?}", data);
+                log::info!(
+                    "[INS]: event_id: {}, team_name: {}, player_name: {}",
+                    data.event_id,
+                    data.team_name,
+                    data.player_name
+                );
             }
             Ok(())
         }
@@ -96,20 +97,17 @@ pub async fn get_match_events_from_match_id(
 }
 
 #[tauri::command]
-pub async fn delete_by_id(
-    payload: TaggedEvent,
-    state: State<'_, Database>,
-) -> Result<(), AppError> {
+pub async fn delete_by_id(payload: i32, state: State<'_, Database>) -> Result<(), AppError> {
     let db = state.db.lock().await;
 
     match db
-        .delete::<Option<TaggedEvent>>(("tagged_events", payload.uuid))
+        .delete::<Option<TaggedEvent>>(("tagged_events", payload))
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
         Ok(deleted) => {
             if let Some(data) = deleted {
-                log::info!("[DEL]: {:?}", data.uuid);
+                log::info!("[DEL]: {:?}", data.event_id);
             }
             Ok(())
         }

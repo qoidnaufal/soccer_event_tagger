@@ -6,7 +6,6 @@ use wasm_bindgen::prelude::*;
 use types::{AppError, MatchData, MatchInfo, Payload, Point, TaggedEvent, TeamInfo, TeamInfoQuery};
 
 async fn get_match_info_by_match_id(match_id: String) -> Result<MatchInfo, AppError> {
-    logging::log!("{}", match_id);
     let match_id = Payload { payload: match_id };
     let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
     let match_info = invoke("get_match_info_by_match_id", match_id).await;
