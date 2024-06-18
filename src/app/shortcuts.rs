@@ -19,6 +19,17 @@ pub fn Shortcuts() -> impl IntoView {
             </div>
             <div class="flex flex-col px-2 pb-2 w-full">
                 <div class="py-2 flex flex-col items-center text-xl bg-indigo-600 text-white">"SHORTCUTS"</div>
+                <div class="bg-green-300 w-fit rounded-lg px-2 py-1 mt-1">"GUIDES"</div>
+                <div class="text-wrap pl-2 pr-10 mb-1">
+                    <p>
+                        "Command shortcuts are separated by \"/\".
+                        for example: 3h/pi/9a, will be translated into: [PLAYER] player number [3] from team [h]ome / [EVENT] [p]ass [i]ntercepted / [OUTCOME] intercepted by player number [9] from team [a]way.
+                        Events which are categorized as pass, need 3 commands to register: the [PLAYER], the [EVENT], and the [OUTCOME]. The [PLAYER] is the guy doing the action. The [EVENT] is the action.
+                        The [OUTCOME] is the player at the end of an action, for example a player receiving or intercepting the pass, etc. In case you forget to register the [OUTCOME],
+                        it would still be okay and the event would still be registered. It's just that later on you will need to do more effort when analyzing the data. Substitution also requires you
+                        to register the [OUTCOME]."
+                    </p>
+                </div>
                 <div class="flex flex-row overflow-scroll w-full">
                     <div class="flex flex-col w-fit px-1">
                         <div class=SUBTITLE_BAR>"PASS"</div>
@@ -32,6 +43,7 @@ pub fn Shortcuts() -> impl IntoView {
                         <p><span class=TEXT_HIGHLIGHT>"\"gks\""</span>" => Pass { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Success\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"gki\""</span>" => Pass { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Intercepted\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"gko\""</span>" => Pass { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Out of Play\""</span>" },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"gko\""</span>" => Pass { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Catched\""</span>" },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"SHOT"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"son\""</span>" => Shot { name: "<span class=TEXT_HIGHLIGHT>"\"Shot\""</span>", shot_type: "<span class=TEXT_HIGHLIGHT>"\"Open Play\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"On target\""</span>" },"</p>

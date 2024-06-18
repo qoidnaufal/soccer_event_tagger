@@ -3,9 +3,12 @@ use super::{invoke, menu, pitch, table_data, team_sheet, video};
 use leptos::*;
 use wasm_bindgen::prelude::*;
 
-use types::{AppError, Event, MatchInfo, Payload, Point, TaggedEvent, TeamInfo, TeamInfoQuery};
+use types::{
+    AppError, Event, MatchData, MatchInfo, Payload, Point, TaggedEvent, TeamInfo, TeamInfoQuery,
+};
 
 async fn get_match_info_by_match_id(match_id: String) -> Result<MatchInfo, AppError> {
+    logging::log!("{}", match_id);
     let match_id = Payload { payload: match_id };
     let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
     let match_info = invoke("get_match_info_by_match_id", match_id).await;
@@ -32,7 +35,7 @@ pub fn EventTagger() -> impl IntoView {
     let (team_buffer, set_team_buffer) = create_signal(String::new());
     let (player_buffer, set_player_buffer) = create_signal(String::new());
     let (action_buffer, set_action_buffer) = create_signal(Event::default());
-    let (match_id, set_match_id) = create_signal(String::new());
+    let (match_data, set_match_data) = create_signal(MatchData::default());
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
@@ -40,7 +43,10 @@ pub fn EventTagger() -> impl IntoView {
         create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
     let register_match_info_action = expect_context::<Action<JsValue, JsValue>>();
 
-    let team_info_resource = create_resource(move || match_id.get(), get_match_info_by_match_id);
+    let team_info_resource = create_resource(
+        move || match_data.get().match_id,
+        get_match_info_by_match_id,
+    );
 
     let match_info_resource = create_resource(
         move || register_match_info_action.version().get(),
@@ -127,7 +133,18 @@ pub fn EventTagger() -> impl IntoView {
                     tag.player_name = player_buffer.get_untracked();
                     tag.team_name = team_buffer.get_untracked();
                     tag.event = action_buffer.get_untracked();
-                    tag.match_id = match_id.get_untracked();
+                    tag.match_id = match_data.get_untracked().match_id;
+                    tag.match_teams = format!(
+                        "{} vs {}",
+                        match_data.get_untracked().team_home,
+                        match_data.get_untracked().team_away
+                    );
+                    tag.opponent_team =
+                        if team_buffer.get_untracked() == match_data.get_untracked().team_home {
+                            match_data.get_untracked().team_away
+                        } else {
+                            match_data.get_untracked().team_home
+                        };
                 });
                 let tagged_event = tagged_event.get_untracked();
                 let payload = Payload {
@@ -169,7 +186,7 @@ pub fn EventTagger() -> impl IntoView {
 
                 let payload = Payload {
                     payload: TeamInfoQuery {
-                        match_id: match_id.get_untracked(),
+                        match_id: match_data.get_untracked().match_id,
                         team_state: team_state.clone(),
                     },
                 };
@@ -227,7 +244,7 @@ pub fn EventTagger() -> impl IntoView {
                     };
                     let payload = Payload {
                         payload: TeamInfoQuery {
-                            match_id: match_id.get_untracked(),
+                            match_id: match_data.get_untracked().match_id,
                             team_state: t_state.clone(),
                         },
                     };
@@ -240,7 +257,6 @@ pub fn EventTagger() -> impl IntoView {
                         .players
                         .iter()
                         .filter(|p| p.number == num)
-                        .map(|p| p)
                         .collect::<Vec<_>>()
                         .get(0)
                     {
@@ -303,7 +319,7 @@ pub fn EventTagger() -> impl IntoView {
                         </button>
                     </Show>
                 </div>
-                <menu::MenuBar menu_bar_node_ref/>
+                <menu::MenuBar menu_bar_node_ref match_data/>
                 <div id="video_container" class="flex flex-col w-fit px-[10px] shrink-0">
                     <div class="relative flex flex-row w-fit h-fit">
                         <pitch::Pitch set_coordinate/>
@@ -311,7 +327,7 @@ pub fn EventTagger() -> impl IntoView {
                     </div>
                 </div>
                 <div id="info" class="flex flex-col shrink-0 items-center w-[350px] bg-slate-800/[.65] p-2 rounded-lg">
-                    <team_sheet::SelectTeamSheet match_info_resource set_match_id/>
+                    <team_sheet::SelectTeamSheet match_info_resource set_match_data/>
                     <div class="flex flex-row">
                         <team_sheet::TeamSheet team_info_resource team_state="Home".to_string()/>
                         <team_sheet::TeamSheet team_info_resource team_state="Away".to_string()/>
@@ -347,7 +363,7 @@ pub fn EventTagger() -> impl IntoView {
                         </tbody>
                     </table>
                 </div>
-                <table_data::TableData video_player_node_ref register_event_action match_id/>
+                <table_data::TableData video_player_node_ref register_event_action match_data/>
             </div>
         </div>
     }

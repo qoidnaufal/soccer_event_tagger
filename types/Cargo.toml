@@ -7,3 +7,4 @@ edition = "2021"
 serde.workspace = true
 thiserror.workspace = true
 uuid.workspace = true
+csv.workspace = true

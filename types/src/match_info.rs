@@ -8,6 +8,16 @@ pub struct MatchInfo {
     pub team_away: TeamInfo,
 }
 
+impl std::fmt::Display for MatchInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}/{}/{}",
+            self.match_id, self.team_home.team_name, self.team_away.team_name
+        )
+    }
+}
+
 impl PartialEq for MatchInfo {
     fn eq(&self, other: &Self) -> bool {
         self.match_id == other.match_id
@@ -48,9 +58,27 @@ pub struct TeamInfoQuery {
     pub team_state: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PlayerQuery {
+#[derive(Debug, Clone, Default, Eq)]
+pub struct MatchData {
     pub match_id: String,
-    pub team_name: String,
-    pub number: String,
+    pub team_home: String,
+    pub team_away: String,
+}
+
+impl PartialEq for MatchData {
+    fn eq(&self, other: &Self) -> bool {
+        self.match_id == other.match_id
+    }
+}
+
+impl MatchData {
+    pub fn from_str(input: String) -> Self {
+        let mut data = input.split('/').map(|s| s.to_string());
+
+        Self {
+            match_id: data.next().unwrap_or_default(),
+            team_home: data.next().unwrap_or_default(),
+            team_away: data.next().unwrap_or_default(),
+        }
+    }
 }

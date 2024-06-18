@@ -5,6 +5,8 @@ use super::{Event, Point};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaggedEvent {
     pub match_id: String,
+    pub match_teams: String,
+    pub opponent_team: String,
     pub uuid: String,
     pub time_start: f64,
     pub loc_start: Point,
@@ -39,6 +41,8 @@ impl Default for TaggedEvent {
     fn default() -> Self {
         Self {
             match_id: String::new(),
+            match_teams: String::new(),
+            opponent_team: String::new(),
             uuid: String::new(),
             time_start: 0.,
             player_name: String::new(),
@@ -54,11 +58,7 @@ impl Default for TaggedEvent {
 impl TaggedEvent {
     pub fn assign_uuid(&mut self) {
         let uuid = uuid::Uuid::now_v7().as_simple().to_string();
-        let uuid = format!(
-            "{}{}",
-            ((self.time_start * 10000.) as usize).to_string(),
-            uuid
-        );
+        let uuid = format!("{}", uuid);
         self.uuid = uuid;
     }
 }

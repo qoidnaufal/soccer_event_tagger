@@ -1,6 +1,6 @@
 use super::invoke;
 use leptos::*;
-use types::{AppError, Payload, TaggedEvent};
+use types::{AppError, MatchData, Payload, TaggedEvent};
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 async fn get_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
@@ -16,19 +16,32 @@ async fn get_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
 pub fn TableData(
     video_player_node_ref: NodeRef<html::Video>,
     register_event_action: Action<JsValue, JsValue>,
-    match_id: ReadSignal<String>,
+    match_data: ReadSignal<MatchData>,
 ) -> impl IntoView {
     let delete_action = create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
+    let delete_all_action = create_action(|payload: &JsValue| {
+        invoke("delete_all_records_by_match_id", payload.clone())
+    });
     let data_resource = create_resource(
         move || {
             (
                 register_event_action.version().get(),
                 delete_action.version().get(),
-                match_id.get(),
+                delete_all_action.version().get(),
+                match_data.get(),
             )
         },
-        move |_| get_data(match_id.get_untracked()),
+        move |_| get_data(match_data.get_untracked().match_id),
     );
+
+    let delete_all = move |ev: ev::MouseEvent| {
+        ev.prevent_default();
+        let payload = Payload {
+            payload: match_data.get_untracked().match_id,
+        };
+        let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+        delete_all_action.dispatch(payload);
+    };
 
     view! {
         <div class="w-full mt-1">
@@ -42,7 +55,12 @@ pub fn TableData(
                                 <thead class="w-full">
                                     <tr class="w-full">
                                         <th scope="col" class="text-xs text-left w-[20px]">
-                                            "delete"
+                                            <button
+                                                on:click=delete_all
+                                                class="hover:text-red-600 text-xs"
+                                            >
+                                                "DEL"
+                                            </button>
                                         </th>
                                         <th scope="col" class="text-xs text-left w-[30px]">
                                             "time start"
@@ -76,7 +94,7 @@ pub fn TableData(
                                 <tbody class="w-full">
                                     <For
                                         each=move || data_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
-                                        key=|event| event.uuid.clone()
+                                        key=|event| ((event.time_start * 10000.) as usize, event.uuid.clone())
                                         children=move |event| {
                                             let event = create_rw_signal(event).read_only();
                                             let video = video_player_node_ref.get().unwrap();
@@ -109,15 +127,15 @@ pub fn TableData(
                                                         </button>
                                                     </td>
                                                     <td class="text-xs w-[30px]">
-                                                        {move || (event.get().time_start / 60.) as u8} ":"
-                                                        {move || (event.get().time_start % 60.) as u8}
+                                                        {move || format!("{:02}", (event.get().time_start / 60.) as u8)} ":"
+                                                        {move || format!("{:02}", (event.get().time_start % 60.) as u8)}
                                                     </td>
                                                     <td class="text-xs w-[30px]">
                                                         {move || event.get().loc_start.to_string()}
                                                     </td>
                                                     <td class="text-xs w-[30px]">
-                                                        {move || (event.get().time_end / 60.) as u8} ":"
-                                                        {move || (event.get().time_end % 60.) as u8}
+                                                        {move || format!("{:02}", (event.get().time_end / 60.) as u8)} ":"
+                                                        {move || format!("{:02}", (event.get().time_end % 60.) as u8)}
                                                     </td>
                                                     <td class="text-xs w-[30px]">
                                                         {move || event.get().loc_end.to_string()}

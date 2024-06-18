@@ -7,7 +7,7 @@ mod point;
 mod tagged_event;
 
 pub use event::Event;
-pub use match_info::{MatchInfo, PlayerInfo, PlayerQuery, TeamInfo, TeamInfoQuery};
+pub use match_info::{MatchData, MatchInfo, PlayerInfo, TeamInfo, TeamInfoQuery};
 pub use point::Point;
 pub use tagged_event::TaggedEvent;
 
@@ -20,4 +20,6 @@ pub struct Payload<T: Clone + 'static> {
 pub enum AppError {
     #[error("Database Error: {0}")]
     DatabaseError(String),
+    #[error("Error Writing CSV File: {0}")]
+    CsvWriteError(String),
 }

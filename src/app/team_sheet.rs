@@ -1,13 +1,19 @@
 use leptos::*;
-use types::{AppError, MatchInfo, TeamInfo};
+use types::{AppError, MatchData, MatchInfo, TeamInfo};
 
 #[component]
 pub fn SelectTeamSheet(
     match_info_resource: Resource<usize, Result<Vec<MatchInfo>, AppError>>,
-    set_match_id: WriteSignal<String>,
+    set_match_data: WriteSignal<MatchData>,
 ) -> impl IntoView {
+    let handle_change = move |ev: ev::Event| {
+        let value = event_target_value(&ev);
+        let match_data = MatchData::from_str(value);
+        set_match_data.set(match_data);
+    };
+
     view! {
-        <select class="text-xs w-full" on:change=move |ev| set_match_id.set(event_target_value(&ev))>
+        <select class="text-xs w-full" on:change=handle_change>
             <option value="">"Select team sheet.."</option>
             <Transition>
                 {move || {
@@ -23,7 +29,7 @@ pub fn SelectTeamSheet(
                                 let match_info = create_rw_signal(match_info).read_only();
 
                                 view! {
-                                    <option value=move || match_info.get().match_id>
+                                    <option value=move || match_info.get().to_string()>
                                         { move || match_info.get().match_date } ": "
                                         { move || match_info.get().team_home.team_name } " vs "
                                         { move || match_info.get().team_away.team_name }

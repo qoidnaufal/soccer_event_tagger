@@ -1,4 +1,5 @@
 use super::Database;
+use csv::Writer;
 use tauri::State;
 use types::{AppError, TaggedEvent};
 
@@ -17,12 +18,12 @@ pub async fn insert_data(
     {
         Ok(inserted) => {
             if let Some(data) = inserted {
-                log::info!("Inserted: {:?}", data.uuid);
+                log::info!("[INS]: {:?}", data);
             }
             Ok(())
         }
         Err(err) => {
-            log::error!("Insert error: {}", err);
+            log::error!("[INS]: {}", err);
             Err(err)
         }
     }
@@ -35,6 +36,40 @@ pub async fn get_all_data(state: State<'_, Database>) -> Result<Vec<TaggedEvent>
     db.select::<Vec<TaggedEvent>>("tagged_events")
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
+}
+
+#[tauri::command]
+pub async fn export_tagged_events_from_match_id(
+    payload: String,
+    state: State<'_, Database>,
+) -> Result<(), AppError> {
+    let maybe_file = rfd::AsyncFileDialog::new().save_file().await;
+
+    if let Some(file) = maybe_file {
+        let path = file.path();
+        let db = state.db.lock().await;
+        let data = db
+            .query("SELECT * FROM tagged_events WHERE match_id = $match_id")
+            .bind(("match_id", payload))
+            .await
+            .map_err(|err| AppError::DatabaseError(err.to_string()))?
+            .take::<Vec<TaggedEvent>>(0)
+            .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+
+        let mut writer =
+            Writer::from_path(path).map_err(|err| AppError::CsvWriteError(err.to_string()))?;
+
+        for i in data.iter() {
+            writer
+                .serialize(i)
+                .map_err(|err| AppError::CsvWriteError(err.to_string()))?;
+        }
+        writer
+            .flush()
+            .map_err(|err| AppError::CsvWriteError(err.to_string()))?;
+    }
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -68,38 +103,42 @@ pub async fn delete_by_id(
     let db = state.db.lock().await;
 
     match db
-        .delete::<Option<TaggedEvent>>(("tagged_events", &payload.uuid))
+        .delete::<Option<TaggedEvent>>(("tagged_events", payload.uuid))
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
         Ok(deleted) => {
             if let Some(data) = deleted {
-                log::info!("Deleted record: {:?}", data.uuid);
+                log::info!("[DEL]: {:?}", data.uuid);
             }
             Ok(())
         }
         Err(err) => {
-            log::error!("Failed to delete record: {}", err);
+            log::error!("[DEL]: {}", err);
             Err(err)
         }
     }
 }
 
 #[tauri::command]
-pub async fn delete_all_records(state: State<'_, Database>) -> Result<(), AppError> {
+pub async fn delete_all_records_by_match_id(
+    payload: String,
+    state: State<'_, Database>,
+) -> Result<(), AppError> {
     let db = state.db.lock().await;
 
     match db
-        .delete::<Vec<TaggedEvent>>("tagged_events")
+        .query("DELETE tagged_events WHERE match_id = $match_id")
+        .bind(("match_id", &payload))
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
-        Ok(deleted) => {
-            log::info!("Cleaned {} database records", deleted.len());
+        Ok(_) => {
+            log::info!("[CLR]: {}", payload);
             Ok(())
         }
         Err(err) => {
-            log::error!("Failed to clear the database: {}", err);
+            log::error!("[CLR]: {}", err);
             Err(err)
         }
     }

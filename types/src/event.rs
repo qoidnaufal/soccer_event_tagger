@@ -25,6 +25,11 @@ impl std::fmt::Display for EventOutcome {
 impl EventOutcome {
     fn from_args(event_args: &str, team_outcome: Option<String>, player_outcome: Option<String>) -> Self {
         match event_args {
+            // --- goal kick
+            "gks" => Self::PassOutcome { outcome: "Success".to_string(), team: team_outcome, player: player_outcome, },
+            "gki" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
+            "gko" => Self::PassOutcome { outcome: "Out of Play".to_string(), team: team_outcome, player: player_outcome, },
+            "gkc" => Self::PassOutcome { outcome: "Catched".to_string(), team: team_outcome, player: player_outcome, },
             // --- pass
             "ps" => Self::PassOutcome { outcome: "Success".to_string(), team: team_outcome, player: player_outcome, },
             "pi" => Self::PassOutcome { outcome: "Intercepted".to_string(), team: team_outcome, player: player_outcome, },
@@ -114,6 +119,7 @@ impl Event {
             "gks" => Self::Pass { name: "Pass".to_string(), pass_type: "Goal Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "gki" => Self::Pass { name: "Pass".to_string(), pass_type: "Goal Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             "gko" => Self::Pass { name: "Pass".to_string(), pass_type: "Goal Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
+            "gkc" => Self::Pass { name: "Pass".to_string(), pass_type: "Goal Kick".to_string(), outcome: EventOutcome::from_args(event_args, team_args, player_args) },
             // --- shot
             "son" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "On target".to_string() },
             "sof" => Self::Shot { name: "Shot".to_string(), shot_type: "Open Play".to_string(), outcome: "Off target".to_string() },
