@@ -4,10 +4,14 @@ use tauri::State;
 use types::{AppError, TaggedEvent};
 
 #[tauri::command]
-pub async fn insert_data(payload: TaggedEvent, state: State<'_, Database>) -> Result<(), AppError> {
+pub async fn insert_data(
+    mut payload: TaggedEvent,
+    state: State<'_, Database>,
+) -> Result<(), AppError> {
+    payload.assign_uuid();
     let db = state.db.lock().await;
     match db
-        .create::<Option<TaggedEvent>>(("tagged_events", payload.event_id))
+        .create::<Option<TaggedEvent>>(("tagged_events", &payload.uuid))
         .content(payload)
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))

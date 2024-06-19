@@ -13,7 +13,7 @@ pub fn Shortcuts() -> impl IntoView {
                     <button
                         class="bg-slate-600 rounded-r-lg size-[30px] pl-1"
                     >
-                        <img src="public/icon-home-blue.svg"/>
+                        <img src="public/home.svg" width="20" height="20"/>
                     </button>
                 </A>
             </div>
@@ -38,12 +38,14 @@ pub fn Shortcuts() -> impl IntoView {
                         <p><span class=TEXT_HIGHLIGHT>"\"pb\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Open Play\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Blocked\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"po\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Open Play\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Out of Play\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"pc\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Open Play\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Catched\""</span>" },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"pp\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Open Play\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Punched\""</span>" },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"GOAL KICK"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"gks\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Success\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"gki\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Intercepted\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"gko\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Out of Play\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"gko\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Catched\""</span>" },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"gkp\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Goal Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Punched\""</span>" },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"SHOT"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"son\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Shot\""</span>", shot_type: "<span class=TEXT_HIGHLIGHT>"\"Open Play\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"On target\""</span>" },"</p>
@@ -74,18 +76,21 @@ pub fn Shortcuts() -> impl IntoView {
                         <p><span class=TEXT_HIGHLIGHT>"\"crc\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Cross\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Catched\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"crb\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Cross\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Blocked\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"cro\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Cross\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Out of Play\""</span>" },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"crp\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Cross\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Punched\""</span>" },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"THROW IN"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"tis\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Throw In\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Success\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"tii\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Throw In\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Intercepted\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"tic\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Throw In\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Catched\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"tio\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Throw In\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Out of Play\""</span>" },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"tip\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Throw In\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Punched\""</span>" },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"CORNER KICK"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"cks\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Corner Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Success\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"cki\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Corner Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Intercepted\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"ckc\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Corner Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Catched\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"cko\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Corner Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Out of Play\""</span>" },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"ckp\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Corner Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Punched\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"ckg\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Shot\""</span>", shot_type: "<span class=TEXT_HIGHLIGHT>"\"Corner Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Goal\""</span>" },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"FREE KICK SHOT"</div>
@@ -98,8 +103,9 @@ pub fn Shortcuts() -> impl IntoView {
                         <p><span class=TEXT_HIGHLIGHT>"\"fkpi\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Free Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Intercepted\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"fkpo\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Free Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Out of Play\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"fkpc\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Free Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Catched\""</span>" },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"fkpp\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Pass\""</span>", pass_type: "<span class=TEXT_HIGHLIGHT>"\"Free Kick\""</span>", outcome: "<span class=TEXT_HIGHLIGHT>"\"Punched\""</span>" },"</p>
                     </div>
-                    <div class="flex flex-col w-fit px-1 ml-4">
+                    <div class="flex flex-col w-fit px-1 ml-9">
                         <div class=SUBTITLE_BAR>"RECOVERY & LOST BALL"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"r\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Recovery\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"lb\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Lost Ball\""</span>" },"</p>
@@ -140,10 +146,9 @@ pub fn Shortcuts() -> impl IntoView {
                         <br/>
                         <div class=SUBTITLE_BAR>"GOALKEEPER SAVE"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"svs\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Save\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Shot\""</span>" },"</p>
-                        <p><span class=TEXT_HIGHLIGHT>"\"svp\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Save\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Penalty\""</span>" },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"svpk\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Save\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Penalty\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"svfk\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Save\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Freekick\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"svck\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Save\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Cornerkick\""</span>" },"</p>
-                        <p><span class=TEXT_HIGHLIGHT>"\"svti\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Save\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Throw In\""</span>" },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"GOALKEEPEER CATCH"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"gccr\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Catch\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Crossing\""</span>" },"</p>
@@ -152,7 +157,7 @@ pub fn Shortcuts() -> impl IntoView {
                         <p><span class=TEXT_HIGHLIGHT>"\"gcck\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Catch\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Cornerkick\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"gcti\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Catch\""</span>", event_source: "<span class=TEXT_HIGHLIGHT>"\"Throw In\""</span>" },"</p>
                     </div>
-                    <div class="flex flex-col 2-fit px-1 ml-4">
+                    <div class="flex flex-col 2-fit px-1 ml-9">
                         <div class=SUBTITLE_BAR>"TIME MARKER"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"kofh\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Kick Off First Half\""</span>" },"</p>
                         <p><span class=TEXT_HIGHLIGHT>"\"kosh\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Kick Off Second Half\""</span>" },"</p>
@@ -185,7 +190,14 @@ pub fn Shortcuts() -> impl IntoView {
                         <p><span class=TEXT_HIGHLIGHT>"\"changecf\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Change Position\""</span>", position: "<span class=TEXT_HIGHLIGHT>"\"CF\""</span>" },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"SUBSTITUTION"</div>
-                        <p><span class=TEXT_HIGHLIGHT>"\"subs\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs\""</span>", team: team_args, subs_in: player_args },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"sigk\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs In\""</span>", play_position: "<span class=TEXT_HIGHLIGHT>"\"GK\""</span>" team: team_args, subs_in: player_args },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"sirfb\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs In\""</span>", play_position: "<span class=TEXT_HIGHLIGHT>"\"RFB\""</span>" team: team_args, subs_in: player_args },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"silfb\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs In\""</span>", play_position: "<span class=TEXT_HIGHLIGHT>"\"LFB\""</span>" team: team_args, subs_in: player_args },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"sicb\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs In\""</span>", play_position: "<span class=TEXT_HIGHLIGHT>"\"CB\""</span>" team: team_args, subs_in: player_args },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"simf\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs In\""</span>", play_position: "<span class=TEXT_HIGHLIGHT>"\"MF\""</span>" team: team_args, subs_in: player_args },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"sirwg\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs In\""</span>", play_position: "<span class=TEXT_HIGHLIGHT>"\"RWG\""</span>" team: team_args, subs_in: player_args },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"silwg\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs In\""</span>", play_position: "<span class=TEXT_HIGHLIGHT>"\"LWG\""</span>" team: team_args, subs_in: player_args },"</p>
+                        <p><span class=TEXT_HIGHLIGHT>"\"sicf\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Subs In\""</span>", play_position: "<span class=TEXT_HIGHLIGHT>"\"CF\""</span>" team: team_args, subs_in: player_args },"</p>
                         <br/>
                         <div class=SUBTITLE_BAR>"OTHER"</div>
                         <p><span class=TEXT_HIGHLIGHT>"\"yc\""</span>" => { name: "<span class=TEXT_HIGHLIGHT>"\"Yellow Card\""</span>" },"</p>

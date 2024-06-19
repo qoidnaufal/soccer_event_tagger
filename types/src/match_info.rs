@@ -27,7 +27,7 @@ impl PartialEq for MatchInfo {
 impl MatchInfo {
     pub fn assign_id(&mut self) {
         let uuid = uuid::Uuid::now_v7().as_simple().to_string();
-        let match_id = format!("{}-{}", self.match_date.clone(), uuid);
+        let match_id = format!("{}_{}", self.match_date.clone(), uuid);
         self.match_id = match_id;
     }
 }

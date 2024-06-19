@@ -57,9 +57,9 @@ pub fn TableData(
                                         <th scope="col" class="text-xs text-left w-[15px]">
                                             <button
                                                 on:click=delete_all
-                                                class="hover:text-red-600 text-xs"
+                                                class="hover:bg-red-600 px-2 py-1 rounded-md text-xs"
                                             >
-                                                "DEL"
+                                                <img src="/public/delete.svg" width="15" height="15"/>
                                             </button>
                                         </th>
                                         <th scope="col" class="text-xs text-left w-[20px]">
@@ -109,13 +109,17 @@ pub fn TableData(
                                 <tbody class="w-full">
                                     <For
                                         each=move || data_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
-                                        key=|event| ((event.time_start * 10000.) as usize, event.event_id)
+                                        key=|event| ((event.time_start * 10000.) as usize, event.uuid.clone())
                                         children=move |event| {
                                             let event = create_rw_signal(event).read_only();
-                                            let video = video_player_node_ref.get().unwrap();
-                                            let seek = move |ev: ev::MouseEvent| {
+                                            // let video = video_player_node_ref.get().unwrap();
+                                            let seek_start = move |ev: ev::MouseEvent| {
                                                 ev.prevent_default();
-                                                let _ = video.fast_seek(event.get().time_start);
+                                                let _ = video_player_node_ref.get().unwrap().fast_seek(event.get().time_start);
+                                            };
+                                            let seek_end = move |ev: ev::MouseEvent| {
+                                                ev.stop_immediate_propagation();
+                                                let _ = video_player_node_ref.get().unwrap().fast_seek(event.get().time_end);
                                             };
                                             let delete = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
@@ -130,15 +134,15 @@ pub fn TableData(
                                             };
                                             view! {
                                                 <tr
-                                                    on:click=seek
-                                                    class="w-full h-fit py-2 odd:bg-slate-200 even:bg-white hover:bg-green-300"
+                                                    on:click=seek_start
+                                                    class="w-full h-fit py-2 odd:bg-slate-200 even:bg-white hover:bg-green-300 hover:cursor-pointer"
                                                 >
                                                     <td class="w-[15px]">
                                                         <button
                                                             on:click=delete
-                                                            class="bg-blue-300 hover:bg-red-600 rounded-md w-fit p-2 text-xs z-10"
+                                                            class="bg-blue-300 hover:bg-red-600 hover:text-white rounded-md w-fit px-2 py-1 m-1 text-xs z-10"
                                                         >
-                                                            "del"
+                                                            "X"
                                                         </button>
                                                     </td>
                                                     <td class="text-xs w-[20px]">
@@ -149,7 +153,7 @@ pub fn TableData(
                                                         "x: "{move || event.get().x_start.unwrap_or_default()}
                                                         ", y: "{move || event.get().y_start.unwrap_or_default()}
                                                     </td>
-                                                    <td class="text-xs w-[20px]">
+                                                    <td class="text-xs w-[20px] hover:bg-green-500" on:click=seek_end>
                                                         {move || format!("{:02}", (event.get().time_end / 60.) as u8)} ":"
                                                         {move || format!("{:02}", (event.get().time_end % 60.) as u8)}
                                                     </td>

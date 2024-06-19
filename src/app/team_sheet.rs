@@ -13,7 +13,7 @@ pub fn SelectTeamSheet(
     };
 
     view! {
-        <select class="text-xs w-full" on:change=handle_change>
+        <select class="text-xs w-full mb-1" on:change=handle_change>
             <option value="">"Select team sheet.."</option>
             <Transition>
                 {move || {
@@ -51,7 +51,7 @@ pub fn TeamSheet(
 ) -> impl IntoView {
     let team_state = create_rw_signal(team_state).read_only();
     view! {
-        <div class="flex flex-col p-2 text-xs w-[170px]">
+        <div class="flex flex-col p-2 text-xs w-[280px]">
             <Transition
                 fallback=move || view! { <p>"Loading..."</p> }
             >
@@ -68,13 +68,13 @@ pub fn TeamSheet(
 
                 view! {
                     <p class="text-white mb-1 font-bold">{ move || team_info.get().team_name }</p>
-                    <ol>
+                    <ol class="max-h-[410px] overflow-y-scroll">
                         <For
                             each=move || team_info.get().players
                             key=|player_info| player_info.number.clone()
                             children=move |player_info| {
                                 view! {
-                                    <li class="even:bg-slate-200 odd:bg-white">
+                                    <li class="px-2 py-1 even:bg-slate-200 odd:bg-white">
                                         {move || player_info.number.clone() }". "
                                         { move || player_info.player_name.clone() }
                                     </li>

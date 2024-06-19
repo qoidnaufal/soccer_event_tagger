@@ -314,14 +314,14 @@ pub fn EventTagger() -> impl IntoView {
                         fallback=move || view! {
                             <button
                                 on:click=toggle_menu
-                                class="rotate-90 border-none bg-slate-600 hover:bg-slate-400 px-2 size-[30px] rounded-t-lg text-white">
-                                "X"
+                                class="border-none bg-slate-300 hover:bg-slate-500 px-2 size-[30px] rounded-r-lg text-white">
+                                <img src="public/close.svg"/>
                             </button>
                         }>
                         <button
                             on:click=toggle_menu
-                            class="rotate-90 border-none bg-slate-600 hover:bg-slate-400 px-2 size-[30px] rounded-t-lg text-white">
-                            "|||"
+                            class="border-none bg-slate-300 hover:bg-slate-500 px-2 size-[30px] rounded-r-lg">
+                            <img src="public/menu.svg" width="30" height="30"/>
                         </button>
                     </Show>
                 </div>
@@ -332,7 +332,7 @@ pub fn EventTagger() -> impl IntoView {
                         <video::VideoPlayer video_src video_player_node_ref/>
                     </div>
                 </div>
-                <div id="info" class="flex flex-col shrink-0 items-center w-[350px] bg-slate-800/[.65] p-2 rounded-lg">
+                <div id="info" class="flex flex-col mr-[40px] items-center w-full bg-slate-800/[.65] p-4 rounded-lg">
                     <team_sheet::SelectTeamSheet match_info_resource set_match_data/>
                     <div class="flex flex-row">
                         <team_sheet::TeamSheet team_info_resource team_state="Home".to_string()/>
@@ -341,7 +341,7 @@ pub fn EventTagger() -> impl IntoView {
                 </div>
             </div>
             <div class="flex flex-col px-[40px]">
-                <div class="w-full bg-slate-200 rounded-lg px-2 py-1 mt-1">
+                <div class="w-full bg-green-50 rounded-lg px-2 py-1 mt-1">
                     <table class="table-fixed w-full">
                         <tbody>
                             <tr>
@@ -366,6 +366,7 @@ pub fn EventTagger() -> impl IntoView {
                                     <p class="text-xs">{ move || tagged_event.get().event_name }"_"</p>
                                     <p class="text-xs">{ move || tagged_event.get().event_type }"_"</p>
                                     <p class="text-xs">{ move || tagged_event.get().event_source }"_"</p>
+                                    <p class="text-xs">{ move || tagged_event.get().play_position }"_"</p>
                                     <p class="text-xs">{ move || tagged_event.get().outcome }"_"</p>
                                     <p class="text-xs">{ move || tagged_event.get().team_end }"_"</p>
                                     <p class="text-xs">{ move || tagged_event.get().player_end }</p>
