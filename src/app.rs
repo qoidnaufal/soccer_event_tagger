@@ -20,12 +20,23 @@ extern "C" {
     pub fn convertFileSrc(path: String, protocol: String) -> JsValue;
 }
 
+#[derive(Clone)]
+pub struct CtxProvider {
+    register_match_info_action: Action<JsValue, JsValue>,
+    register_player_info_action: Action<JsValue, JsValue>,
+}
+
 #[component]
 pub fn App() -> impl IntoView {
-    let register_action =
+    let register_match_info_action =
         create_action(|payload: &JsValue| invoke("register_match_info", payload.clone()));
+    let register_player_info_action =
+        create_action(|payload: &JsValue| invoke("register_player_info", payload.clone()));
 
-    provide_context(register_action);
+    provide_context(CtxProvider {
+        register_match_info_action,
+        register_player_info_action,
+    });
 
     view! {
         <Router fallback=|| view! { <p>"Error"</p> }.into_view()>

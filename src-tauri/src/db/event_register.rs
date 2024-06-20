@@ -9,6 +9,7 @@ pub async fn insert_data(
     state: State<'_, Database>,
 ) -> Result<(), AppError> {
     payload.assign_uuid();
+
     let db = state.db.lock().await;
     match db
         .create::<Option<TaggedEvent>>(("tagged_events", &payload.uuid))

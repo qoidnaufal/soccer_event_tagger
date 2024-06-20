@@ -28,7 +28,9 @@ fn main() -> tauri::Result<()> {
             db::event_register::delete_all_records_by_match_id,
             db::event_register::export_tagged_events_from_match_id,
             db::match_register::register_match_info,
+            db::match_register::register_player_info,
             db::match_register::get_all_match_info,
+            db::match_register::get_all_players_from_match_id,
             db::match_register::get_match_info_by_match_id,
             db::match_register::get_team_info_by_query,
         ])

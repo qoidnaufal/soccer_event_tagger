@@ -1,5 +1,5 @@
 use leptos::*;
-use types::{AppError, MatchData, MatchInfo, TeamInfo};
+use types::{AppError, MatchData, MatchInfo, PlayerInfo};
 
 #[component]
 pub fn SelectTeamSheet(
@@ -31,8 +31,8 @@ pub fn SelectTeamSheet(
                                 view! {
                                     <option value=move || match_info.get().to_string()>
                                         { move || match_info.get().match_date } ": "
-                                        { move || match_info.get().team_home.team_name } " vs "
-                                        { move || match_info.get().team_away.team_name }
+                                        { move || match_info.get().team_home } " vs "
+                                        { move || match_info.get().team_away }
                                     </option>
                                 }
                             }
@@ -46,10 +46,11 @@ pub fn SelectTeamSheet(
 
 #[component]
 pub fn TeamSheet(
-    team_info_resource: Resource<String, Result<MatchInfo, AppError>>,
+    team_info_resource: Resource<String, Result<Vec<PlayerInfo>, AppError>>,
     team_state: String,
 ) -> impl IntoView {
     let team_state = create_rw_signal(team_state).read_only();
+
     view! {
         <div class="flex flex-col p-2 text-xs w-[280px]">
             <Transition
@@ -57,21 +58,23 @@ pub fn TeamSheet(
             >
             { move || {
                 let team_info = create_memo(move |_| {
-                    team_info_resource.and_then(|m| {
-                        match team_state.get().as_str() {
-                            "Home" => m.team_home.clone(),
-                            "Away" => m.team_away.clone(),
-                            _ => TeamInfo::default()
-                        }
-                    }).unwrap_or(Ok(TeamInfo::default())).unwrap_or_default()
+                    team_info_resource.and_then(|t| {
+                        let mut vec = match team_state.get().as_str() {
+                            "Home" => t.iter().filter(|v| v.team_state.as_str() == "Home").map(|p| p.clone()).collect::<Vec<_>>(),
+                            "Away" => t.iter().filter(|v| v.team_state.as_str() == "Away").map(|p| p.clone()).collect::<Vec<_>>(),
+                            _ => t.iter().filter(|v| v.team_state.as_str() == "Neutral").map(|p| p.clone()).collect::<Vec<_>>()
+                        };
+                        vec.sort_by_key(|p| p.number);
+                        vec
+                    }).unwrap_or(Ok(Vec::new())).unwrap_or_default()
                 });
 
                 view! {
-                    <p class="text-white mb-1 font-bold">{ move || team_info.get().team_name }</p>
+                    <p class="text-white mb-1 font-bold">{ move || team_info.get().get(0).unwrap_or(&PlayerInfo::default()).team_name.clone() }</p>
                     <ol class="max-h-[410px] overflow-y-scroll">
                         <For
-                            each=move || team_info.get().players
-                            key=|player_info| player_info.number.clone()
+                            each=move || team_info.get()
+                            key=|player_info| player_info.number
                             children=move |player_info| {
                                 view! {
                                     <li class="px-2 py-1 even:bg-slate-200 odd:bg-white">

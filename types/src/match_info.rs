@@ -2,19 +2,15 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, Eq)]
 pub struct MatchInfo {
-    pub match_date: String,
     pub match_id: String,
-    pub team_home: TeamInfo,
-    pub team_away: TeamInfo,
+    pub match_date: String,
+    pub team_home: String,
+    pub team_away: String,
 }
 
 impl std::fmt::Display for MatchInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}/{}/{}",
-            self.match_id, self.team_home.team_name, self.team_away.team_name
-        )
+        write!(f, "{}/{}/{}", self.match_id, self.team_home, self.team_away)
     }
 }
 
@@ -26,30 +22,34 @@ impl PartialEq for MatchInfo {
 
 impl MatchInfo {
     pub fn assign_id(&mut self) {
-        let uuid = uuid::Uuid::now_v7().as_simple().to_string();
-        let match_id = format!("{}_{}", self.match_date.clone(), uuid);
-        self.match_id = match_id;
+        let uuid = uuid::Uuid::new_v4().as_simple().to_string();
+        self.match_id = uuid;
     }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, Eq)]
-pub struct TeamInfo {
-    pub team_state: String,
+pub struct PlayerInfo {
+    pub player_id: String,
+    pub match_id: String, // use this as table name
     pub team_name: String,
-    pub players: Vec<PlayerInfo>,
+    pub team_state: String,
+    pub number: i32,
+    pub player_name: String,
+    pub start: bool,
+    pub play: bool,
+    pub play_position: Vec<String>,
 }
 
-impl PartialEq for TeamInfo {
+impl PartialEq for PlayerInfo {
     fn eq(&self, other: &Self) -> bool {
-        self.team_name == other.team_name
+        self.player_id == other.player_id
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq, Eq)]
-pub struct PlayerInfo {
-    pub team_name: String,
-    pub number: String,
-    pub player_name: String,
+impl PlayerInfo {
+    pub fn assign_id(&mut self) {
+        self.player_id = format!("{}{}", self.team_name, self.number);
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

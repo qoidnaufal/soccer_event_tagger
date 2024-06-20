@@ -5,7 +5,7 @@ mod match_info;
 mod point;
 mod tagged_event;
 
-pub use match_info::{MatchData, MatchInfo, PlayerInfo, TeamInfo, TeamInfoQuery};
+pub use match_info::{MatchData, MatchInfo, PlayerInfo, TeamInfoQuery};
 pub use point::Point;
 pub use tagged_event::TaggedEvent;
 

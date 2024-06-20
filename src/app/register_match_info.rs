@@ -1,7 +1,10 @@
+use super::CtxProvider;
 use leptos::*;
 use leptos_router::A;
 use types::{MatchInfo, Payload, PlayerInfo};
-use wasm_bindgen::{JsValue, UnwrapThrowExt};
+use wasm_bindgen::UnwrapThrowExt;
+
+const GUIDE: &str = "Use \")\" after the number, \"/position\" after starting 11 player's name, and \",\" to separate each players. Example: 1) Toldo /gk, 2) D. Alves /rfb, ...";
 
 #[component]
 pub fn RegisterMatchInfo() -> impl IntoView {
@@ -9,7 +12,8 @@ pub fn RegisterMatchInfo() -> impl IntoView {
     let input_home_ref = create_node_ref::<html::Div>();
     let input_away_ref = create_node_ref::<html::Div>();
 
-    let register_match_info_action = expect_context::<Action<JsValue, JsValue>>();
+    let register_match_info_action = expect_context::<CtxProvider>().register_match_info_action;
+    let register_player_info_action = expect_context::<CtxProvider>().register_player_info_action;
 
     let register = move |ev: ev::SubmitEvent| {
         ev.prevent_default();
@@ -19,51 +23,115 @@ pub fn RegisterMatchInfo() -> impl IntoView {
             .inner_text()
             .trim()
             .to_string();
-        let player_list_home = player_list_home
-            .split(',')
-            .filter(|s| !s.is_empty())
-            .map(|s| {
-                let mut token = s.split(')');
-                let number = token.next().unwrap().trim().to_string();
-                let player_name = token.next().unwrap().to_string();
-                PlayerInfo {
-                    team_name: match_info.get_untracked().team_home.team_name,
-                    number,
-                    player_name,
-                }
-            })
-            .collect::<Vec<_>>();
+
         let player_list_away = input_away_ref
             .get()
             .unwrap()
             .inner_text()
             .trim()
             .to_string();
-        let player_list_away = player_list_away
-            .split(',')
-            .filter(|s| !s.is_empty())
-            .map(|s| {
-                let mut token = s.split(')');
-                let number = token.next().unwrap().trim().to_string();
-                let player_name = token.next().unwrap().to_string();
-                PlayerInfo {
-                    team_name: match_info.get_untracked().team_away.team_name,
-                    number,
-                    player_name,
-                }
-            })
-            .collect::<Vec<_>>();
-        set_match_info.update(|m| {
-            m.team_home.players = player_list_home;
-            m.team_away.players = player_list_away;
-        });
 
+        set_match_info.update(|m| m.assign_id());
         let payload = match_info.get_untracked();
-        let payload = Payload {
-            payload: payload.clone(),
-        };
+        let payload = Payload { payload };
         let payload = serde_wasm_bindgen::to_value(&payload).unwrap_throw();
         register_match_info_action.dispatch(payload);
+
+        player_list_home
+            .split(',')
+            .filter(|s| !s.is_empty())
+            .for_each(|s| {
+                let mut token = s.split(')');
+                let number = token
+                    .next()
+                    .unwrap()
+                    .trim()
+                    .to_string()
+                    .parse::<i32>()
+                    .unwrap();
+                let p_info = token.next().unwrap().to_string();
+
+                let mut player_info = PlayerInfo::default();
+
+                if p_info.contains('/') {
+                    let mut p_token = p_info.split('/').map(|p| p.trim().to_string());
+                    let p_name = p_token.next().unwrap();
+                    let p_position = p_token.next().unwrap();
+
+                    player_info.player_name = p_name;
+                    player_info.play_position = vec![p_position];
+                    player_info.start = true;
+                    player_info.play = true;
+                    player_info.number = number;
+                    player_info.team_state = "Home".to_string();
+                    player_info.team_name = match_info.get_untracked().team_home;
+                    player_info.assign_id();
+                    player_info.match_id = match_info.get_untracked().match_id.clone();
+                } else {
+                    player_info.number = number;
+                    player_info.player_name = p_info;
+                    player_info.start = false;
+                    player_info.play = false;
+                    player_info.team_state = "Home".to_string();
+                    player_info.team_name = match_info.get_untracked().team_home;
+                    player_info.assign_id();
+                    player_info.match_id = match_info.get_untracked().match_id.clone();
+                };
+
+                let payload = Payload {
+                    payload: player_info,
+                };
+                let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
+                register_player_info_action.dispatch(payload);
+            });
+
+        player_list_away
+            .split(',')
+            .filter(|s| !s.is_empty())
+            .for_each(|s| {
+                let mut token = s.split(')');
+                let number = token
+                    .next()
+                    .unwrap()
+                    .trim()
+                    .to_string()
+                    .parse::<i32>()
+                    .unwrap();
+                let p_info = token.next().unwrap().to_string();
+
+                let mut player_info = PlayerInfo::default();
+
+                if p_info.contains('/') {
+                    let mut p_token = p_info.split('/').map(|p| p.trim().to_string());
+                    let p_name = p_token.next().unwrap();
+                    let p_position = p_token.next().unwrap();
+
+                    player_info.player_name = p_name;
+                    player_info.play_position = vec![p_position];
+                    player_info.start = true;
+                    player_info.play = true;
+                    player_info.number = number;
+                    player_info.team_state = "Away".to_string();
+                    player_info.team_name = match_info.get_untracked().team_away;
+                    player_info.assign_id();
+                    player_info.match_id = match_info.get_untracked().match_id.clone();
+                } else {
+                    player_info.number = number;
+                    player_info.player_name = p_info;
+                    player_info.start = false;
+                    player_info.play = false;
+                    player_info.team_state = "Away".to_string();
+                    player_info.team_name = match_info.get_untracked().team_away;
+                    player_info.assign_id();
+                    player_info.match_id = match_info.get_untracked().match_id.clone();
+                };
+
+                let payload = Payload {
+                    payload: player_info,
+                };
+                let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
+                register_player_info_action.dispatch(payload);
+            });
 
         set_match_info.set(MatchInfo::default());
     };
@@ -71,7 +139,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
     let handle_focus = move |ev: ev::FocusEvent| {
         ev.prevent_default();
         let input = input_home_ref.get().unwrap();
-        if input.inner_text().as_str() == "Use \")\" after the number, and \",\" to separate each players. Example: 1) Toldo, 2) D. Alves, ..." {
+        if input.inner_text().as_str() == GUIDE {
             input_home_ref.get().unwrap().set_inner_text("");
         }
     };
@@ -129,8 +197,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 on:change=move |ev| {
                                     ev.prevent_default();
                                     set_match_info.update(|m| {
-                                        m.team_home.team_name = event_target_value(&ev);
-                                        m.team_home.team_state = "Home".to_string();
+                                        m.team_home = event_target_value(&ev);
                                     });
                                 }
                             />
@@ -147,7 +214,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 _ref=input_home_ref
                                 class="grow border h-[270px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
                             >
-                                "Use \")\" after the number, and \",\" to separate each players. Example: 1) Toldo, 2) D. Alves, ..."
+                                {move || GUIDE}
                             </div>
                         </div>
                         <div class="flex flex-col w-[330px] my-1">
@@ -164,8 +231,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 on:change=move |ev| {
                                     ev.prevent_default();
                                     set_match_info.update(|m| {
-                                        m.team_away.team_name = event_target_value(&ev);
-                                        m.team_away.team_state = "Away".to_string();
+                                        m.team_away = event_target_value(&ev);
                                     });
                                 }
                             />

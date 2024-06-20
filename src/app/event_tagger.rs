@@ -1,17 +1,20 @@
-use super::{invoke, menu, pitch, table_data, team_sheet, video};
+use super::{invoke, menu, pitch, table_data, team_sheet, video, CtxProvider};
 
 use leptos::*;
 use wasm_bindgen::prelude::*;
 
-use types::{AppError, MatchData, MatchInfo, Payload, Point, TaggedEvent, TeamInfo, TeamInfoQuery};
+use types::{
+    AppError, MatchData, MatchInfo, Payload, PlayerInfo, Point, TaggedEvent, TeamInfoQuery,
+};
 
-async fn get_match_info_by_match_id(match_id: String) -> Result<MatchInfo, AppError> {
+async fn get_all_players_from_match_id(match_id: String) -> Result<Vec<PlayerInfo>, AppError> {
     let match_id = Payload { payload: match_id };
     let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
-    let match_info = invoke("get_match_info_by_match_id", match_id).await;
-    let match_info = serde_wasm_bindgen::from_value::<MatchInfo>(match_info).unwrap_or_default();
+    let team_info = invoke("get_all_players_from_match_id", match_id).await;
+    let team_info =
+        serde_wasm_bindgen::from_value::<Vec<PlayerInfo>>(team_info).unwrap_or_default();
 
-    Ok(match_info)
+    Ok(team_info)
 }
 
 async fn get_all_match_info() -> Result<Vec<MatchInfo>, AppError> {
@@ -38,11 +41,12 @@ pub fn EventTagger() -> impl IntoView {
     let register_event_action =
         create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
 
-    let register_match_info_action = expect_context::<Action<JsValue, JsValue>>();
+    let register_match_info_action = expect_context::<CtxProvider>().register_match_info_action;
+    // let register_player_info_action = expect_context::<CtxProvider>().register_player_info_action;
 
     let team_info_resource = create_resource(
         move || match_data.get().match_id,
-        get_match_info_by_match_id,
+        get_all_players_from_match_id,
     );
 
     let match_info_resource = create_resource(
@@ -174,7 +178,9 @@ pub fn EventTagger() -> impl IntoView {
                     .collect::<String>()
                     .chars()
                     .filter(|c| c.is_numeric())
-                    .collect::<String>();
+                    .collect::<String>()
+                    .parse::<i32>()
+                    .unwrap_or_default();
 
                 let team_state = match args
                     .split('/')
@@ -199,28 +205,26 @@ pub fn EventTagger() -> impl IntoView {
                 let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
                 team_info_action.dispatch(payload);
                 let team_info = team_info_action.value().get().unwrap_or_default();
-                let team_info =
-                    serde_wasm_bindgen::from_value::<TeamInfo>(team_info).unwrap_or_default();
+                let team_info = serde_wasm_bindgen::from_value::<Vec<PlayerInfo>>(team_info)
+                    .unwrap_or_default();
+
+                let player_info = team_info
+                    .iter()
+                    .filter(|p| p.number == number)
+                    .collect::<Vec<_>>();
 
                 set_player_buffer.update(|p| {
-                    let player_name = if let Some(player_info) = team_info
-                        .players
-                        .iter()
-                        .filter(|p| p.number == number)
-                        .map(|p| p)
-                        .collect::<Vec<_>>()
-                        .get(0)
-                    {
-                        player_info.player_name.clone()
+                    let player_name = if let Some(player) = player_info.get(0) {
+                        player.player_name.clone()
                     } else {
-                        number
+                        number.to_string()
                     };
 
                     *p = player_name;
                 });
                 set_team_buffer.update(|t| {
-                    let team_name = if !team_info.team_name.is_empty() {
-                        team_info.team_name
+                    let team_name = if let Some(player) = player_info.get(0) {
+                        player.team_name.clone()
                     } else {
                         team_state
                     };
@@ -233,11 +237,13 @@ pub fn EventTagger() -> impl IntoView {
                     .map(|a| a.to_string())
                     .collect::<Vec<String>>();
 
-                let (team_outcome, player_outcome) = if let Some(evt_arg) = event_args.get(1) {
+                let (team_end, player_end) = if let Some(evt_arg) = event_args.get(1) {
                     let num = evt_arg
                         .chars()
                         .filter(|c| c.is_numeric())
-                        .collect::<String>();
+                        .collect::<String>()
+                        .parse::<i32>()
+                        .unwrap_or_default();
                     let t_state = match evt_arg
                         .chars()
                         .filter(|c| !c.is_numeric())
@@ -256,26 +262,27 @@ pub fn EventTagger() -> impl IntoView {
                     };
                     let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
                     team_end_action.dispatch(payload);
-                    let team_end = team_end_action.value().get().unwrap_or_default();
-                    let team_end =
-                        serde_wasm_bindgen::from_value::<TeamInfo>(team_end).unwrap_or_default();
-                    let player_outcome = if let Some(player_end) = team_end
-                        .players
+                    let team_outcome = team_end_action.value().get().unwrap_or_default();
+                    let team_outcome =
+                        serde_wasm_bindgen::from_value::<Vec<PlayerInfo>>(team_outcome)
+                            .unwrap_or_default();
+
+                    let player_outcome = team_outcome
                         .iter()
                         .filter(|p| p.number == num)
-                        .collect::<Vec<_>>()
-                        .get(0)
-                    {
-                        player_end.player_name.clone()
+                        .collect::<Vec<_>>();
+
+                    let player_end = if let Some(p_end) = player_outcome.get(0) {
+                        p_end.player_name.clone()
                     } else {
-                        num
+                        num.to_string()
                     };
-                    let team_outcome = if !team_end.team_name.is_empty() {
-                        team_end.team_name
+                    let team_end = if let Some(p_end) = player_outcome.get(0) {
+                        p_end.team_name.clone()
                     } else {
                         t_state
                     };
-                    (Some(team_outcome), Some(player_outcome))
+                    (Some(team_end), Some(player_end))
                 } else {
                     (None, None)
                 };
@@ -283,7 +290,7 @@ pub fn EventTagger() -> impl IntoView {
                 let event_args = event_args.get(0).unwrap_or(&"".to_string()).clone();
 
                 set_tagged_event.update(|t| {
-                    t.assign_event_from_args(event_args.as_str(), team_outcome, player_outcome);
+                    t.assign_event_from_args(event_args.as_str(), team_end, player_end);
                 });
             }
             _unregistered_key => {
