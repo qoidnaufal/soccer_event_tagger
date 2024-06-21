@@ -38,11 +38,9 @@ pub fn EventTagger() -> impl IntoView {
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
-    let register_event_action =
-        create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
+    let register_event_action = expect_context::<CtxProvider>().register_event_action;
 
     let register_match_info_action = expect_context::<CtxProvider>().register_match_info_action;
-    // let register_player_info_action = expect_context::<CtxProvider>().register_player_info_action;
 
     let team_info_resource = create_resource(
         move || match_data.get().match_id,
@@ -130,7 +128,7 @@ pub fn EventTagger() -> impl IntoView {
                     let _ = video_player.pause();
                 }
                 set_tagged_event.update(|tag| {
-                    tag.time_end = video_player.current_time();
+                    tag.time_end = Some(video_player.current_time());
                     tag.x_end = coordinate.get_untracked().x;
                     tag.y_end = coordinate.get_untracked().y;
                 });
@@ -193,7 +191,7 @@ pub fn EventTagger() -> impl IntoView {
                 {
                     "a" => "Away".to_string(),
                     "h" => "Home".to_string(),
-                    _ => "Unregistered".to_string(),
+                    _ => "".to_string(),
                 };
 
                 let payload = Payload {
@@ -214,7 +212,7 @@ pub fn EventTagger() -> impl IntoView {
                     .collect::<Vec<_>>();
 
                 set_player_buffer.update(|p| {
-                    let player_name = if let Some(player) = player_info.get(0) {
+                    let player_name = if let Some(player) = player_info.first() {
                         player.player_name.clone()
                     } else {
                         number.to_string()
@@ -223,7 +221,7 @@ pub fn EventTagger() -> impl IntoView {
                     *p = player_name;
                 });
                 set_team_buffer.update(|t| {
-                    let team_name = if let Some(player) = player_info.get(0) {
+                    let team_name = if let Some(player) = player_info.first() {
                         player.team_name.clone()
                     } else {
                         team_state
@@ -252,7 +250,7 @@ pub fn EventTagger() -> impl IntoView {
                     {
                         "h" => "Home".to_string(),
                         "a" => "Away".to_string(),
-                        _ => "Unregistered".to_string(),
+                        _ => "".to_string(),
                     };
                     let payload = Payload {
                         payload: TeamInfoQuery {
@@ -272,22 +270,22 @@ pub fn EventTagger() -> impl IntoView {
                         .filter(|p| p.number == num)
                         .collect::<Vec<_>>();
 
-                    let player_end = if let Some(p_end) = player_outcome.get(0) {
-                        p_end.player_name.clone()
+                    let player_end = if let Some(p_end) = player_outcome.first() {
+                        Some(p_end.player_name.clone())
                     } else {
-                        num.to_string()
+                        None
                     };
-                    let team_end = if let Some(p_end) = player_outcome.get(0) {
+                    let team_end = if let Some(p_end) = player_outcome.first() {
                         p_end.team_name.clone()
                     } else {
                         t_state
                     };
-                    (Some(team_end), Some(player_end))
+                    (Some(team_end), player_end)
                 } else {
                     (None, None)
                 };
 
-                let event_args = event_args.get(0).unwrap_or(&"".to_string()).clone();
+                let event_args = event_args.first().unwrap_or(&Default::default()).clone();
 
                 set_tagged_event.update(|t| {
                     t.assign_event_from_args(event_args.as_str(), team_end, player_end);
@@ -317,7 +315,7 @@ pub fn EventTagger() -> impl IntoView {
         <div class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col">
             <div class="flex flex-row">
                 <div>
-                    <Show when=move || show_menu.get() == false
+                    <Show when=move || !show_menu.get()
                         fallback=move || view! {
                             <button
                                 on:click=toggle_menu
@@ -361,7 +359,7 @@ pub fn EventTagger() -> impl IntoView {
                                 <td class="text-xs flex flex-row">
                                     <p>"S: "{ move || format!("{:.3}", tagged_event.get().time_start) }"--"</p>
                                     <p>"x: "{ move || tagged_event.get().x_start }", y: "{ move || tagged_event.get().y_start }"-->"</p>
-                                    <p>"E: "{ move || format!("{:.3}", tagged_event.get().time_end) }"--"</p>
+                                    <p>"E: "{ move || format!("{:.3}", tagged_event.get().time_end.unwrap_or_default()) }"--"</p>
                                     <p>"x: "{ move || tagged_event.get().x_end }", y: "{ move || tagged_event.get().y_end }</p>
                                 </td>
                             </tr>

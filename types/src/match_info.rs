@@ -72,7 +72,7 @@ impl PartialEq for MatchData {
 }
 
 impl MatchData {
-    pub fn from_str(input: String) -> Self {
+    pub fn get_from_str(input: String) -> Self {
         let mut data = input.split('/').map(|s| s.to_string());
 
         Self {

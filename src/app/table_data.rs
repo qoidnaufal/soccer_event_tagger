@@ -7,7 +7,7 @@ async fn get_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
     let payload = Payload { payload: match_id };
     let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
     let data = invoke("get_match_events_from_match_id", payload).await;
-    let vec_data = serde_wasm_bindgen::from_value::<Vec<TaggedEvent>>(data).unwrap_or(Vec::new());
+    let vec_data = serde_wasm_bindgen::from_value::<Vec<TaggedEvent>>(data).unwrap_or_default();
 
     Ok(vec_data)
 }
@@ -80,6 +80,9 @@ pub fn TableData(
                                         <th scope="col" class="text-xs text-left w-[30px]">
                                             "player name"
                                         </th>
+                                        <th scope="col" class="text-xs text-left w-[20px]">
+                                            "position"
+                                        </th>
                                         <th scope="col" class="text-xs text-left w-[30px]">
                                             "event name"
                                         </th>
@@ -103,7 +106,7 @@ pub fn TableData(
                             </table>
                         </div>
                         <div
-                            class="w-full max-h-[180px] overflow-y-scroll flex flex-col-reverse"
+                            class="w-full grow-0 h-[300px] overflow-y-scroll flex flex-col-reverse"
                         >
                             <table class="table-fixed w-full">
                                 <tbody class="w-full">
@@ -119,7 +122,7 @@ pub fn TableData(
                                             };
                                             let seek_end = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
-                                                let _ = video_player_node_ref.get().unwrap().fast_seek(event.get().time_end);
+                                                let _ = video_player_node_ref.get().unwrap().fast_seek(event.get().time_end.unwrap_or_default());
                                             };
                                             let delete = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
@@ -153,9 +156,9 @@ pub fn TableData(
                                                         "x: "{move || event.get().x_start.unwrap_or_default()}
                                                         ", y: "{move || event.get().y_start.unwrap_or_default()}
                                                     </td>
-                                                    <td class="text-xs w-[20px] hover:bg-green-500" on:click=seek_end>
-                                                        {move || format!("{:02}", (event.get().time_end / 60.) as u8)} ":"
-                                                        {move || format!("{:02}", (event.get().time_end % 60.) as u8)}
+                                                    <td class="text-xs w-[20px] hover:text-lg" on:click=seek_end>
+                                                        {move || format!("{:02}", (event.get().time_end.unwrap_or_default() / 60.) as u8)} ":"
+                                                        {move || format!("{:02}", (event.get().time_end.unwrap_or_default() % 60.) as u8)}
                                                     </td>
                                                     <td class="text-xs w-[30px]">
                                                         "x: "{move || event.get().x_end.unwrap_or_default()}
@@ -166,6 +169,9 @@ pub fn TableData(
                                                     </td>
                                                     <td class="text-xs w-[30px]">
                                                         {move || event.get().player_name}
+                                                    </td>
+                                                    <td class="text-xs w-[20px]">
+                                                        {move || event.get().play_position}
                                                     </td>
                                                     <td class="text-xs w-[30px]">
                                                         {move || event.get().event_name}

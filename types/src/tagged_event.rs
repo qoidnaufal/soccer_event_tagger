@@ -11,7 +11,7 @@ pub struct TaggedEvent {
     pub time_start: f64,
     pub x_start: Option<i32>,
     pub y_start: Option<i32>,
-    pub time_end: f64,
+    pub time_end: Option<f64>,
     pub x_end: Option<i32>,
     pub y_end: Option<i32>,
     pub play_position: Option<String>,
@@ -1055,7 +1055,7 @@ impl TaggedEvent {
             }
             // --- time marker
             "eofh" => {
-                self.event_id = 10;
+                self.event_id = 800;
                 self.event_name = "End of First Half".to_string();
                 self.event_type = None;
                 self.event_source = None;
@@ -1064,7 +1064,7 @@ impl TaggedEvent {
                 self.player_end = player_args;
             }
             "eosh" => {
-                self.event_id = 11;
+                self.event_id = 801;
                 self.event_name = "End of Second Half".to_string();
                 self.event_type = None;
                 self.event_source = None;
@@ -1073,7 +1073,7 @@ impl TaggedEvent {
                 self.player_end = player_args;
             }
             "eoefh" => {
-                self.event_id = 12;
+                self.event_id = 802;
                 self.event_name = "End of Extra Time First Half".to_string();
                 self.event_type = None;
                 self.event_source = None;
@@ -1082,7 +1082,7 @@ impl TaggedEvent {
                 self.player_end = player_args;
             }
             "eoesh" => {
-                self.event_id = 13;
+                self.event_id = 803;
                 self.event_name = "End of Extra Time Second Half".to_string();
                 self.event_type = None;
                 self.event_source = None;
@@ -1091,7 +1091,7 @@ impl TaggedEvent {
                 self.player_end = player_args;
             }
             "eom" => {
-                self.event_id = 14;
+                self.event_id = 804;
                 self.event_name = "End of Match".to_string();
                 self.event_type = None;
                 self.event_source = None;

@@ -30,7 +30,7 @@ pub fn MenuBar(
     };
 
     view! {
-        <Show when=move || show_menu.get() == true>
+        <Show when=move || show_menu.get()>
             <div
                 _ref=menu_bar_node_ref
                 class=MENU_BAR

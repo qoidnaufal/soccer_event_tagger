@@ -17,17 +17,7 @@ pub async fn insert_data(
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
-        Ok(inserted) => {
-            if let Some(data) = inserted {
-                log::info!(
-                    "[INS]: event_id: {}, team_name: {}, player_name: {}",
-                    data.event_id,
-                    data.team_name,
-                    data.player_name
-                );
-            }
-            Ok(())
-        }
+        Ok(_) => Ok(()),
         Err(err) => {
             log::error!("[INS]: {}", err);
             Err(err)
@@ -110,12 +100,7 @@ pub async fn delete_by_id(payload: i32, state: State<'_, Database>) -> Result<()
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
-        Ok(deleted) => {
-            if let Some(data) = deleted {
-                log::info!("[DEL]: {:?}", data.event_id);
-            }
-            Ok(())
-        }
+        Ok(_) => Ok(()),
         Err(err) => {
             log::error!("[DEL]: {}", err);
             Err(err)
@@ -136,10 +121,7 @@ pub async fn delete_all_records_by_match_id(
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
-        Ok(_) => {
-            log::info!("[CLR]: {}", payload);
-            Ok(())
-        }
+        Ok(_) => Ok(()),
         Err(err) => {
             log::error!("[CLR]: {}", err);
             Err(err)

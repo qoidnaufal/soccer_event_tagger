@@ -1,7 +1,7 @@
 use super::CtxProvider;
 use leptos::*;
 use leptos_router::A;
-use types::{MatchInfo, Payload, PlayerInfo};
+use types::{MatchInfo, Payload, PlayerInfo, TaggedEvent};
 use wasm_bindgen::UnwrapThrowExt;
 
 const GUIDE: &str = "Use \")\" after the number, \"/position\" after starting 11 player's name, and \",\" to separate each players. Example: 1) Toldo /gk, 2) D. Alves /rfb, ...";
@@ -14,6 +14,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
 
     let register_match_info_action = expect_context::<CtxProvider>().register_match_info_action;
     let register_player_info_action = expect_context::<CtxProvider>().register_player_info_action;
+    let register_event_action = expect_context::<CtxProvider>().register_event_action;
 
     let register = move |ev: ev::SubmitEvent| {
         ev.prevent_default();
@@ -56,7 +57,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                 if p_info.contains('/') {
                     let mut p_token = p_info.split('/').map(|p| p.trim().to_string());
                     let p_name = p_token.next().unwrap();
-                    let p_position = p_token.next().unwrap();
+                    let p_position = p_token.next().unwrap().to_uppercase();
 
                     player_info.player_name = p_name;
                     player_info.play_position = vec![p_position];
@@ -66,7 +67,9 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                     player_info.team_state = "Home".to_string();
                     player_info.team_name = match_info.get_untracked().team_home;
                     player_info.assign_id();
-                    player_info.match_id = match_info.get_untracked().match_id.clone();
+                    player_info
+                        .match_id
+                        .clone_from(&match_info.get_untracked().match_id);
                 } else {
                     player_info.number = number;
                     player_info.player_name = p_info;
@@ -75,14 +78,40 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                     player_info.team_state = "Home".to_string();
                     player_info.team_name = match_info.get_untracked().team_home;
                     player_info.assign_id();
-                    player_info.match_id = match_info.get_untracked().match_id.clone();
+                    player_info
+                        .match_id
+                        .clone_from(&match_info.get_untracked().match_id);
                 };
 
                 let payload = Payload {
-                    payload: player_info,
+                    payload: player_info.clone(),
                 };
                 let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
                 register_player_info_action.dispatch(payload);
+
+                if player_info.start {
+                    let mut tagged_event = TaggedEvent::default();
+                    tagged_event.match_id = player_info.match_id;
+                    tagged_event.player_id = player_info.player_id;
+                    tagged_event.match_teams = format!(
+                        "{} vs {}",
+                        match_info.get_untracked().team_home,
+                        match_info.get_untracked().team_away
+                    );
+                    tagged_event.opponent_team = match_info.get_untracked().team_away;
+                    tagged_event.time_start = 0.;
+                    tagged_event.play_position = player_info.play_position.first().cloned();
+                    tagged_event.player_name = player_info.player_name;
+                    tagged_event.team_name = match_info.get_untracked().team_home;
+                    tagged_event.event_name = "Play".to_string();
+                    tagged_event.event_type = Some("Start".to_string());
+
+                    let payload = Payload {
+                        payload: tagged_event,
+                    };
+                    let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+                    register_event_action.dispatch(payload);
+                }
             });
 
         player_list_away
@@ -104,7 +133,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                 if p_info.contains('/') {
                     let mut p_token = p_info.split('/').map(|p| p.trim().to_string());
                     let p_name = p_token.next().unwrap();
-                    let p_position = p_token.next().unwrap();
+                    let p_position = p_token.next().unwrap().to_uppercase();
 
                     player_info.player_name = p_name;
                     player_info.play_position = vec![p_position];
@@ -114,7 +143,9 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                     player_info.team_state = "Away".to_string();
                     player_info.team_name = match_info.get_untracked().team_away;
                     player_info.assign_id();
-                    player_info.match_id = match_info.get_untracked().match_id.clone();
+                    player_info
+                        .match_id
+                        .clone_from(&match_info.get_untracked().match_id);
                 } else {
                     player_info.number = number;
                     player_info.player_name = p_info;
@@ -123,14 +154,40 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                     player_info.team_state = "Away".to_string();
                     player_info.team_name = match_info.get_untracked().team_away;
                     player_info.assign_id();
-                    player_info.match_id = match_info.get_untracked().match_id.clone();
+                    player_info
+                        .match_id
+                        .clone_from(&match_info.get_untracked().match_id);
                 };
 
                 let payload = Payload {
-                    payload: player_info,
+                    payload: player_info.clone(),
                 };
                 let payload = serde_wasm_bindgen::to_value(&payload).unwrap();
                 register_player_info_action.dispatch(payload);
+
+                if player_info.start {
+                    let mut tagged_event = TaggedEvent::default();
+                    tagged_event.match_id = player_info.match_id;
+                    tagged_event.player_id = player_info.player_id;
+                    tagged_event.match_teams = format!(
+                        "{} vs {}",
+                        match_info.get_untracked().team_home,
+                        match_info.get_untracked().team_away
+                    );
+                    tagged_event.opponent_team = match_info.get_untracked().team_home;
+                    tagged_event.time_start = 0.;
+                    tagged_event.play_position = player_info.play_position.first().cloned();
+                    tagged_event.player_name = player_info.player_name;
+                    tagged_event.team_name = match_info.get_untracked().team_away;
+                    tagged_event.event_name = "Play".to_string();
+                    tagged_event.event_type = Some("Start".to_string());
+
+                    let payload = Payload {
+                        payload: tagged_event,
+                    };
+                    let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+                    register_event_action.dispatch(payload);
+                }
             });
 
         set_match_info.set(MatchInfo::default());

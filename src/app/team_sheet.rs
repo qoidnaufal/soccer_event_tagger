@@ -8,7 +8,7 @@ pub fn SelectTeamSheet(
 ) -> impl IntoView {
     let handle_change = move |ev: ev::Event| {
         let value = event_target_value(&ev);
-        let match_data = MatchData::from_str(value);
+        let match_data = MatchData::get_from_str(value);
         set_match_data.set(match_data);
     };
 
@@ -60,9 +60,9 @@ pub fn TeamSheet(
                 let team_info = create_memo(move |_| {
                     team_info_resource.and_then(|t| {
                         let mut vec = match team_state.get().as_str() {
-                            "Home" => t.iter().filter(|v| v.team_state.as_str() == "Home").map(|p| p.clone()).collect::<Vec<_>>(),
-                            "Away" => t.iter().filter(|v| v.team_state.as_str() == "Away").map(|p| p.clone()).collect::<Vec<_>>(),
-                            _ => t.iter().filter(|v| v.team_state.as_str() == "Neutral").map(|p| p.clone()).collect::<Vec<_>>()
+                            "Home" => t.iter().filter(|v| v.team_state.as_str() == "Home").cloned().collect::<Vec<_>>(),
+                            "Away" => t.iter().filter(|v| v.team_state.as_str() == "Away").cloned().collect::<Vec<_>>(),
+                            _ => t.iter().filter(|v| v.team_state.as_str() == "Neutral").cloned().collect::<Vec<_>>()
                         };
                         vec.sort_by_key(|p| p.number);
                         vec
@@ -70,7 +70,7 @@ pub fn TeamSheet(
                 });
 
                 view! {
-                    <p class="text-white mb-1 font-bold">{ move || team_info.get().get(0).unwrap_or(&PlayerInfo::default()).team_name.clone() }</p>
+                    <p class="text-white mb-1 font-bold">{ move || team_info.get().first().unwrap_or(&PlayerInfo::default()).team_name.clone() }</p>
                     <ol class="max-h-[410px] overflow-y-scroll">
                         <For
                             each=move || team_info.get()
@@ -78,7 +78,7 @@ pub fn TeamSheet(
                             children=move |player_info| {
                                 view! {
                                     <li class="px-2 py-1 even:bg-slate-200 odd:bg-white">
-                                        {move || player_info.number.clone() }". "
+                                        {move || player_info.number }". "
                                         { move || player_info.player_name.clone() }
                                     </li>
                                 }

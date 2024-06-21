@@ -24,6 +24,7 @@ extern "C" {
 pub struct CtxProvider {
     register_match_info_action: Action<JsValue, JsValue>,
     register_player_info_action: Action<JsValue, JsValue>,
+    register_event_action: Action<JsValue, JsValue>,
 }
 
 #[component]
@@ -32,10 +33,13 @@ pub fn App() -> impl IntoView {
         create_action(|payload: &JsValue| invoke("register_match_info", payload.clone()));
     let register_player_info_action =
         create_action(|payload: &JsValue| invoke("register_player_info", payload.clone()));
+    let register_event_action =
+        create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
 
     provide_context(CtxProvider {
         register_match_info_action,
         register_player_info_action,
+        register_event_action,
     });
 
     view! {
