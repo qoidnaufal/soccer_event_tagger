@@ -1,6 +1,6 @@
 [package]
 name = "soccer_event_tagger"
-version = "0.0.0"
+version = "1.0.0"
 description = "Tag Soccer Events"
 authors = ["Qoid Naufal"]
 edition = "2021"
@@ -14,7 +14,7 @@ tauri-build = { version = "1", features = [] }
 csv.workspace = true
 serde.workspace = true
 types = { path = "../types" }
-tauri = { version = "1", features = [ "api-all"] }
+tauri = { version = "1", features = [ "path-all", "protocol-all", "shell-open"] }
 rfd = "0.14.1"
 env_logger = "0.11.3"
 log = "0.4.21"
