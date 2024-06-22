@@ -13,13 +13,13 @@ tauri-build = { version = "1", features = [] }
 [dependencies]
 csv.workspace = true
 serde.workspace = true
-types = { path = "../types" }
-tauri = { version = "1", features = [ "path-all", "protocol-all", "shell-open"] }
+percent-encoding = "2.3.1"
 rfd = "0.14.1"
 env_logger = "0.11.3"
 log = "0.4.21"
 surrealdb = { version = "1.5.0", features = ["kv-rocksdb", "sql2", "kv-mem"] }
-percent-encoding = "2.3.1"
+types = { path = "../types" }
+tauri = { version = "1", features = ["shell-open"] }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

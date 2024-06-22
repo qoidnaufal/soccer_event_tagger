@@ -4,7 +4,7 @@
     "beforeBuildCommand": "trunk build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
-    "withGlobalTauri": false
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "Soccer Event Tagger",
@@ -16,14 +16,6 @@
       "shell": {
         "all": false,
         "open": true
-      },
-      "path": {
-        "all": true
-      },
-      "protocol": {
-        "all": true,
-        "asset": true,
-        "assetScope": ["**"]
       }
     },
     "windows": [
@@ -34,13 +26,11 @@
         "resizable": true,
         "maximized": true,
         "fullscreen": false,
-        "minWidth": 800,
-        "minHeight": 600,
         "visible": true
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost stream: http://stream.localhost"
+      "csp": "default-src 'self'; img-src 'self'; media-src stream: http://stream.localhost; script-src 'wasm-unsafe-eval'"
     },
     "bundle": {
       "active": true,
