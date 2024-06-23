@@ -1,6 +1,6 @@
 use super::invoke;
 use leptos::*;
-use types::{AppError, MatchData, Payload, TaggedEvent};
+use types::{AppError, MatchInfo, Payload, TaggedEvent};
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 async fn get_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
@@ -16,7 +16,7 @@ async fn get_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
 pub fn TableData(
     video_player_node_ref: NodeRef<html::Video>,
     register_event_action: Action<JsValue, JsValue>,
-    match_data: ReadSignal<MatchData>,
+    match_info: ReadSignal<MatchInfo>,
 ) -> impl IntoView {
     let delete_action = create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
     let delete_all_action = create_action(|payload: &JsValue| {
@@ -28,16 +28,16 @@ pub fn TableData(
                 register_event_action.version().get(),
                 delete_action.version().get(),
                 delete_all_action.version().get(),
-                match_data.get(),
+                match_info.get(),
             )
         },
-        move |_| get_data(match_data.get_untracked().match_id),
+        move |_| get_data(match_info.get_untracked().match_id),
     );
 
     let delete_all = move |ev: ev::MouseEvent| {
         ev.prevent_default();
         let payload = Payload {
-            payload: match_data.get_untracked().match_id,
+            payload: match_info.get_untracked().match_id,
         };
         let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
         delete_all_action.dispatch(payload);

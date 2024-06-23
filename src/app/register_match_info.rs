@@ -4,7 +4,8 @@ use leptos_router::A;
 use types::{MatchInfo, Payload, PlayerInfo, TaggedEvent};
 use wasm_bindgen::UnwrapThrowExt;
 
-const GUIDE: &str = "Use \")\" after the number, \"/position\" after starting 11 player's name, and \",\" to separate each players. Example: 1) Toldo /gk, 2) D. Alves /rfb, ...";
+const GUIDE_HOME: &str = "Check the guide -------->";
+const GUIDE_AWAY: &str = "Use \")\" after the number, \"/position\" after starting 11 player's name, and \",\" to separate each players. Example: 1) Toldo /gk, 2) D. Alves /rfb, 3) Zlatan Ibrahimovic, ... Toldo & D. Alves will be registered as starting xi while Zlatan Ibrahimovic isn't";
 
 #[component]
 pub fn RegisterMatchInfo() -> impl IntoView {
@@ -90,21 +91,24 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                 register_player_info_action.dispatch(payload);
 
                 if player_info.start {
-                    let mut tagged_event = TaggedEvent::default();
-                    tagged_event.match_id = player_info.match_id;
-                    tagged_event.player_id = player_info.player_id;
-                    tagged_event.match_teams = format!(
-                        "{} vs {}",
-                        match_info.get_untracked().team_home,
-                        match_info.get_untracked().team_away
-                    );
-                    tagged_event.opponent_team = match_info.get_untracked().team_away;
-                    tagged_event.time_start = 0.;
-                    tagged_event.play_position = player_info.play_position.first().cloned();
-                    tagged_event.player_name = player_info.player_name;
-                    tagged_event.team_name = match_info.get_untracked().team_home;
-                    tagged_event.event_name = "Play".to_string();
-                    tagged_event.event_type = Some("Start".to_string());
+                    let tagged_event = TaggedEvent {
+                        match_id: player_info.match_id,
+                        player_id: player_info.player_id,
+                        match_date: match_info.get_untracked().match_date,
+                        match_teams: format!(
+                            "{} vs {}",
+                            match_info.get_untracked().team_home,
+                            match_info.get_untracked().team_away
+                        ),
+                        opponent_team: match_info.get_untracked().team_away,
+                        time_start: 0.,
+                        play_position: player_info.play_position.first().cloned(),
+                        player_name: player_info.player_name,
+                        team_name: match_info.get_untracked().team_home,
+                        event_name: "Play".to_string(),
+                        event_type: Some("Start".to_string()),
+                        ..Default::default()
+                    };
 
                     let payload = Payload {
                         payload: tagged_event,
@@ -166,21 +170,24 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                 register_player_info_action.dispatch(payload);
 
                 if player_info.start {
-                    let mut tagged_event = TaggedEvent::default();
-                    tagged_event.match_id = player_info.match_id;
-                    tagged_event.player_id = player_info.player_id;
-                    tagged_event.match_teams = format!(
-                        "{} vs {}",
-                        match_info.get_untracked().team_home,
-                        match_info.get_untracked().team_away
-                    );
-                    tagged_event.opponent_team = match_info.get_untracked().team_home;
-                    tagged_event.time_start = 0.;
-                    tagged_event.play_position = player_info.play_position.first().cloned();
-                    tagged_event.player_name = player_info.player_name;
-                    tagged_event.team_name = match_info.get_untracked().team_away;
-                    tagged_event.event_name = "Play".to_string();
-                    tagged_event.event_type = Some("Start".to_string());
+                    let tagged_event = TaggedEvent {
+                        match_id: player_info.match_id,
+                        player_id: player_info.player_id,
+                        match_date: match_info.get_untracked().match_date,
+                        match_teams: format!(
+                            "{} vs {}",
+                            match_info.get_untracked().team_home,
+                            match_info.get_untracked().team_away
+                        ),
+                        opponent_team: match_info.get_untracked().team_home,
+                        time_start: 0.,
+                        play_position: player_info.play_position.first().cloned(),
+                        player_name: player_info.player_name,
+                        team_name: match_info.get_untracked().team_away,
+                        event_name: "Play".to_string(),
+                        event_type: Some("Start".to_string()),
+                        ..Default::default()
+                    };
 
                     let payload = Payload {
                         payload: tagged_event,
@@ -193,11 +200,35 @@ pub fn RegisterMatchInfo() -> impl IntoView {
         set_match_info.set(MatchInfo::default());
     };
 
-    let handle_focus = move |ev: ev::FocusEvent| {
+    let handle_focus_in_home = move |ev: ev::FocusEvent| {
         ev.prevent_default();
         let input = input_home_ref.get().unwrap();
-        if input.inner_text().as_str() == GUIDE {
-            input_home_ref.get().unwrap().set_inner_text("");
+        if input.inner_text().as_str() == GUIDE_HOME {
+            input.set_inner_text("");
+        }
+    };
+
+    let handle_focus_out_home = move |ev: ev::FocusEvent| {
+        ev.prevent_default();
+        let input = input_home_ref.get().unwrap();
+        if input.inner_text().is_empty() {
+            input.set_inner_text(GUIDE_HOME);
+        }
+    };
+
+    let handle_focus_in_away = move |ev: ev::FocusEvent| {
+        ev.prevent_default();
+        let input = input_away_ref.get().unwrap();
+        if input.inner_text().as_str() == GUIDE_AWAY {
+            input.set_inner_text("");
+        }
+    };
+
+    let handle_focus_out_away = move |ev: ev::FocusEvent| {
+        ev.prevent_default();
+        let input = input_away_ref.get().unwrap();
+        if input.inner_text().is_empty() {
+            input.set_inner_text(GUIDE_AWAY);
         }
     };
 
@@ -260,7 +291,8 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                             />
                             <div
                                 required
-                                on:focus=handle_focus
+                                on:focusin=handle_focus_in_home
+                                on:focusout=handle_focus_out_home
                                 role="textbox"
                                 aria-multiline="true"
                                 contenteditable="true"
@@ -271,7 +303,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 _ref=input_home_ref
                                 class="grow border h-[270px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
                             >
-                                {move || GUIDE}
+                                {move || GUIDE_HOME}
                             </div>
                         </div>
                         <div class="flex flex-col w-[330px] my-1">
@@ -294,6 +326,8 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                             />
                             <div
                                 required
+                                on:focusin=handle_focus_in_away
+                                on:focusout=handle_focus_out_away
                                 role="textbox"
                                 aria-multiline="true"
                                 contenteditable="true"
@@ -304,6 +338,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 _ref=input_away_ref
                                 class="grow border h-[270px] overflow-y-scroll p-2 focus:outline-none bg-white rounded-md"
                             >
+                                {move || GUIDE_AWAY}
                             </div>
                         </div>
                     </div>

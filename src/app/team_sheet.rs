@@ -1,15 +1,15 @@
 use leptos::*;
-use types::{AppError, MatchData, MatchInfo, PlayerInfo};
+use types::{AppError, MatchInfo, PlayerInfo};
 
 #[component]
 pub fn SelectTeamSheet(
     match_info_resource: Resource<usize, Result<Vec<MatchInfo>, AppError>>,
-    set_match_data: WriteSignal<MatchData>,
+    set_match_info: WriteSignal<MatchInfo>,
 ) -> impl IntoView {
     let handle_change = move |ev: ev::Event| {
         let value = event_target_value(&ev);
-        let match_data = MatchData::get_from_str(value);
-        set_match_data.set(match_data);
+        let match_info = serde_json::from_str::<MatchInfo>(value.as_str()).unwrap_or_default();
+        set_match_info.set(match_info);
     };
 
     view! {
@@ -17,19 +17,19 @@ pub fn SelectTeamSheet(
             <option value="">"Select team sheet.."</option>
             <Transition>
                 {move || {
-                    let match_info = create_memo(move |_| {
+                    let match_info_memo = create_memo(move |_| {
                         match_info_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
                     });
 
                     view! {
                         <For
-                            each=move || match_info.get()
-                            key=|match_info| match_info.match_id.clone()
+                            each=move || match_info_memo.get()
+                            key=|match_info| (match_info.match_date.clone(), match_info.match_id.clone())
                             children=move |match_info| {
                                 let match_info = create_rw_signal(match_info).read_only();
 
                                 view! {
-                                    <option value=move || match_info.get().to_string()>
+                                    <option value=move || serde_json::to_string(&match_info.get()).unwrap_or_default()>
                                         { move || match_info.get().match_date } ": "
                                         { move || match_info.get().team_home } " vs "
                                         { move || match_info.get().team_away }

@@ -1,6 +1,6 @@
 use super::invoke;
 use leptos::*;
-use types::{MatchData, Payload};
+use types::{MatchInfo, Payload};
 use wasm_bindgen::UnwrapThrowExt;
 
 const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[200px] text-xs text-black hover:text-white";
@@ -9,7 +9,7 @@ const MENU_BAR: &str = "block absolute z-20 left-[35px] top-[10px] flex flex-col
 #[component]
 pub fn MenuBar(
     menu_bar_node_ref: NodeRef<html::Div>,
-    match_data: ReadSignal<MatchData>,
+    match_info: ReadSignal<MatchInfo>,
 ) -> impl IntoView {
     let set_video_src = expect_context::<WriteSignal<Option<String>>>();
     let show_menu = expect_context::<ReadSignal<bool>>();
@@ -37,7 +37,7 @@ pub fn MenuBar(
             >
                 <OpenVideo get_file_path/>
                 <RegisterMatchInfo/>
-                <ExportData match_data/>
+                <ExportData match_info/>
                 <ShortcutsInfo/>
             </div>
         </Show>
@@ -70,12 +70,12 @@ pub fn RegisterMatchInfo() -> impl IntoView {
 }
 
 #[component]
-pub fn ExportData(match_data: ReadSignal<MatchData>) -> impl IntoView {
+pub fn ExportData(match_info: ReadSignal<MatchInfo>) -> impl IntoView {
     let export_data = move |ev: ev::MouseEvent| {
         ev.prevent_default();
         spawn_local(async move {
-            let match_id = match_data.get_untracked().match_id;
-            let payload = Payload { payload: match_id };
+            let payload = match_info.get_untracked();
+            let payload = Payload { payload };
             let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
             invoke("export_tagged_events_from_match_id", payload).await;
         });
@@ -85,7 +85,7 @@ pub fn ExportData(match_data: ReadSignal<MatchData>) -> impl IntoView {
         <button
             on:click=export_data
             class=STYLE
-        >"Export Data"</button>
+        >"Export Data [*.csv]"</button>
     }
 }
 

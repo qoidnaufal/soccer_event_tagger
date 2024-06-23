@@ -1,7 +1,7 @@
 use super::Database;
 use csv::Writer;
 use tauri::State;
-use types::{AppError, TaggedEvent};
+use types::{AppError, MatchInfo, TaggedEvent};
 
 #[tauri::command]
 pub async fn insert_data(
@@ -36,17 +36,26 @@ pub async fn get_all_data(state: State<'_, Database>) -> Result<Vec<TaggedEvent>
 
 #[tauri::command]
 pub async fn export_tagged_events_from_match_id(
-    payload: String,
+    payload: MatchInfo,
     state: State<'_, Database>,
 ) -> Result<(), AppError> {
-    let maybe_file = rfd::AsyncFileDialog::new().save_file().await;
+    let file_name = format!(
+        "[{}] {} vs {}.csv",
+        payload.match_date,
+        payload.team_home.as_str(),
+        payload.team_away.as_str()
+    );
+    let maybe_file = rfd::AsyncFileDialog::new()
+        .set_file_name(file_name)
+        .save_file()
+        .await;
 
     if let Some(file) = maybe_file {
         let path = file.path();
         let db = state.db.lock().await;
         let data = db
             .query("SELECT * FROM tagged_events WHERE match_id = $match_id")
-            .bind(("match_id", payload))
+            .bind(("match_id", payload.match_id))
             .await
             .map_err(|err| AppError::DatabaseError(err.to_string()))?
             .take::<Vec<TaggedEvent>>(0)

@@ -5,6 +5,7 @@ pub struct TaggedEvent {
     pub uuid: String,
     pub match_id: String,
     pub player_id: String,
+    pub match_date: String,
     pub match_teams: String,
     pub opponent_team: String,
     pub event_id: i32,
@@ -1100,53 +1101,85 @@ impl TaggedEvent {
                 self.player_end = player_args;
             }
             // --- change position
-            "changegk" => {
+            "cpgk" => {
                 self.event_id = 21;
                 self.event_name = "Play".to_string();
                 self.event_type = Some("Change Position".to_string());
                 self.play_position = Some("GK".to_string());
+                self.event_source = None;
+                self.outcome = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
-            "changerfb" => {
+            "cprfb" => {
                 self.event_id = 22;
                 self.event_name = "Play".to_string();
                 self.event_type = Some("Change Position".to_string());
                 self.play_position = Some("RFB".to_string());
+                self.event_source = None;
+                self.outcome = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
-            "changelfb" => {
+            "cplfb" => {
                 self.event_id = 25;
                 self.event_name = "Play".to_string();
                 self.event_type = Some("Change Position".to_string());
                 self.play_position = Some("LFB".to_string());
+                self.event_source = None;
+                self.outcome = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
-            "changecb" => {
+            "cpcb" => {
                 self.event_id = 23;
                 self.event_name = "Play".to_string();
                 self.event_type = Some("Change Position".to_string());
                 self.play_position = Some("CB".to_string());
+                self.event_source = None;
+                self.outcome = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
-            "changemf" => {
+            "cpmf" => {
                 self.event_id = 28;
                 self.event_name = "Play".to_string();
                 self.event_type = Some("Change Position".to_string());
                 self.play_position = Some("MF".to_string());
+                self.event_source = None;
+                self.outcome = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
-            "changerwg" => {
+            "cprwg" => {
                 self.event_id = 27;
                 self.event_name = "Play".to_string();
                 self.event_type = Some("Change Position".to_string());
                 self.play_position = Some("RWG".to_string());
+                self.event_source = None;
+                self.outcome = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
-            "changelwf" => {
+            "cplwf" => {
                 self.event_id = 24;
                 self.event_name = "Play".to_string();
                 self.event_type = Some("Change Position".to_string());
                 self.play_position = Some("LWG".to_string());
+                self.event_source = None;
+                self.outcome = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
-            "changecf" => {
+            "cpcf" => {
                 self.event_id = 29;
                 self.event_name = "Play".to_string();
                 self.event_type = Some("Change Position".to_string());
                 self.play_position = Some("CF".to_string());
+                self.event_source = None;
+                self.outcome = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
             // --- subs
             "sigk" => {
@@ -1156,6 +1189,8 @@ impl TaggedEvent {
                 self.play_position = Some("GK".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "sirfb" => {
                 self.event_id = 32;
@@ -1164,6 +1199,8 @@ impl TaggedEvent {
                 self.play_position = Some("RFB".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "silfb" => {
                 self.event_id = 35;
@@ -1172,6 +1209,8 @@ impl TaggedEvent {
                 self.play_position = Some("LFB".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "sicb" => {
                 self.event_id = 33;
@@ -1180,6 +1219,8 @@ impl TaggedEvent {
                 self.play_position = Some("CB".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "simf" => {
                 self.event_id = 38;
@@ -1188,6 +1229,8 @@ impl TaggedEvent {
                 self.play_position = Some("MF".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "sirwg" => {
                 self.event_id = 37;
@@ -1196,6 +1239,8 @@ impl TaggedEvent {
                 self.play_position = Some("RWG".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "silwg" => {
                 self.event_id = 34;
@@ -1204,6 +1249,8 @@ impl TaggedEvent {
                 self.play_position = Some("LWG".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "sicf" => {
                 self.event_id = 39;
@@ -1212,23 +1259,49 @@ impl TaggedEvent {
                 self.play_position = Some("CF".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             // --- other events
             "yc" => {
                 self.event_id = 40;
                 self.event_name = "Yellow Card".to_string();
+                self.event_type = None;
+                self.play_position = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "syc" => {
                 self.event_id = 41;
                 self.event_name = "Second Yellow Card".to_string();
+                self.event_type = None;
+                self.play_position = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
             "rc" => {
                 self.event_id = 42;
                 self.event_name = "Red Card".to_string();
+                self.event_type = None;
+                self.play_position = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
-            n => {
+            unregistered => {
                 self.event_id = 43;
-                self.event_name = format!("Unregistered: {}", n);
+                self.event_name = format!("Unregistered: {}", unregistered);
+                self.event_type = None;
+                self.play_position = None;
+                self.team_end = team_args;
+                self.player_end = player_args;
+                self.event_source = None;
+                self.outcome = None;
             }
         }
     }

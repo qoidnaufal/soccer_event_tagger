@@ -8,12 +8,6 @@ pub struct MatchInfo {
     pub team_away: String,
 }
 
-impl std::fmt::Display for MatchInfo {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}/{}/{}", self.match_id, self.team_home, self.team_away)
-    }
-}
-
 impl PartialEq for MatchInfo {
     fn eq(&self, other: &Self) -> bool {
         self.match_id == other.match_id
@@ -48,7 +42,13 @@ impl PartialEq for PlayerInfo {
 
 impl PlayerInfo {
     pub fn assign_id(&mut self) {
-        self.player_id = format!("{}{}", self.team_name, self.number);
+        let team_code = self
+            .team_name
+            .as_bytes()
+            .into_iter()
+            .map(|n| n.to_string())
+            .collect::<String>();
+        self.player_id = format!("{}_{:03}", team_code, self.number);
     }
 }
 
@@ -56,29 +56,4 @@ impl PlayerInfo {
 pub struct TeamInfoQuery {
     pub match_id: String,
     pub team_state: String,
-}
-
-#[derive(Debug, Clone, Default, Eq)]
-pub struct MatchData {
-    pub match_id: String,
-    pub team_home: String,
-    pub team_away: String,
-}
-
-impl PartialEq for MatchData {
-    fn eq(&self, other: &Self) -> bool {
-        self.match_id == other.match_id
-    }
-}
-
-impl MatchData {
-    pub fn get_from_str(input: String) -> Self {
-        let mut data = input.split('/').map(|s| s.to_string());
-
-        Self {
-            match_id: data.next().unwrap_or_default(),
-            team_home: data.next().unwrap_or_default(),
-            team_away: data.next().unwrap_or_default(),
-        }
-    }
 }
