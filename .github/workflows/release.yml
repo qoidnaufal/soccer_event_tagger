@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - release
+      - main
 
 # This workflow will trigger on each push to the `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
 
@@ -36,7 +37,6 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: install dependencies (ubuntu only)
@@ -44,17 +44,23 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
-        # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
-        # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
 
       - name: install frontend dependencies
-        run: npm install # change this to npm, pnpm or bun depending on which one you use.
+        run: |
+          npm install -D tailwindcss
+          cargo install --locked trunk
+
+      - name: install frontend dependecies (windows only)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          npm install -g npx
 
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
         with:
-          tagName: soccer_event_tagger-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: soccer_event_tagger-v__VERSION__
           releaseName: 'Soccer Event Tagger v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
