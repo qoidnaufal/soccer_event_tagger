@@ -2,11 +2,8 @@ name: 'publish'
 
 on:
   push:
-    branches:
-      - release
-      - main
-
-# This workflow will trigger on each push to the `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
+    tags:
+      - 'v*'
 
 jobs:
   publish-tauri:
@@ -26,6 +23,12 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: build changelog
+        id: build_changelog
+        run: echo "changelog=- ADD CHANGELOG" >> $GITHUB_OUTPUT
 
       - name: setup node
         uses: actions/setup-node@v4
