@@ -1,5 +1,4 @@
 use super::Database;
-use csv::Writer;
 use tauri::State;
 use types::{AppError, MatchInfo, TaggedEvent};
 
@@ -39,11 +38,10 @@ pub async fn export_tagged_events_from_match_id(
     payload: MatchInfo,
     state: State<'_, Database>,
 ) -> Result<(), AppError> {
+    let date = payload.match_date.split('T').next().unwrap_or_default();
     let file_name = format!(
         "[{}] {} vs {}.csv",
-        payload.match_date,
-        payload.team_home.as_str(),
-        payload.team_away.as_str()
+        date, payload.team_home, payload.team_away
     );
     let maybe_file = rfd::AsyncFileDialog::new()
         .set_file_name(file_name)
@@ -52,6 +50,8 @@ pub async fn export_tagged_events_from_match_id(
 
     if let Some(file) = maybe_file {
         let path = file.path();
+        log::info!("path: {:?}", path);
+
         let db = state.db.lock().await;
         let data = db
             .query("SELECT * FROM tagged_events WHERE match_id = $match_id")
@@ -61,8 +61,10 @@ pub async fn export_tagged_events_from_match_id(
             .take::<Vec<TaggedEvent>>(0)
             .map_err(|err| AppError::DatabaseError(err.to_string()))?;
 
-        let mut writer =
-            Writer::from_path(path).map_err(|err| AppError::CsvWriteError(err.to_string()))?;
+        let mut writer = csv::Writer::from_path(path).map_err(|err| {
+            log::error!("csv error: {}", err);
+            AppError::CsvWriteError(err.to_string())
+        })?;
 
         for i in data.iter() {
             writer

@@ -1,4 +1,4 @@
-use super::{invoke, menu, pitch, table_data, team_sheet, video, CtxProvider};
+use super::{convertFileSrc, invoke, menu, pitch, table_data, team_sheet, video, CtxProvider};
 
 use leptos::*;
 use wasm_bindgen::prelude::*;
@@ -94,7 +94,9 @@ pub fn EventTagger() -> impl IntoView {
                     let path_protocol = invoke("open", wasm_bindgen::JsValue::null()).await;
                     let (path, protocol): (String, String) =
                         serde_wasm_bindgen::from_value(path_protocol).unwrap_throw();
-                    let resolved_path = format!("{}://localhost/{}", protocol, path);
+                    let resolved_path = convertFileSrc(path, protocol);
+                    let resolved_path =
+                        serde_wasm_bindgen::from_value::<String>(resolved_path).unwrap_or_default();
 
                     logging::log!("resolved path: {:?}", resolved_path);
 
@@ -300,8 +302,6 @@ pub fn EventTagger() -> impl IntoView {
         set_show_menu.update(|v| *v = !*v);
     };
 
-    let menu_bar_node_ref = create_node_ref::<html::Div>();
-
     provide_context(show_menu);
     provide_context(set_video_src);
 
@@ -313,22 +313,18 @@ pub fn EventTagger() -> impl IntoView {
         <div class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col">
             <div class="flex flex-row">
                 <div>
-                    <Show when=move || !show_menu.get()
-                        fallback=move || view! {
-                            <button
-                                on:click=toggle_menu
-                                class="border-none bg-slate-300 hover:bg-slate-500 px-2 size-[30px] rounded-r-lg text-white">
-                                <img src="public/close.svg"/>
-                            </button>
-                        }>
-                        <button
-                            on:click=toggle_menu
-                            class="border-none bg-slate-300 hover:bg-slate-500 px-2 size-[30px] rounded-r-lg">
-                            <img src="public/menu.svg" width="30" height="30"/>
-                        </button>
-                    </Show>
+                    <button
+                        on:click=toggle_menu
+                        class="border-none bg-slate-300 hover:bg-lime-400 px-2 size-[30px] rounded-r-lg">
+                        <Show
+                            when=move || !show_menu.get()
+                            fallback=move || view! { <img src="public/close.svg"/> }
+                        >
+                            <img src="public/menu.svg"/>
+                        </Show>
+                    </button>
                 </div>
-                <menu::MenuBar menu_bar_node_ref match_info/>
+                <menu::MenuBar match_info/>
                 <div id="video_container" class="flex flex-col w-fit px-[10px] shrink-0">
                     <div class="relative flex flex-row w-fit h-fit">
                         <pitch::Pitch set_coordinate/>

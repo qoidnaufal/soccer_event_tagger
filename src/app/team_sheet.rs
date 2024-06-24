@@ -59,13 +59,13 @@ pub fn TeamSheet(
             { move || {
                 let team_info = create_memo(move |_| {
                     team_info_resource.and_then(|t| {
-                        let mut vec = match team_state.get().as_str() {
+                        let mut players = match team_state.get().as_str() {
                             "Home" => t.iter().filter(|v| v.team_state.as_str() == "Home").cloned().collect::<Vec<_>>(),
                             "Away" => t.iter().filter(|v| v.team_state.as_str() == "Away").cloned().collect::<Vec<_>>(),
                             _ => t.iter().filter(|v| v.team_state.as_str() == "Neutral").cloned().collect::<Vec<_>>()
                         };
-                        vec.sort_by_key(|p| p.number);
-                        vec
+                        players.sort_by_key(|p| p.number);
+                        players
                     }).unwrap_or(Ok(Vec::new())).unwrap_or_default()
                 });
 
