@@ -23,9 +23,12 @@ pub fn get_stream_response(
     let uri = request.uri().parse::<Uri>().unwrap();
     let path = percent_decode(uri.path().as_bytes())
         .decode_utf8_lossy()
+        .to_string()
+        .strip_prefix('/')
+        .unwrap_or_default()
         .to_string();
 
-    let mut file = std::fs::File::open(&path)?;
+    let mut file = std::fs::File::open(path)?;
     let len = {
         let old_pos = file.stream_position()?;
         let len = file.seek(SeekFrom::End(0))?;
@@ -35,7 +38,6 @@ pub fn get_stream_response(
 
     let mut resp = ResponseBuilder::new().mimetype("video/mp4");
     let http_response = if let Some(range_header) = request.headers().get("range") {
-        // log::info!("range header: {:?}", range_header);
         let not_satisfiable = || {
             ResponseBuilder::new()
                 .status(StatusCode::RANGE_NOT_SATISFIABLE)

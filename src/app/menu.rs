@@ -1,4 +1,4 @@
-use super::invoke;
+use super::{convertFileSrc, invoke};
 use leptos::*;
 use types::{MatchInfo, Payload};
 use wasm_bindgen::UnwrapThrowExt;
@@ -21,7 +21,9 @@ pub fn MenuBar(
             let path_protocol = invoke("open", wasm_bindgen::JsValue::null()).await;
             let (path, protocol): (String, String) =
                 serde_wasm_bindgen::from_value(path_protocol).unwrap_throw();
-            let resolved_path = format!("{}://localhost/{}", protocol, path);
+            let resolved_path = convertFileSrc(path, protocol);
+            let resolved_path =
+                serde_wasm_bindgen::from_value::<String>(resolved_path).unwrap_or_default();
 
             logging::log!("resolved path: {:?}", resolved_path);
 
