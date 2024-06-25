@@ -44,7 +44,7 @@ pub fn App() -> impl IntoView {
 
     view! {
         <Router fallback=|| view! { <p>"Error"</p> }.into_view()>
-            <main class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col">
+            <main>
                 <Routes>
                     <Route path="/" view=event_tagger::EventTagger/>
                     <Route path="/team_sheet" view=register_match_info::RegisterMatchInfo/>

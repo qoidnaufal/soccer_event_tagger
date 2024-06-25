@@ -211,8 +211,8 @@ pub fn EventTagger() -> impl IntoView {
                 let player_info = team_info
                     .iter()
                     .filter(|p| p.number == number)
-                    .cloned()
-                    .next();
+                    .next()
+                    .cloned();
 
                 set_player_buffer.update(|p| {
                     let player_name = if let Some(player) = player_info.clone() {
@@ -310,7 +310,7 @@ pub fn EventTagger() -> impl IntoView {
     });
 
     view! {
-        <div class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col">
+        <div class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col pr-[40px]">
             <div class="flex flex-row">
                 <div>
                     <button
@@ -331,7 +331,7 @@ pub fn EventTagger() -> impl IntoView {
                         <video::VideoPlayer video_src video_player_node_ref/>
                     </div>
                 </div>
-                <div id="info" class="flex flex-col mr-[40px] items-center w-full bg-slate-800/[.65] p-4 rounded-lg">
+                <div id="info" class="flex flex-col items-center w-full grow-0 bg-slate-800/[.65] p-4 rounded-lg">
                     <team_sheet::SelectTeamSheet match_info_resource set_match_info/>
                     <div class="flex flex-row">
                         <team_sheet::TeamSheet team_info_resource team_state="Home".to_string()/>
@@ -339,7 +339,7 @@ pub fn EventTagger() -> impl IntoView {
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col px-[40px]">
+            <div class="flex flex-col ml-[40px]">
                 <div class="w-full bg-green-50 rounded-lg px-2 py-1 mt-1">
                     <table class="table-fixed w-full">
                         <tbody>

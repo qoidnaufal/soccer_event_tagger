@@ -4,7 +4,7 @@ use types::{MatchInfo, Payload};
 use wasm_bindgen::UnwrapThrowExt;
 
 const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[200px] text-xs text-black hover:text-white";
-const MENU_BAR: &str = "block absolute z-20 left-[35px] top-[10px] flex flex-col rounded-xl bg-slate-800/[.85] p-[10px] w-fit space-y-[10px] ease-in-out duration-300";
+const MENU_BAR: &str = "block absolute z-20 left-[35px] top-[10px] flex flex-col rounded-xl bg-slate-600/[.85] p-[10px] w-fit space-y-[10px] ease-in-out duration-300";
 
 #[component]
 pub fn MenuBar(match_info: ReadSignal<MatchInfo>) -> impl IntoView {

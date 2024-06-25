@@ -18,6 +18,14 @@
         "open": true
       }
     },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/qoidnaufal/soccer_event_tagger/releases/latest/download/latest.json"
+      ],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDYyMzE1MDQ3QjdCQ0ZBNkYKUldSdityeTNSMUF4WXVibzFIRnpLN3YzSEVQL1laNnRYM2h0cEx2MU44S3FmOW9Kd3VseGs3em0K"
+    },
     "windows": [
       {
         "title": "Soccer Event Tagger",

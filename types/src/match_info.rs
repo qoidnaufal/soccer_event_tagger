@@ -45,7 +45,7 @@ impl PlayerInfo {
         let team_code = self
             .team_name
             .as_bytes()
-            .into_iter()
+            .iter()
             .map(|n| n.to_string())
             .collect::<String>();
         self.player_id = format!("{}_{:03}", team_code, self.number);
