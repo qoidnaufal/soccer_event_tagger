@@ -244,7 +244,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
 
     view! {
         <div
-            class="block m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
+            class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
         >
             <div>
                 <A href="/">
