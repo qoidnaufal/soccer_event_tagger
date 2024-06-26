@@ -1,6 +1,6 @@
 [package]
 name = "soccer_event_tagger"
-version = "1.0.3"
+version = "1.0.4"
 description = "Tag Soccer Events"
 authors = ["Qoid Naufal"]
 edition = "2021"
