@@ -198,11 +198,7 @@ pub fn EventTagger() -> impl IntoView {
                 let team_info = serde_wasm_bindgen::from_value::<Vec<PlayerInfo>>(team_info)
                     .unwrap_or_default();
 
-                let player_info = team_info
-                    .iter()
-                    .filter(|p| p.number == number)
-                    .next()
-                    .cloned();
+                let player_info = team_info.iter().find(|p| p.number == number).cloned();
 
                 set_player_buffer.update(|p| {
                     let player_name = if let Some(player) = player_info.clone() {

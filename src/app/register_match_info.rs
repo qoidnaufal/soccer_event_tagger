@@ -246,12 +246,12 @@ pub fn RegisterMatchInfo() -> impl IntoView {
 
     let submit_button_ref = create_node_ref::<html::Button>();
 
-    let _button_text = create_memo(move |_| {
-        if register_match_info_action.value().get().is_some() {
-            "Success"
-        } else {
-            "Submit"
-        }
+    create_effect(move |_| {
+        submit_button_ref.on_load(|b| {
+            if b.inner_text() != "Submit" {
+                b.set_inner_text("Submit");
+            }
+        });
     });
 
     view! {
