@@ -12,6 +12,9 @@ pub fn RegisterMatchInfo() -> impl IntoView {
     let (match_info, set_match_info) = create_signal(MatchInfo::default());
     let input_home_ref = create_node_ref::<html::Div>();
     let input_away_ref = create_node_ref::<html::Div>();
+    let input_date_ref = create_node_ref::<html::Input>();
+    let team_home_name_ref = create_node_ref::<html::Input>();
+    let team_away_name_ref = create_node_ref::<html::Input>();
 
     let register_match_info_action = expect_context::<CtxProvider>().register_match_info_action;
     let register_player_info_action = expect_context::<CtxProvider>().register_player_info_action;
@@ -33,7 +36,16 @@ pub fn RegisterMatchInfo() -> impl IntoView {
             .trim()
             .to_string();
 
-        set_match_info.update(|m| m.assign_id());
+        let match_date = input_date_ref.get().unwrap().value();
+        let team_home_name = team_home_name_ref.get().unwrap().value();
+        let team_away_name = team_away_name_ref.get().unwrap().value();
+
+        set_match_info.update(|m| {
+            m.match_date = match_date;
+            m.team_home = team_home_name;
+            m.team_away = team_away_name;
+            m.assign_id();
+        });
         let payload = match_info.get_untracked();
         let payload = Payload { payload };
         let payload = serde_wasm_bindgen::to_value(&payload).unwrap_throw();
@@ -234,12 +246,12 @@ pub fn RegisterMatchInfo() -> impl IntoView {
 
     let submit_button_ref = create_node_ref::<html::Button>();
 
-    create_effect(move |_| {
-        submit_button_ref.on_load(|b| {
-            if b.inner_text() != "Submit" {
-                b.set_inner_text("Submit");
-            }
-        });
+    let _button_text = create_memo(move |_| {
+        if register_match_info_action.value().get().is_some() {
+            "Success"
+        } else {
+            "Submit"
+        }
     });
 
     view! {
@@ -266,7 +278,13 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                     </div>
                     <input
                         required
-                        on:change=move |ev| set_match_info.update(|m| m.match_date = event_target_value(&ev))
+                        _ref=input_date_ref
+                        on:change=move |_| {
+                            let submit_button = submit_button_ref.get().unwrap();
+                            if submit_button.inner_text() != "Submit" {
+                                submit_button.set_inner_text("Submit")
+                            }
+                        }
                         type="datetime-local"
                         class="rounded-full h-[30px] w-[150px] mb-2 text-xs justify-center self-center"
                     />
@@ -282,17 +300,24 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 autocapitalize="off"
                                 spellcheck="false"
                                 placeholder="Team name..."
-                                on:change=move |ev| {
-                                    ev.prevent_default();
-                                    set_match_info.update(|m| {
-                                        m.team_home = event_target_value(&ev);
-                                    });
+                                _ref=team_home_name_ref
+                                on:input=move |_| {
+                                    let submit_button = submit_button_ref.get().unwrap();
+                                    if submit_button.inner_text() != "Submit" {
+                                        submit_button.set_inner_text("Submit")
+                                    }
                                 }
                             />
                             <div
                                 required
                                 on:focusin=handle_focus_in_home
                                 on:focusout=handle_focus_out_home
+                                on:input=move |_| {
+                                    let button = submit_button_ref.get().unwrap();
+                                    if button.inner_text() != "Submit" {
+                                        button.set_inner_text("Submit")
+                                    }
+                                }
                                 role="textbox"
                                 aria-multiline="true"
                                 contenteditable="true"
@@ -317,17 +342,24 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 autocapitalize="off"
                                 spellcheck="false"
                                 placeholder="Team name..."
-                                on:change=move |ev| {
-                                    ev.prevent_default();
-                                    set_match_info.update(|m| {
-                                        m.team_away = event_target_value(&ev);
-                                    });
+                                _ref=team_away_name_ref
+                                on:input=move |_| {
+                                    let button = submit_button_ref.get().unwrap();
+                                    if button.inner_text() != "Submit" {
+                                        button.set_inner_text("Submit")
+                                    }
                                 }
                             />
                             <div
                                 required
                                 on:focusin=handle_focus_in_away
                                 on:focusout=handle_focus_out_away
+                                on:input=move |_| {
+                                    let button = submit_button_ref.get().unwrap();
+                                    if button.inner_text() != "Submit" {
+                                        button.set_inner_text("Submit")
+                                    }
+                                }
                                 role="textbox"
                                 aria-multiline="true"
                                 contenteditable="true"

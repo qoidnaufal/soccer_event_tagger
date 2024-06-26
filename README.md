@@ -54,10 +54,11 @@ Go to menu, select `Export Data`. For now, only *.csv is available.
 There are various features which i think i need to add, but pretty much the skeleton of the app is pretty stable. In the upcoming version, i will try to add these:
   * prevent auto video resizing [done]
   * stabilize window size accross different platform
-  * caching video src
+  * caching video src [done]
   * database management page, or
   * simple button to delete registered match info
   * switch to file based db
+  * move some heavy-lifting on the front-end to back-end
   * video clipping and exporting (perhaps this is included in db management page, idk)
   * show latest tagged event as dot on the pitch (maybe with arrow)
   * generate relevant dataviz (maybe, but i think this is too much)

@@ -25,7 +25,6 @@ async fn get_all_match_info() -> Result<Vec<MatchInfo>, AppError> {
 
 #[component]
 pub fn EventTagger() -> impl IntoView {
-    let (video_src, set_video_src) = create_signal::<Option<String>>(None);
     let (coordinate, set_coordinate) = create_signal(Point::default());
     let (show_menu, set_show_menu) = create_signal(false);
     let (tagged_event, set_tagged_event) = create_signal(TaggedEvent::default());
@@ -39,6 +38,8 @@ pub fn EventTagger() -> impl IntoView {
     let register_event_action = expect_context::<CtxProvider>().register_event_action;
 
     let register_match_info_action = expect_context::<CtxProvider>().register_match_info_action;
+
+    let open_video_action = expect_context::<CtxProvider>().open_video_action;
 
     let team_info_resource = create_resource(
         move || match_info.get().match_id,
@@ -90,18 +91,7 @@ pub fn EventTagger() -> impl IntoView {
             }
             // --- open video
             open if ev.ctrl_key() && open == "o" => {
-                spawn_local(async move {
-                    let path_protocol = invoke("open", wasm_bindgen::JsValue::null()).await;
-                    let (path, protocol): (String, String) =
-                        serde_wasm_bindgen::from_value(path_protocol).unwrap_throw();
-                    let resolved_path = convertFileSrc(path, protocol);
-                    let resolved_path =
-                        serde_wasm_bindgen::from_value::<String>(resolved_path).unwrap_or_default();
-
-                    logging::log!("resolved path: {:?}", resolved_path);
-
-                    set_video_src.set(Some(resolved_path));
-                });
+                open_video_action.dispatch(JsValue::null());
             }
             // --- buffer management
             "Backspace" => {
@@ -297,13 +287,25 @@ pub fn EventTagger() -> impl IntoView {
         }
     });
 
+    let video_src = create_memo(move |_| {
+        open_video_action.value().get().map(|path| {
+            let path = serde_wasm_bindgen::from_value::<String>(path).unwrap_throw();
+            let resolved_path = convertFileSrc(path, "stream".to_string());
+            let resolved_path =
+                serde_wasm_bindgen::from_value::<String>(resolved_path).unwrap_or_default();
+
+            logging::log!("resolved path: {:?}", resolved_path);
+
+            resolved_path
+        })
+    });
+
     let toggle_menu = move |ev: ev::MouseEvent| {
         ev.prevent_default();
         set_show_menu.update(|v| *v = !*v);
     };
 
     provide_context(show_menu);
-    provide_context(set_video_src);
 
     on_cleanup(move || {
         shortcuts.remove();
@@ -324,7 +326,7 @@ pub fn EventTagger() -> impl IntoView {
                         </Show>
                     </button>
                 </div>
-                <menu::MenuBar match_info/>
+                <menu::MenuBar match_info open_video_action/>
                 <div id="video_container" class="flex flex-col w-fit px-[10px] shrink-0">
                     <div class="relative flex flex-row w-fit h-fit">
                         <pitch::Pitch set_coordinate/>

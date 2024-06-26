@@ -1,31 +1,22 @@
-use super::{convertFileSrc, invoke};
+use super::invoke;
 use leptos::*;
 use types::{MatchInfo, Payload};
-use wasm_bindgen::UnwrapThrowExt;
+use wasm_bindgen::JsValue;
 
 const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[200px] text-xs text-black hover:text-white";
 const MENU_BAR: &str = "block absolute z-20 left-[35px] top-[10px] flex flex-col rounded-xl bg-slate-600/[.85] p-[10px] w-fit space-y-[10px] ease-in-out duration-300";
 
 #[component]
-pub fn MenuBar(match_info: ReadSignal<MatchInfo>) -> impl IntoView {
-    let set_video_src = expect_context::<WriteSignal<Option<String>>>();
+pub fn MenuBar(
+    match_info: ReadSignal<MatchInfo>,
+    open_video_action: Action<JsValue, JsValue>,
+) -> impl IntoView {
     let show_menu = expect_context::<ReadSignal<bool>>();
 
     // pls refer to this documentation: https://tauri.app/v1/api/js/tauri/#convertfilesrc
     let get_file_path = move |ev: ev::MouseEvent| {
         ev.prevent_default();
-        spawn_local(async move {
-            let path_protocol = invoke("open", wasm_bindgen::JsValue::null()).await;
-            let (path, protocol): (String, String) =
-                serde_wasm_bindgen::from_value(path_protocol).unwrap_throw();
-            let resolved_path = convertFileSrc(path, protocol);
-            let resolved_path =
-                serde_wasm_bindgen::from_value::<String>(resolved_path).unwrap_or_default();
-
-            logging::log!("resolved path: {:?}", resolved_path);
-
-            set_video_src.set(Some(resolved_path));
-        });
+        open_video_action.dispatch(JsValue::null());
     };
 
     view! {

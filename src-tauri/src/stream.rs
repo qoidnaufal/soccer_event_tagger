@@ -6,13 +6,13 @@ use tauri::http::{header, status::StatusCode, HttpRange, Request, Response, Resp
 const MAX_LEN: u64 = 4000 * 1024;
 
 #[tauri::command]
-pub fn open() -> (String, String) {
+pub fn open() -> String {
     let maybe_path = rfd::FileDialog::new().pick_file();
     if let Some(path) = maybe_path {
         let path_to_resolve = path.to_str().unwrap();
-        (path_to_resolve.to_string(), "stream".to_string())
+        path_to_resolve.to_string()
     } else {
-        (String::new(), String::new())
+        String::new()
     }
 }
 

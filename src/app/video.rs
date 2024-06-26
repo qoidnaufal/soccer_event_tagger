@@ -2,7 +2,7 @@ use leptos::*;
 
 #[component]
 pub fn VideoPlayer(
-    video_src: ReadSignal<Option<String>>,
+    video_src: Memo<Option<String>>,
     video_player_node_ref: NodeRef<html::Video>,
 ) -> impl IntoView {
     view! {
