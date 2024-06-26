@@ -1,9 +1,3 @@
-![Soccer Event Tagger](src-tauri/icons/Square150x150Logo.png)
-
-# Soccer Event Tagger
-
-WIP
-
 ## User Manual [eng]
 ### Register match info
 After opening the app, first thing you wanna do is to register match info. Click menu button <img src="public/buttons/menu.svg" alt="menu" width="15" height="15"> on the upper left, select `Register Match Info`.
@@ -49,17 +43,3 @@ Clicking on the row of the table will navigate to the minute of the start of the
 
 ### Export the data
 Go to menu, select `Export Data`. For now, only *.csv is available.
-
-## TODO:
-There are various features which i think i need to add, but pretty much the skeleton of the app is pretty stable. In the upcoming version, i will try to add these:
-- prevent auto video resizing [done]
-- stabilize window size accross different platform
-- caching video src
-- database management page, or
-- simple button to delete registered match info
-- switch to file based db
-- video clipping and exporting (perhaps this is included in db management page, idk)
-- show latest tagged event as dot on the pitch (maybe with arrow)
-- generate relevant dataviz (maybe, but i think this is too much)
-- user manual [done, see above, but i need to put this inside the app]
-- updater [done but need testing]
