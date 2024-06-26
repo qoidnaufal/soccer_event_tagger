@@ -9,6 +9,8 @@ const GUIDE: &str = "Command shortcuts are separated by \"/\".
                     it would still be okay and the event would still be registered. It's just that later on you will need to do more effort when analyzing the data. Substitution also requires you
                     to register the [OUTCOME].";
 
+// todo: fix this!
+
 #[component]
 pub fn Shortcuts() -> impl IntoView {
     let sc = SOURCE_CODE.lines().collect::<Vec<_>>();
