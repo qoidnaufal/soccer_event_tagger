@@ -33,23 +33,19 @@ You can play / pause the video by pressing `space` on your keyboard. You can als
 - [`team state`][`player number`][`/`][`event`],
 - `team state` => is either `h` = `Home` or `a` = `Away`. This will directly query the team name you registered earlier. For example if you registered PSID Jombang as team away, when you type a it will show PSID Jombang,
 - `player number` => is the number of the player you registered
-- `event` => you can check this on the `menu` and select `Shortcuts Info`,
-- So, typing a1/gks/a3 means:
-- a1 => player number 1 from team away,
-- gks => event name: pass, event type: goal kick, outcome: success,
-- a3 => 
+- `event` => you can check this on the `menu` and select `Shortcuts Info`. At the moment, i'm still working on making this page easier to navigate because there are a lot of shortcuts you can use. But basically, the shortcut itself should be pretty intuitive, like `ps` stands for `pass success`, `dgl` stands for `duel ground lose`, etc.
 
-Some events occured as "long event" in which they started somehere and ended somewhere else, eg: passes, shots and dribbles. These type of events need to be registered with the starting time & starting location of the event, and the end time and end location of the event. Other events just occured as "instant event", eg: aerial duel, foul, etc. With these type of events, you just need to register the start of the event.
+Some events occured as "long event" in which they started somehere and ended somewhere else, eg: passes, shots and dribbles. These type of events need to be registered with the starting time & starting location of the event, and the end time and end location of the event. To register the end location of the event, pick the coordinate and press `Shift E`. Make sure you register the end of the event on the correct video time. Other events just occured as "instant event", eg: aerial duel, foul, etc. With these type of events, you just need to register the start of the event.
 
 Some events also occured as "displacement of the ball", in which there is another player at the end of the event, eg: pass (another player either receive the ball or intercept it). You need to add additional arguments with this format: [`/`][`team state`][`player number`].
 
 Example:
-- a4/daw => player no.4 from team away, event name: duel, event type: aerial, outcome: won.
-- h8/pi/a6 => player no. 8 from team home, event name: pass, event type: open play, outcome: intercepted, interceptor: player no.6 from the away
+- `a4/daw` => `player no.[4]` from `team [a]way`, event name: `[d]uel`, event type: `[a]erial`, outcome: `[w]on`.
+- `h8/pi/a6` => `player no.[8]` from `team [h]ome`, event name: `[p]ass`, event type: `open play`, outcome: `[i]ntercepted`, interceptor: `player no.[6]` from `team [a]way`
 
 I designed this way to make it easier later when processing the data. For example, within the registered pass event, there is also the registered pass receiver or pass interceptor.
 
-Clicking on the row of the table will navigate to the minute of the start of the selected event. You can also delete each individual row by clicking `x` button on the left most of the row. If you click ![delete](public/buttons/delete.svg) button, all the registered events will be deleted.
+Clicking on the row of the table will navigate to the minute of the start of the selected event. You can also delete each individual row by clicking `x` button on the left most of the row. If you click <img src="public/buttons/delete.svg" alt="delete" width="15" height="15"> button, all the registered events will be deleted.
 
 ### Export the data
 Go to menu, select `Export Data`. For now, only *.csv is available.
