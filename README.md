@@ -16,13 +16,13 @@ You will see this on the screen:
   * If the player is not registered as starting xi, just ommit [`/position`],
   * Each player must be separated by comma (`,`),
   * For example: `7) Marselino Ferdinan /mf` means Marselino will be registered as starting xi in which he started as a Midfielder,
-4. Click `submit`, and back to home screen by clicking the top left button ![home](public/buttons/home.svg)
+4. Click `submit`, and back to home screen by clicking the top left button <img src="public/buttons/home.svg" alt="home" width="15" height="15">
 
 ### Back to home screen
 ![home screen](public/screenshots/homescreen.png)
-1. Select the `team sheet` that you have registered,
-2. The list of the registered players will appear, unfortunately the list of the players is still sorted by the player's number, not by whether they start the game or not,
-3. The players  with `/position` will automatically registered as `events` with event name: `Play`, event type: `Start`. I designed it this way to make it easier later when working with the data (eg: calculating minutes played, etc.),
+  1. Select the `team sheet` that you have registered,
+  2. The list of the registered players will appear, unfortunately the list of the players is still sorted by the player's number, not by whether they start the game or not,
+  3. The players  with `/position` will automatically registered as `events` with event name: `Play`, event type: `Start`. I designed it this way to make it easier later when working with the data (eg: calculating minutes played, etc.),
 
 ### Tagging the events
 Before you start tagging the events, click on the menu and select `Open Video`. The currently supported video format is *.mp4 only.
