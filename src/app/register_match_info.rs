@@ -7,6 +7,8 @@ use wasm_bindgen::UnwrapThrowExt;
 const GUIDE_HOME: &str = "Check the guide -------->";
 const GUIDE_AWAY: &str = "Use \")\" after the number, \"/position\" after starting 11 player's name, and \",\" to separate each players. Example: 1) Toldo /gk, 2) D. Alves /rfb, 3) Zlatan Ibrahimovic, ... Toldo & D. Alves will be registered as starting xi while Zlatan Ibrahimovic isn't";
 
+// todo: move the parsing to the backend
+
 #[component]
 pub fn RegisterMatchInfo() -> impl IntoView {
     let (match_info, set_match_info) = create_signal(MatchInfo::default());
