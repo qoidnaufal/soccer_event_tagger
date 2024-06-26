@@ -6,9 +6,9 @@ WIP
 
 ## User Manual [eng]
 ### Register match info
-After opening the app, first thing you wanna do is to register match info. Click menu button ![menu](public/buttons/menu.svg) on the upper left, select `Register Match Info`.
+After opening the app, first thing you wanna do is to register match info. Click menu button <img src="public/buttons/menu.svg" alt="menu" width="15" height="15"> on the upper left, select `Register Match Info`.
 You will see this on the screen:
-![register match info](public/screenshots/register_match_info)
+![register match info](public/screenshots/register_match_info.png)
 1. Pick `date and time` of the match,
 2. Insert the `team name`, both home and away,
 3. Insert the `list of the players`, both home and away. The rule is as follow:
@@ -16,10 +16,10 @@ You will see this on the screen:
 - If the player is not registered as starting xi, just ommit [`/position`],
 - Each player must be separated by comma (`,`),
 - For example: `7) Marselino Ferdinan /mf` means Marselino will be registered as starting xi in which he started as a Midfielder,
-4. Click `submit`, and back to home screen by clicking the upperleft button ![home](public/buttons/home.svg)
+4. Click `submit`, and back to home screen by clicking the top left button ![home](public/buttons/home.svg)
 
 ### Back to home screen
-![home screen](public/screenshots/homescreen)
+![home screen](public/screenshots/homescreen.png)
 1. Select the `team sheet` that you have registered,
 2. The list of the registered players will appear, unfortunately the list of the players is still sorted by the player's number, not by whether they start the game or not,
 3. The players registered as starting xi (those who you register with `/position`). I designed this way to make it easier later when working with the data (eg: calculating minutes played, etc.),
@@ -27,7 +27,7 @@ You will see this on the screen:
 ### Tagging the events
 Before you start tagging the events, click on the menu and select `Open Video`. The currently supported video format is *.mp4 only.
 You can play / pause the video by pressing `space` on your keyboard. You can also navigate by pressing `right` or `left` on your keyboard. You can also speed up the video by pressing `Ctrl +` or `Ctrl 2`, reduce the playback speed by pressing `Ctrl -`, or return to normal speed by pressing `Ctrl 1`.
-![buffer](public/screenshots/buffer)
+![buffer](public/screenshots/buffer.png)
 1. At the start of the event, pause the video, click anywhere on the football pitch where the start of an event occured. Your click will record the `x` & `y` coordinate of the pitch. Press `Shift S` on your keyboard to register it as the location of the start of an event. Keep in mind, when you press `Shift S` this will also register the time of the video.
 2. To register the type of the event, type on your keyboard with the following format:
 - [`team state`][`player number`][`/`][`event`],
