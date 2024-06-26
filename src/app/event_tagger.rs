@@ -318,9 +318,9 @@ pub fn EventTagger() -> impl IntoView {
                         class="border-none bg-slate-300 hover:bg-lime-400 px-2 size-[30px] rounded-r-lg">
                         <Show
                             when=move || !show_menu.get()
-                            fallback=move || view! { <img src="public/close.svg"/> }
+                            fallback=move || view! { <img src="public/buttons/close.svg"/> }
                         >
-                            <img src="public/menu.svg"/>
+                            <img src="public/buttons/menu.svg"/>
                         </Show>
                     </button>
                 </div>

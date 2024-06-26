@@ -52,7 +52,7 @@ pub fn SelectTeamSheet(
                 type="button"
                 class="text-xs bg-lime-400 border-none rounded-xl w-[50px] py-1 ml-2 flex flex-row justify-center hover:bg-red-500"
             >
-                <img src="/public/delete.svg" width="15" height="15"/>
+                <img src="/public/buttons/delete.svg" width="15" height="15"/>
             </button>
         </div>
     }

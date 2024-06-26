@@ -59,7 +59,7 @@ pub fn TableData(
                                                 on:click=delete_all
                                                 class="hover:bg-red-600 px-2 py-1 rounded-md text-xs"
                                             >
-                                                <img src="/public/delete.svg" width="15" height="15"/>
+                                                <img src="/public/buttons/delete.svg" width="15" height="15"/>
                                             </button>
                                         </th>
                                         <th scope="col" class="text-xs text-left w-[20px]">
