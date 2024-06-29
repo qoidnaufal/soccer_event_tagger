@@ -46,7 +46,10 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "soccer.event.tagger",
+      "macOS": {
+        "signingIdentity": "-"
+      },
+      "identifier": "com.qnaa.dev",
       "copyright": "© 2024 Qoid Naufal",
       "category": "Sports",
       "icon": [

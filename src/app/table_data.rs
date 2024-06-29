@@ -126,7 +126,7 @@ pub fn TableData(
                                             };
                                             let delete = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
-                                                let to_delete = event.get_untracked().event_id;
+                                                let to_delete = event.get_untracked().uuid;
                                                 let payload = types::Payload {
                                                     payload: to_delete,
                                                 };

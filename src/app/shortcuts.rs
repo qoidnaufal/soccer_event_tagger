@@ -9,12 +9,47 @@ const GUIDE: &str = "Command shortcuts are separated by \"/\".
                     it would still be okay and the event would still be registered. It's just that later on you will need to do more effort when analyzing the data. Substitution also requires you
                     to register the [OUTCOME].";
 
-// todo: fix this!
+async fn source_code(search: String, sc: Memo<Vec<(usize, String)>>) -> Vec<(usize, String)> {
+    sc.get_untracked()
+        .iter()
+        .filter(|s| s.1.to_lowercase().contains(search.as_str()))
+        .cloned()
+        .collect::<Vec<_>>()
+}
 
 #[component]
 pub fn Shortcuts() -> impl IntoView {
-    let sc = SOURCE_CODE.lines().collect::<Vec<_>>();
-    let src = create_rw_signal(sc).read_only();
+    let sc = SOURCE_CODE
+        .lines()
+        .skip(60)
+        .filter(|s| !s.contains("//"))
+        .collect::<String>();
+
+    let sc = create_memo(move |_| {
+        sc.split_inclusive("} ")
+            .map(|s| {
+                s.replace("self.", "")
+                    .replace(';', ";\n")
+                    .replace("{ ", "{\n ")
+            })
+            .take(142)
+            .enumerate()
+            .collect::<Vec<_>>()
+    });
+
+    let (filter, set_filter) = create_signal(String::new());
+
+    let resource = create_local_resource_with_initial_value(
+        move || filter.get(),
+        move |search| source_code(search, sc),
+        Some(sc.get_untracked()),
+    );
+
+    let search = move |ev: ev::Event| {
+        ev.prevent_default();
+        let keyword = event_target_value(&ev);
+        set_filter.set(keyword)
+    };
 
     view! {
         <div class="text-xs absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row">
@@ -35,30 +70,36 @@ pub fn Shortcuts() -> impl IntoView {
                         { move || GUIDE }
                     </p>
                 </div>
+                <input
+                    class="border rounded-lg py-1 px-2 focus:outline-none mb-2"
+                    type="search"
+                    placeholder="Search... eg: free kick"
+                    on:input=search
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                />
                 <div class="flex flex-col overflow-scroll w-full pl-2">
-                    <For
-                        each=move || src.get().into_iter().enumerate()
-                        key=|(idx, _)| *idx
-                        children=|(idx, source)| {
-                            if !source.is_empty() {
+                    <Suspense
+                        fallback=move || view! { <p>"Loading..."</p> }
+                    >
+                        <For
+                            {move || resource.track()}
+                            each=move || resource.get().unwrap_or(Vec::new())
+                            key=|(idx, _)| *idx
+                            children=|(idx, source)| {
                                 view! {
                                     <pre class="flex flex-row w-full">
                                         <div class="w-[40px] text-right mr-4 bg-slate-200 px-1">{ move || idx }</div>
                                         <code>
-                                            { move || source }
+                                            { move || source.clone() }
                                         </code>
                                     </pre>
-                                }.into_view()
-                            } else {
-                                view! {
-                                    <pre class="flex flex-row w-full">
-                                        <div class="w-[40px] text-right mr-4 bg-slate-200 px-1">{ move || idx }</div>
-                                        <br/>
-                                    </pre>
-                                }.into_view()
+                                }
                             }
-                        }
-                    />
+                        />
+                    </Suspense>
                 </div>
             </div>
         </div>
