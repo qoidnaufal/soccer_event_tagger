@@ -9,10 +9,11 @@ const GUIDE: &str = "Command shortcuts are separated by \"/\".
                     it would still be okay and the event would still be registered. It's just that later on you will need to do more effort when analyzing the data. Substitution also requires you
                     to register the [OUTCOME].";
 
-async fn source_code(search: String, sc: Memo<Vec<(usize, String)>>) -> Vec<(usize, String)> {
+async fn source_code(keyword: String, sc: Memo<Vec<(usize, String)>>) -> Vec<(usize, String)> {
+    let keyword = keyword.split_whitespace().collect::<Vec<_>>();
     sc.get_untracked()
         .iter()
-        .filter(|s| s.1.to_lowercase().contains(search.as_str()))
+        .filter(|s| keyword.iter().all(|ss| s.1.to_lowercase().contains(ss)))
         .cloned()
         .collect::<Vec<_>>()
 }
@@ -41,7 +42,7 @@ pub fn Shortcuts() -> impl IntoView {
 
     let resource = create_local_resource_with_initial_value(
         move || filter.get(),
-        move |search| source_code(search, sc),
+        move |keyword| source_code(keyword, sc),
         Some(sc.get_untracked()),
     );
 
@@ -71,9 +72,9 @@ pub fn Shortcuts() -> impl IntoView {
                     </p>
                 </div>
                 <input
-                    class="border rounded-lg py-1 px-2 focus:outline-none mb-2"
+                    class="border rounded-lg py-1 px-2 focus:outline-none ml-2 mb-2 w-full"
                     type="search"
-                    placeholder="Search... eg: free kick"
+                    placeholder="Search... eg: 'free kick intercepted' or 'foul'"
                     on:input=search
                     autocomplete="off"
                     autocorrect="off"
@@ -90,12 +91,12 @@ pub fn Shortcuts() -> impl IntoView {
                             key=|(idx, _)| *idx
                             children=|(idx, source)| {
                                 view! {
-                                    <pre class="flex flex-row w-full">
+                                    <div class="flex flex-row w-full hover:bg-green-300">
                                         <div class="w-[40px] text-right mr-4 bg-slate-200 px-1">{ move || idx }</div>
-                                        <code>
+                                        <pre>
                                             { move || source.clone() }
-                                        </code>
-                                    </pre>
+                                        </pre>
+                                    </div>
                                 }
                             }
                         />
