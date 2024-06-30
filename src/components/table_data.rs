@@ -1,37 +1,29 @@
-use crate::app::invoke;
+use crate::app::{get_table_data, invoke};
 use leptos::*;
-use types::{AppError, MatchInfo, Payload, TaggedEvent};
+use types::{MatchInfo, Payload};
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
-
-async fn get_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
-    let payload = Payload { payload: match_id };
-    let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
-    let data = invoke("get_match_events_from_match_id", payload).await;
-    let vec_data = serde_wasm_bindgen::from_value::<Vec<TaggedEvent>>(data).unwrap_or_default();
-
-    Ok(vec_data)
-}
 
 #[component]
 pub fn TableData(
-    video_player_node_ref: NodeRef<html::Video>,
+    #[prop(optional)] video_player_node_ref: NodeRef<html::Video>,
     register_event_action: Action<JsValue, JsValue>,
     match_info: ReadSignal<MatchInfo>,
 ) -> impl IntoView {
-    let delete_action = create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
-    let delete_all_action = create_action(|payload: &JsValue| {
+    let delete_row_action =
+        create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
+    let delete_all_row_action = create_action(|payload: &JsValue| {
         invoke("delete_all_records_by_match_id", payload.clone())
     });
     let data_resource = create_resource(
         move || {
             (
                 register_event_action.version().get(),
-                delete_action.version().get(),
-                delete_all_action.version().get(),
+                delete_row_action.version().get(),
+                delete_all_row_action.version().get(),
                 match_info.get(),
             )
         },
-        move |_| get_data(match_info.get_untracked().match_id),
+        move |_| get_table_data(match_info.get_untracked().match_id),
     );
 
     let delete_all = move |ev: ev::MouseEvent| {
@@ -40,7 +32,7 @@ pub fn TableData(
             payload: match_info.get_untracked().match_id,
         };
         let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
-        delete_all_action.dispatch(payload);
+        delete_all_row_action.dispatch(payload);
     };
 
     view! {
@@ -115,14 +107,17 @@ pub fn TableData(
                                         key=|event| ((event.time_start * 10000.) as usize, event.uuid.clone())
                                         children=move |event| {
                                             let event = create_rw_signal(event).read_only();
-                                            // let video = video_player_node_ref.get().unwrap();
                                             let seek_start = move |ev: ev::MouseEvent| {
                                                 ev.prevent_default();
-                                                let _ = video_player_node_ref.get().unwrap().fast_seek(event.get().time_start);
+                                                if let Some(video_player) = video_player_node_ref.get() {
+                                                    let _ = video_player.fast_seek(event.get().time_start);
+                                                }
                                             };
                                             let seek_end = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
-                                                let _ = video_player_node_ref.get().unwrap().fast_seek(event.get().time_end.unwrap_or_default());
+                                                if let Some(video_player) = video_player_node_ref.get() {
+                                                    let _ = video_player.fast_seek(event.get().time_end.unwrap_or_default());
+                                                }
                                             };
                                             let delete = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
@@ -132,7 +127,7 @@ pub fn TableData(
                                                 };
                                                 let payload = serde_wasm_bindgen::to_value(&payload)
                                                     .unwrap_throw();
-                                                delete_action.dispatch(payload);
+                                                delete_row_action.dispatch(payload);
                                                 event.dispose();
                                             };
                                             view! {

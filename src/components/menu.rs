@@ -27,7 +27,7 @@ pub fn MenuBar(
                 <OpenVideo get_file_path/>
                 <RegisterMatchInfo/>
                 <ExportData match_info/>
-                <ClearDatabse/>
+                <DataDashboard/>
                 <ShortcutsInfo/>
                 <UserManual/>
             </div>
@@ -81,19 +81,17 @@ fn ExportData(match_info: ReadSignal<MatchInfo>) -> impl IntoView {
 }
 
 #[component]
-fn ClearDatabse() -> impl IntoView {
-    let clear_db = move |ev: ev::MouseEvent| {
-        ev.prevent_default();
-        spawn_local(async move {
-            invoke("clear_db", JsValue::null()).await;
-        })
+fn DataDashboard() -> impl IntoView {
+    let navigate = move |_: ev::MouseEvent| {
+        let nav = leptos_router::use_navigate();
+        nav("/dashboard", Default::default());
     };
 
     view! {
         <button
-            on:click=clear_db
+            on:click=navigate
             class=BUTTON_STYLE
-        >"Clear Database"</button>
+        >"Data Dashboard"</button>
     }
 }
 

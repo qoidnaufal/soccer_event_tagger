@@ -1,8 +1,17 @@
-use crate::pages::{EventTagger, RegisterMatchInfo, Shortcuts, UserManual};
+use crate::pages::{DataDashboard, EventTagger, RegisterMatchInfo, Shortcuts, UserManual};
+use types::{AppError, MatchInfo, Payload, PlayerInfo, TaggedEvent};
 
 use leptos::*;
 use leptos_router::*;
 use wasm_bindgen::prelude::*;
+
+#[derive(Clone)]
+pub struct CtxProvider {
+    pub register_match_info_action: Action<JsValue, JsValue>,
+    pub register_player_info_action: Action<JsValue, JsValue>,
+    pub register_event_action: Action<JsValue, JsValue>,
+    pub open_video_action: Action<JsValue, JsValue>,
+}
 
 #[wasm_bindgen]
 extern "C" {
@@ -13,12 +22,31 @@ extern "C" {
     pub fn convertFileSrc(path: String, protocol: String) -> JsValue;
 }
 
-#[derive(Clone)]
-pub struct CtxProvider {
-    pub register_match_info_action: Action<JsValue, JsValue>,
-    pub register_player_info_action: Action<JsValue, JsValue>,
-    pub register_event_action: Action<JsValue, JsValue>,
-    pub open_video_action: Action<JsValue, JsValue>,
+pub async fn get_players_by_match_id(match_id: String) -> Result<Vec<PlayerInfo>, AppError> {
+    let match_id = Payload { payload: match_id };
+    let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
+    let team_info = invoke("get_all_players_from_match_id", match_id).await;
+    let team_info =
+        serde_wasm_bindgen::from_value::<Vec<PlayerInfo>>(team_info).unwrap_or_default();
+
+    Ok(team_info)
+}
+
+pub async fn get_all_match() -> Result<Vec<MatchInfo>, AppError> {
+    let match_info = invoke("get_all_match_info", JsValue::null()).await;
+    let match_info =
+        serde_wasm_bindgen::from_value::<Vec<MatchInfo>>(match_info).unwrap_or_default();
+
+    Ok(match_info)
+}
+
+pub async fn get_table_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
+    let payload = Payload { payload: match_id };
+    let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+    let data = invoke("get_match_events_from_match_id", payload).await;
+    let vec_data = serde_wasm_bindgen::from_value::<Vec<TaggedEvent>>(data).unwrap_or_default();
+
+    Ok(vec_data)
 }
 
 #[component]
@@ -46,6 +74,7 @@ pub fn App() -> impl IntoView {
                     <Route path="/team_sheet" view=RegisterMatchInfo/>
                     <Route path="/shortcuts" view=Shortcuts/>
                     <Route path="/user_manual" view=UserManual/>
+                    <Route path="/dashboard" view=DataDashboard/>
                 </Routes>
             </main>
         </Router>

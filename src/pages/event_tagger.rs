@@ -1,28 +1,10 @@
-use crate::app::{convertFileSrc, invoke, CtxProvider};
+use crate::app::{convertFileSrc, get_all_match, get_players_by_match_id, invoke, CtxProvider};
 use crate::components::{MenuBar, Pitch, SelectTeamSheet, TableData, TeamSheet, VideoPlayer};
 
-use types::{AppError, MatchInfo, Payload, PlayerInfo, Point, TaggedEvent, TeamInfoQuery};
+use types::{MatchInfo, Payload, PlayerInfo, Point, TaggedEvent, TeamInfoQuery};
 
 use leptos::*;
 use wasm_bindgen::prelude::*;
-
-async fn get_all_players_from_match_id(match_id: String) -> Result<Vec<PlayerInfo>, AppError> {
-    let match_id = Payload { payload: match_id };
-    let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
-    let team_info = invoke("get_all_players_from_match_id", match_id).await;
-    let team_info =
-        serde_wasm_bindgen::from_value::<Vec<PlayerInfo>>(team_info).unwrap_or_default();
-
-    Ok(team_info)
-}
-
-async fn get_all_match_info() -> Result<Vec<MatchInfo>, AppError> {
-    let match_info = invoke("get_all_match_info", JsValue::null()).await;
-    let match_info =
-        serde_wasm_bindgen::from_value::<Vec<MatchInfo>>(match_info).unwrap_or_default();
-
-    Ok(match_info)
-}
 
 #[component]
 pub fn EventTagger() -> impl IntoView {
@@ -42,14 +24,12 @@ pub fn EventTagger() -> impl IntoView {
 
     let open_video_action = expect_context::<CtxProvider>().open_video_action;
 
-    let team_info_resource = create_resource(
-        move || match_info.get().match_id,
-        get_all_players_from_match_id,
-    );
+    let team_info_resource =
+        create_resource(move || match_info.get().match_id, get_players_by_match_id);
 
     let match_info_resource = create_resource(
         move || register_match_info_action.version().get(),
-        move |_| get_all_match_info(),
+        move |_| get_all_match(),
     );
 
     let team_info_action =
@@ -101,14 +81,6 @@ pub fn EventTagger() -> impl IntoView {
             // --- open video
             open if ev.ctrl_key() && open == "o" => {
                 open_video_action.dispatch(JsValue::null());
-            }
-            // --- buffer management
-            "Backspace" => {
-                set_event_buffer.update(|e| {
-                    if !e.is_empty() {
-                        e.pop();
-                    }
-                });
             }
             // --- start & end time of the event
             "S" => {
@@ -165,6 +137,14 @@ pub fn EventTagger() -> impl IntoView {
                 set_event_buffer.set(String::new());
                 set_team_buffer.set(String::new());
                 set_player_buffer.set(String::new());
+            }
+            // --- buffer management
+            "Backspace" => {
+                set_event_buffer.update(|e| {
+                    if !e.is_empty() {
+                        e.pop();
+                    }
+                });
             }
             keys if ("0"..="9").contains(&keys) || ("a"..="z").contains(&keys) || keys == "/" => {
                 set_event_buffer.update(|e| e.push_str(keys));
