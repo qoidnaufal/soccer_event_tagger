@@ -5,21 +5,22 @@ use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 #[component]
 pub fn TableData(
-    #[prop(optional)] video_player_node_ref: NodeRef<html::Video>,
+    video_player_node_ref: NodeRef<html::Video>,
     register_event_action: Action<JsValue, JsValue>,
+    delete_match_info_action: Action<JsValue, JsValue>,
+    delete_all_row_action: Action<JsValue, JsValue>,
     match_info: ReadSignal<MatchInfo>,
 ) -> impl IntoView {
     let delete_row_action =
         create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
-    let delete_all_row_action = create_action(|payload: &JsValue| {
-        invoke("delete_all_records_by_match_id", payload.clone())
-    });
+
     let data_resource = create_resource(
         move || {
             (
                 register_event_action.version().get(),
                 delete_row_action.version().get(),
                 delete_all_row_action.version().get(),
+                delete_match_info_action.version().get(),
                 match_info.get(),
             )
         },
@@ -36,61 +37,65 @@ pub fn TableData(
     };
 
     view! {
-        <div class="w-full mt-1">
+        <div class="w-full mt-1 text-xs">
             <Transition fallback=move || {
                 view! { <p>"loading..."</p> }
             }>
                 {move || {
+                    let memoized_data = create_memo(move |_| {
+                        data_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
+                    });
+
                     view! {
                         <div class="w-full">
                             <table class="table-fixed w-full">
                                 <thead class="w-full">
                                     <tr class="w-full">
-                                        <th scope="col" class="text-xs text-left w-[15px]">
+                                        <th scope="col" class=" text-left w-[15px]">
                                             <button
                                                 on:click=delete_all
-                                                class="hover:bg-red-600 px-2 py-1 rounded-md text-xs"
+                                                class="hover:bg-red-600 px-2 py-1 rounded-md"
                                             >
                                                 <img src="/public/buttons/delete.svg" width="15" height="15"/>
                                             </button>
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[20px]">
+                                        <th scope="col" class=" text-left w-[20px]">
                                             "time start"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "location start"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[20px]">
+                                        <th scope="col" class=" text-left w-[20px]">
                                             "time end"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "location end"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "team name"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "player name"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[20px]">
+                                        <th scope="col" class=" text-left w-[20px]">
                                             "position"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "event name"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "event type"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "event source"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "outcome"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "team end"
                                         </th>
-                                        <th scope="col" class="text-xs text-left w-[30px]">
+                                        <th scope="col" class=" text-left w-[30px]">
                                             "player end"
                                         </th>
                                     </tr>
@@ -103,10 +108,11 @@ pub fn TableData(
                             <table class="table-fixed w-full">
                                 <tbody class="w-full">
                                     <For
-                                        each=move || data_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
+                                        each=move || memoized_data.get()
                                         key=|event| ((event.time_start * 10000.) as usize, event.uuid.clone())
                                         children=move |event| {
                                             let event = create_rw_signal(event).read_only();
+
                                             let seek_start = move |ev: ev::MouseEvent| {
                                                 ev.prevent_default();
                                                 if let Some(video_player) = video_player_node_ref.get() {
@@ -130,6 +136,7 @@ pub fn TableData(
                                                 delete_row_action.dispatch(payload);
                                                 event.dispose();
                                             };
+
                                             view! {
                                                 <tr
                                                     on:click=seek_start
@@ -138,52 +145,52 @@ pub fn TableData(
                                                     <td class="w-[15px]">
                                                         <button
                                                             on:click=delete
-                                                            class="bg-blue-300 hover:bg-red-600 hover:text-white rounded-md w-fit px-2 py-1 m-1 text-xs z-10"
+                                                            class="bg-blue-300 hover:bg-red-600 hover:text-white rounded-md w-fit px-2 py-1 m-1  z-10"
                                                         >
                                                             "X"
                                                         </button>
                                                     </td>
-                                                    <td class="text-xs w-[20px]">
+                                                    <td class=" w-[20px]">
                                                         {move || format!("{:02}", (event.get().time_start / 60.) as u8)} ":"
                                                         {move || format!("{:02}", (event.get().time_start % 60.) as u8)}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         "x: "{move || event.get().x_start.unwrap_or_default()}
                                                         ", y: "{move || event.get().y_start.unwrap_or_default()}
                                                     </td>
-                                                    <td class="text-xs w-[20px] hover:text-lg" on:click=seek_end>
+                                                    <td class=" w-[20px] hover:text-lg" on:click=seek_end>
                                                         {move || format!("{:02}", (event.get().time_end.unwrap_or_default() / 60.) as u8)} ":"
                                                         {move || format!("{:02}", (event.get().time_end.unwrap_or_default() % 60.) as u8)}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         "x: "{move || event.get().x_end.unwrap_or_default()}
                                                         ", y: "{move || event.get().y_end.unwrap_or_default()}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         {move || event.get().team_name}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         {move || event.get().player_name}
                                                     </td>
-                                                    <td class="text-xs w-[20px]">
+                                                    <td class=" w-[20px]">
                                                         {move || event.get().play_position}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         {move || event.get().event_name}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         {move || event.get().event_type}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         {move || event.get().event_source}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         {move || event.get().outcome}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         {move || event.get().team_end}
                                                     </td>
-                                                    <td class="text-xs w-[30px]">
+                                                    <td class=" w-[30px]">
                                                         {move || event.get().player_end}
                                                     </td>
                                                 </tr>

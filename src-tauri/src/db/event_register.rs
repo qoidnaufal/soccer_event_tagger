@@ -80,7 +80,7 @@ pub async fn export_tagged_events_from_match_id(
 }
 
 #[tauri::command]
-pub async fn get_match_events_from_match_id(
+pub async fn get_events_by_match_id(
     payload: String,
     state: State<'_, Database>,
 ) -> Result<Vec<TaggedEvent>, AppError> {
@@ -103,7 +103,7 @@ pub async fn get_match_events_from_match_id(
 }
 
 #[tauri::command]
-pub async fn delete_by_id(payload: i32, state: State<'_, Database>) -> Result<(), AppError> {
+pub async fn delete_by_id(payload: String, state: State<'_, Database>) -> Result<(), AppError> {
     let db = state.db.lock().await;
 
     match db
@@ -137,5 +137,19 @@ pub async fn delete_all_records_by_match_id(
             log::error!("[CLR]: {}", err);
             Err(err)
         }
+    }
+}
+
+#[tauri::command]
+pub async fn delete_all_data(state: State<'_, Database>) -> Result<(), AppError> {
+    let db = state.db.lock().await;
+
+    match db
+        .delete::<Vec<TaggedEvent>>("tagged_events")
+        .await
+        .map_err(|err| AppError::DatabaseError(err.to_string()))
+    {
+        Ok(_) => Ok(()),
+        Err(err) => Err(err),
     }
 }

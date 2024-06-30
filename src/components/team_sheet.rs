@@ -1,20 +1,42 @@
 use leptos::*;
-use types::{AppError, MatchInfo, PlayerInfo};
+use types::{AppError, MatchInfo, Payload, PlayerInfo};
+use wasm_bindgen::JsValue;
+
+use crate::invoke;
 
 #[component]
 pub fn SelectTeamSheet(
-    match_info_resource: Resource<usize, Result<Vec<MatchInfo>, AppError>>,
+    match_info_resource: Resource<(usize, usize), Result<Vec<MatchInfo>, AppError>>,
+    match_info: ReadSignal<MatchInfo>,
     set_match_info: WriteSignal<MatchInfo>,
+    delete_match_info_action: Action<JsValue, JsValue>,
+    delete_all_row_action: Action<JsValue, JsValue>,
 ) -> impl IntoView {
-    let handle_change = move |ev: ev::Event| {
+    let delete_player_info_action = create_action(|payload: &JsValue| {
+        invoke("delete_all_players_from_match_id", payload.clone())
+    });
+
+    let select_match_info = move |ev: ev::Event| {
         let value = event_target_value(&ev);
         let match_info = serde_json::from_str::<MatchInfo>(value.as_str()).unwrap_or_default();
         set_match_info.set(match_info);
     };
 
+    let delete_match_info = move |ev: ev::MouseEvent| {
+        ev.prevent_default();
+        let payload = Payload {
+            payload: match_info.get_untracked().match_id,
+        };
+        let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+
+        delete_match_info_action.dispatch(payload.clone());
+        delete_player_info_action.dispatch(payload.clone());
+        delete_all_row_action.dispatch(payload);
+    };
+
     view! {
         <div class="flex flex-row w-full mb-3 text-xs">
-            <select class="w-full" on:change=handle_change>
+            <select class="w-full" on:change=select_match_info>
                 <option value="">"Select team sheet.."</option>
                 <Suspense>
                     <For
@@ -34,13 +56,14 @@ pub fn SelectTeamSheet(
                     />
                 </Suspense>
             </select>
+            // <button
+            //     type="button"
+            //     class="text-xs bg-lime-400 border-none rounded-xl w-[50px] py-1 ml-2 flex flex-row justify-center hover:bg-green-400"
+            // >
+            //     "edit"
+            // </button>
             <button
-                type="button"
-                class="text-xs bg-lime-400 border-none rounded-xl w-[50px] py-1 ml-2 flex flex-row justify-center hover:bg-green-400"
-            >
-                "edit"
-            </button>
-            <button
+                on:click=delete_match_info
                 type="button"
                 class="text-xs bg-lime-400 border-none rounded-xl w-[50px] py-1 ml-2 flex flex-row justify-center hover:bg-red-500"
             >
@@ -52,7 +75,7 @@ pub fn SelectTeamSheet(
 
 #[component]
 pub fn TeamSheet(
-    team_info_resource: Resource<String, Result<Vec<PlayerInfo>, AppError>>,
+    team_info_resource: Resource<(String, usize), Result<Vec<PlayerInfo>, AppError>>,
     team_state: String,
 ) -> impl IntoView {
     let team_state = create_rw_signal(team_state).read_only();
@@ -63,13 +86,11 @@ pub fn TeamSheet(
                 { move || {
                     let team_info = create_memo(move |_| {
                         team_info_resource.and_then(|t| {
-                            let mut players = match team_state.get().as_str() {
+                            match team_state.get().as_str() {
                                 "Home" => t.iter().filter(|v| v.team_state.as_str() == "Home").cloned().collect::<Vec<_>>(),
                                 "Away" => t.iter().filter(|v| v.team_state.as_str() == "Away").cloned().collect::<Vec<_>>(),
                                 _ => t.iter().filter(|v| v.team_state.as_str() == "Neutral").cloned().collect::<Vec<_>>()
-                            };
-                            players.sort_by_key(|p| (!p.play, p.number));
-                            players
+                            }
                         }).unwrap_or(Ok(Vec::new())).unwrap_or_default()
                     });
 

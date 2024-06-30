@@ -23,6 +23,7 @@ extern "C" {
 }
 
 pub async fn get_players_by_match_id(match_id: String) -> Result<Vec<PlayerInfo>, AppError> {
+    logging::log!("{}", match_id);
     let match_id = Payload { payload: match_id };
     let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
     let team_info = invoke("get_all_players_from_match_id", match_id).await;
@@ -43,10 +44,17 @@ pub async fn get_all_match() -> Result<Vec<MatchInfo>, AppError> {
 pub async fn get_table_data(match_id: String) -> Result<Vec<TaggedEvent>, AppError> {
     let payload = Payload { payload: match_id };
     let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
-    let data = invoke("get_match_events_from_match_id", payload).await;
+    let data = invoke("get_events_by_match_id", payload).await;
     let vec_data = serde_wasm_bindgen::from_value::<Vec<TaggedEvent>>(data).unwrap_or_default();
 
     Ok(vec_data)
+}
+
+pub async fn get_all_data() -> Result<Vec<TaggedEvent>, AppError> {
+    let data = invoke("get_all_data", JsValue::null()).await;
+    let data = serde_wasm_bindgen::from_value::<Vec<TaggedEvent>>(data).unwrap_or_default();
+
+    Ok(data)
 }
 
 #[component]

@@ -21,19 +21,22 @@ fn main() -> tauri::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             stream::open,
-            db::clear_db,
             db::event_register::insert_data,
             db::event_register::get_all_data,
-            db::event_register::get_match_events_from_match_id,
+            db::event_register::get_events_by_match_id,
             db::event_register::delete_by_id,
             db::event_register::delete_all_records_by_match_id,
+            db::event_register::delete_all_data,
             db::event_register::export_tagged_events_from_match_id,
+            db::clear_db,
             db::match_register::register_match_info,
             db::match_register::register_player_info,
             db::match_register::get_all_match_info,
             db::match_register::get_all_players_from_match_id,
-            db::match_register::get_match_info_by_match_id,
-            db::match_register::get_team_info_by_query,
+            db::match_register::query_team_info,
+            db::match_register::delete_all_players_from_match_id,
+            db::match_register::delete_match_info_by_id,
+            db::match_register::delete_all_match_info,
         ])
         .run(tauri::generate_context!())
 }

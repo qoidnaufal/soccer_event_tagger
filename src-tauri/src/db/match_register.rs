@@ -89,30 +89,7 @@ pub async fn get_all_players_from_match_id(
 }
 
 #[tauri::command]
-pub async fn get_match_info_by_match_id(
-    payload: String,
-    state: State<'_, Database>,
-) -> Result<Option<MatchInfo>, AppError> {
-    let db = state.db.lock().await;
-
-    match db
-        .query("SELECT * FROM match_info WHERE match_id = $match_id")
-        .bind(("match_id", &payload))
-        .await
-        .map_err(|err| AppError::DatabaseError(err.to_string()))
-    {
-        Ok(mut res) => {
-            let match_info = res
-                .take(0)
-                .map_err(|err| AppError::DatabaseError(err.to_string()));
-            match_info
-        }
-        Err(err) => Err(err),
-    }
-}
-
-#[tauri::command]
-pub async fn get_team_info_by_query(
+pub async fn query_team_info(
     payload: TeamInfoQuery,
     state: State<'_, Database>,
 ) -> Result<Vec<PlayerInfo>, AppError> {
@@ -133,4 +110,58 @@ pub async fn get_team_info_by_query(
         }
         Err(err) => Err(err),
     }
+}
+
+#[tauri::command]
+pub async fn delete_all_players_from_match_id(
+    payload: String,
+    state: State<'_, Database>,
+) -> Result<(), AppError> {
+    let db = state.db.lock().await;
+
+    match db
+        .delete::<Vec<PlayerInfo>>(payload)
+        .await
+        .map_err(|err| AppError::DatabaseError(err.to_string()))
+    {
+        Ok(_) => Ok(()),
+        Err(err) => Err(err),
+    }
+}
+
+#[tauri::command]
+pub async fn delete_match_info_by_id(
+    payload: String,
+    state: State<'_, Database>,
+) -> Result<(), AppError> {
+    let db = state.db.lock().await;
+
+    match db
+        .delete::<Option<MatchInfo>>(("match_info", payload))
+        .await
+        .map_err(|err| AppError::DatabaseError(err.to_string()))
+    {
+        Ok(_) => Ok(()),
+        Err(err) => Err(err),
+    }
+}
+
+#[tauri::command]
+pub async fn delete_all_match_info(state: State<'_, Database>) -> Result<(), AppError> {
+    let db = state.db.lock().await;
+
+    let all_match_info = db
+        .delete::<Vec<MatchInfo>>("match_info")
+        .await
+        .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+
+    let mut all_match_info = all_match_info.iter();
+
+    while let Some(m) = all_match_info.next() {
+        db.delete::<Vec<PlayerInfo>>(m.match_id.clone())
+            .await
+            .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+    }
+
+    Ok(())
 }

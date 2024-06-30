@@ -670,6 +670,10 @@ video {
   height: 100%;
 }
 
+.h-\[1000px\] {
+  height: 1000px;
+}
+
 .h-\[270px\] {
   height: 270px;
 }
@@ -689,6 +693,14 @@ video {
 .h-fit {
   height: -moz-fit-content;
   height: fit-content;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.h-\[900px\] {
+  height: 900px;
 }
 
 .max-h-\[450px\] {
@@ -742,6 +754,10 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-\[10px\] {
+  width: 10px;
 }
 
 .max-w-\[1020px\] {
@@ -1006,9 +1022,9 @@ video {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.odd\:bg-indigo-200:nth-child(odd) {
+.odd\:bg-green-300:nth-child(odd) {
   --tw-bg-opacity: 1;
-  background-color: rgb(199 210 254 / var(--tw-bg-opacity));
+  background-color: rgb(134 239 172 / var(--tw-bg-opacity));
 }
 
 .odd\:bg-slate-200:nth-child(odd) {
@@ -1016,29 +1032,14 @@ video {
   background-color: rgb(226 232 240 / var(--tw-bg-opacity));
 }
 
-.odd\:bg-white:nth-child(odd) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.odd\:bg-green-200:nth-child(odd) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(187 247 208 / var(--tw-bg-opacity));
-}
-
 .odd\:bg-slate-300:nth-child(odd) {
   --tw-bg-opacity: 1;
   background-color: rgb(203 213 225 / var(--tw-bg-opacity));
 }
 
-.odd\:bg-green-300:nth-child(odd) {
+.even\:bg-lime-200:nth-child(even) {
   --tw-bg-opacity: 1;
-  background-color: rgb(134 239 172 / var(--tw-bg-opacity));
-}
-
-.even\:bg-green-200:nth-child(even) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(187 247 208 / var(--tw-bg-opacity));
+  background-color: rgb(217 249 157 / var(--tw-bg-opacity));
 }
 
 .even\:bg-slate-200:nth-child(even) {
@@ -1049,26 +1050,6 @@ video {
 .even\:bg-white:nth-child(even) {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.even\:bg-indigo-100:nth-child(even) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(224 231 255 / var(--tw-bg-opacity));
-}
-
-.even\:bg-green-100:nth-child(even) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(220 252 231 / var(--tw-bg-opacity));
-}
-
-.even\:bg-green-50:nth-child(even) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(240 253 244 / var(--tw-bg-opacity));
-}
-
-.even\:bg-lime-200:nth-child(even) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(217 249 157 / var(--tw-bg-opacity));
 }
 
 .hover\:cursor-pointer:hover {

@@ -13,30 +13,44 @@ pub fn EventTagger() -> impl IntoView {
     let (tagged_event, set_tagged_event) = create_signal(TaggedEvent::default());
     let (event_buffer, set_event_buffer) = create_signal(String::new());
     let (team_buffer, set_team_buffer) = create_signal(String::new());
-    let (player_buffer, set_player_buffer) = create_signal(String::new());
+    let (player_buffer, set_player_buffer) = create_signal(PlayerInfo::default());
     let (match_info, set_match_info) = create_signal(MatchInfo::default());
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
     let register_event_action = expect_context::<CtxProvider>().register_event_action;
-
     let register_match_info_action = expect_context::<CtxProvider>().register_match_info_action;
-
     let open_video_action = expect_context::<CtxProvider>().open_video_action;
 
-    let team_info_resource =
-        create_resource(move || match_info.get().match_id, get_players_by_match_id);
+    let delete_match_info_action =
+        create_action(|payload: &JsValue| invoke("delete_match_info_by_id", payload.clone()));
+    let team_info_action =
+        create_action(|payload: &JsValue| invoke("query_team_info", payload.clone()));
+    let team_end_action =
+        create_action(|payload: &JsValue| invoke("query_team_info", payload.clone()));
+    let delete_all_row_action = create_action(|payload: &JsValue| {
+        invoke("delete_all_records_by_match_id", payload.clone())
+    });
 
-    let match_info_resource = create_resource(
-        move || register_match_info_action.version().get(),
-        move |_| get_all_match(),
+    let team_info_resource = create_resource(
+        move || {
+            (
+                match_info.get().match_id,
+                delete_match_info_action.version().get(),
+            )
+        },
+        move |(match_id, _)| get_players_by_match_id(match_id),
     );
 
-    let team_info_action =
-        create_action(|payload: &JsValue| invoke("get_team_info_by_query", payload.clone()));
-
-    let team_end_action =
-        create_action(|payload: &JsValue| invoke("get_team_info_by_query", payload.clone()));
+    let match_info_resource = create_resource(
+        move || {
+            (
+                register_match_info_action.version().get(),
+                delete_match_info_action.version().get(),
+            )
+        },
+        move |_| get_all_match(),
+    );
 
     let shortcuts = window_event_listener(ev::keydown, move |ev| {
         ev.prevent_default();
@@ -109,7 +123,8 @@ pub fn EventTagger() -> impl IntoView {
             "Enter" => {
                 // --- dump the data to the table
                 set_tagged_event.update(|tag| {
-                    tag.player_name = player_buffer.get_untracked();
+                    tag.player_name = player_buffer.get_untracked().player_name;
+                    tag.play_position = player_buffer.get_untracked().play_position.last().cloned();
                     tag.team_name = team_buffer.get_untracked();
                     tag.match_id = match_info.get_untracked().match_id;
                     tag.match_date = match_info.get_untracked().match_date;
@@ -136,7 +151,7 @@ pub fn EventTagger() -> impl IntoView {
                 set_tagged_event.set(TaggedEvent::default());
                 set_event_buffer.set(String::new());
                 set_team_buffer.set(String::new());
-                set_player_buffer.set(String::new());
+                set_player_buffer.set(PlayerInfo::default());
             }
             // --- buffer management
             "Backspace" => {
@@ -190,13 +205,11 @@ pub fn EventTagger() -> impl IntoView {
                 let player_info = team_info.iter().find(|p| p.number == number).cloned();
 
                 set_player_buffer.update(|p| {
-                    let player_name = if let Some(player) = player_info.clone() {
-                        player.player_name.clone()
+                    if let Some(player) = player_info.clone() {
+                        *p = player;
                     } else {
-                        number.to_string()
+                        p.player_name = number.to_string();
                     };
-
-                    *p = player_name;
                 });
                 set_team_buffer.update(|t| {
                     let team_name = if let Some(player) = player_info.clone() {
@@ -266,9 +279,7 @@ pub fn EventTagger() -> impl IntoView {
                     t.assign_event_from_args(event_args.as_str(), team_end, player_end);
                 });
             }
-            _unregistered_key => {
-                logging::log!("unregistered key: {}", _unregistered_key);
-            }
+            _unregistered_key => (),
         }
     });
 
@@ -276,12 +287,8 @@ pub fn EventTagger() -> impl IntoView {
         open_video_action.value().get().map(|path| {
             let path = serde_wasm_bindgen::from_value::<String>(path).unwrap_throw();
             let resolved_path = convertFileSrc(path, "stream".to_string());
-            let resolved_path =
-                serde_wasm_bindgen::from_value::<String>(resolved_path).unwrap_or_default();
 
-            logging::log!("resolved path: {:?}", resolved_path);
-
-            resolved_path
+            serde_wasm_bindgen::from_value::<String>(resolved_path).unwrap_or_default()
         })
     });
 
@@ -319,7 +326,13 @@ pub fn EventTagger() -> impl IntoView {
                     </div>
                 </div>
                 <div id="info" class="flex flex-col items-center w-full grow-0 bg-slate-800/[.65] p-4 rounded-lg">
-                    <SelectTeamSheet match_info_resource set_match_info/>
+                    <SelectTeamSheet
+                        match_info_resource
+                        match_info
+                        set_match_info
+                        delete_match_info_action
+                        delete_all_row_action
+                    />
                     <div class="flex flex-row">
                         <TeamSheet team_info_resource team_state="Home".to_string()/>
                         <TeamSheet team_info_resource team_state="Away".to_string()/>
@@ -348,7 +361,7 @@ pub fn EventTagger() -> impl IntoView {
                                 <td class="text-xs w-[200px]">"event args buffer: "{ move || event_buffer.get() }</td>
                                 <td class="text-xs flex flex-row">
                                     <p class="text-xs">{ move || team_buffer.get() }"_"</p>
-                                    <p class="text-xs">{ move || player_buffer.get() }"_"</p>
+                                    <p class="text-xs">{ move || player_buffer.get().player_name }"_"</p>
                                     <p class="text-xs">{ move || tagged_event.get().event_name }"_"</p>
                                     <p class="text-xs">{ move || tagged_event.get().event_type }"_"</p>
                                     <p class="text-xs">{ move || tagged_event.get().event_source }"_"</p>
@@ -361,7 +374,13 @@ pub fn EventTagger() -> impl IntoView {
                         </tbody>
                     </table>
                 </div>
-                <TableData video_player_node_ref register_event_action match_info/>
+                <TableData
+                    video_player_node_ref
+                    register_event_action
+                    delete_match_info_action
+                    delete_all_row_action
+                    match_info
+                />
             </div>
         </div>
     }
