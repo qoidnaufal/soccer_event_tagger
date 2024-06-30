@@ -1,12 +1,10 @@
-use super::invoke;
+use crate::app::invoke;
 use leptos::*;
 use types::{MatchInfo, Payload};
 use wasm_bindgen::JsValue;
 
-const STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[200px] text-xs text-black hover:text-white";
+const BUTTON_STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[200px] text-xs text-black hover:text-white";
 const MENU_BAR: &str = "block absolute z-20 left-[35px] top-[10px] flex flex-col rounded-xl bg-slate-600/[.85] p-[10px] w-fit space-y-[10px] ease-in-out duration-300";
-
-// todo: user manual
 
 #[component]
 pub fn MenuBar(
@@ -29,24 +27,26 @@ pub fn MenuBar(
                 <OpenVideo get_file_path/>
                 <RegisterMatchInfo/>
                 <ExportData match_info/>
+                <ClearDatabse/>
                 <ShortcutsInfo/>
+                <UserManual/>
             </div>
         </Show>
     }
 }
 
 #[component]
-pub fn OpenVideo<F: FnMut(ev::MouseEvent) + 'static>(get_file_path: F) -> impl IntoView {
+fn OpenVideo<F: FnMut(ev::MouseEvent) + 'static>(get_file_path: F) -> impl IntoView {
     view! {
         <button
             on:click=get_file_path
-            class=STYLE
+            class=BUTTON_STYLE
         >"Open Video"</button>
     }
 }
 
 #[component]
-pub fn RegisterMatchInfo() -> impl IntoView {
+fn RegisterMatchInfo() -> impl IntoView {
     let navigate = move |_: ev::MouseEvent| {
         let nav = leptos_router::use_navigate();
         nav("/team_sheet", Default::default());
@@ -55,13 +55,13 @@ pub fn RegisterMatchInfo() -> impl IntoView {
     view! {
         <button
             on:click=navigate
-            class=STYLE
+            class=BUTTON_STYLE
         >"Register Match Info"</button>
     }
 }
 
 #[component]
-pub fn ExportData(match_info: ReadSignal<MatchInfo>) -> impl IntoView {
+fn ExportData(match_info: ReadSignal<MatchInfo>) -> impl IntoView {
     let export_data = move |ev: ev::MouseEvent| {
         ev.prevent_default();
         spawn_local(async move {
@@ -75,13 +75,30 @@ pub fn ExportData(match_info: ReadSignal<MatchInfo>) -> impl IntoView {
     view! {
         <button
             on:click=export_data
-            class=STYLE
+            class=BUTTON_STYLE
         >"Export Data [*.csv]"</button>
     }
 }
 
 #[component]
-pub fn ShortcutsInfo() -> impl IntoView {
+fn ClearDatabse() -> impl IntoView {
+    let clear_db = move |ev: ev::MouseEvent| {
+        ev.prevent_default();
+        spawn_local(async move {
+            invoke("clear_db", JsValue::null()).await;
+        })
+    };
+
+    view! {
+        <button
+            on:click=clear_db
+            class=BUTTON_STYLE
+        >"Clear Database"</button>
+    }
+}
+
+#[component]
+fn ShortcutsInfo() -> impl IntoView {
     let navigate = move |_: ev::MouseEvent| {
         let nav = leptos_router::use_navigate();
         nav("shortcuts", Default::default());
@@ -90,7 +107,22 @@ pub fn ShortcutsInfo() -> impl IntoView {
     view! {
         <button
             on:click=navigate
-            class=STYLE
+            class=BUTTON_STYLE
         >"Shortcuts Info"</button>
+    }
+}
+
+#[component]
+fn UserManual() -> impl IntoView {
+    let navigate = move |_: ev::MouseEvent| {
+        let nav = leptos_router::use_navigate();
+        nav("user_manual", Default::default());
+    };
+
+    view! {
+        <button
+            on:click=navigate
+            class=BUTTON_STYLE
+        >"User Manual"</button>
     }
 }

@@ -26,7 +26,8 @@ You will see this on the screen:
 
 ### Tagging the events
 Before you start tagging the events, click on the menu and select `Open Video`. The currently supported video format is *.mp4 only.
-You can play / pause the video by pressing `space` on your keyboard. You can also navigate by pressing `right` or `left` on your keyboard. You can also speed up the video by pressing `Ctrl +` or `Ctrl 2`, reduce the playback speed by pressing `Ctrl -`, or return to normal speed by pressing `Ctrl 1`.
+You can play / pause the video by pressing `space` on your keyboard. You can also navigate by pressing `ArrwoRight` or `ArrowLeft` on your keyboard, or skip forward / backward `5 secs` by pressing `ArrowUp` or `ArrowDown`.
+You can also speed up the video by pressing `Ctrl =`, `Ctrl 2` or `Ctrl 3`, reduce the playback speed by pressing `Ctrl -`, or return to normal speed by pressing `Ctrl 1`.
 ![buffer](public/screenshots/buffer.png)
 1. At the start of the event, pause the video, click anywhere on the football pitch where the start of an event occured. Your click will record the `x` & `y` coordinate of the pitch. Press `Shift S` on your keyboard to register it as the location of the start of an event. Keep in mind, when you press `Shift S` this will also register the time of the video.
 2. To register the type of the event, type on your keyboard with the following format:

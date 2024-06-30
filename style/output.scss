@@ -611,6 +611,11 @@ video {
   margin-bottom: 0.25rem;
 }
 
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .mb-1 {
   margin-bottom: 0.25rem;
 }
@@ -629,6 +634,10 @@ video {
 
 .ml-2 {
   margin-left: 0.5rem;
+}
+
+.ml-4 {
+  margin-left: 1rem;
 }
 
 .ml-\[40px\] {
@@ -739,6 +748,10 @@ video {
   width: 100%;
 }
 
+.max-w-\[1020px\] {
+  max-width: 1020px;
+}
+
 .shrink-0 {
   flex-shrink: 0;
 }
@@ -793,8 +806,16 @@ video {
   margin-bottom: calc(10px * var(--tw-space-y-reverse));
 }
 
+.place-self-center {
+  place-self: center;
+}
+
 .self-center {
   align-self: center;
+}
+
+.justify-self-center {
+  justify-self: center;
 }
 
 .overflow-scroll {

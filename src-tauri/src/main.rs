@@ -21,6 +21,7 @@ fn main() -> tauri::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             stream::open,
+            db::clear_db,
             db::event_register::insert_data,
             db::event_register::get_all_data,
             db::event_register::get_match_events_from_match_id,

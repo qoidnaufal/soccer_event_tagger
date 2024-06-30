@@ -1,9 +1,10 @@
-use super::{convertFileSrc, invoke, menu, pitch, table_data, team_sheet, video, CtxProvider};
+use crate::app::{convertFileSrc, invoke, CtxProvider};
+use crate::components::{MenuBar, Pitch, SelectTeamSheet, TableData, TeamSheet, VideoPlayer};
+
+use types::{AppError, MatchInfo, Payload, PlayerInfo, Point, TaggedEvent, TeamInfoQuery};
 
 use leptos::*;
 use wasm_bindgen::prelude::*;
-
-use types::{AppError, MatchInfo, Payload, PlayerInfo, Point, TaggedEvent, TeamInfoQuery};
 
 async fn get_all_players_from_match_id(match_id: String) -> Result<Vec<PlayerInfo>, AppError> {
     let match_id = Payload { payload: match_id };
@@ -69,25 +70,33 @@ pub fn EventTagger() -> impl IntoView {
                     let _ = video_player.play();
                 }
             }
-            "+" => {
+            speed_up if ev.ctrl_key() && speed_up == "=" => {
                 let current_playback_rate = video_player.playback_rate();
                 video_player.set_playback_rate(current_playback_rate + 0.25);
             }
-            "-" => {
+            slow_down if ev.ctrl_key() && slow_down == "-" => {
                 let current_playback_rate = video_player.playback_rate();
                 video_player.set_playback_rate(current_playback_rate - 0.25);
             }
+            num if ev.ctrl_key() && ("1"..="3").contains(&num) => {
+                let rate = num.parse::<f64>().unwrap();
+                video_player.set_playback_rate(rate);
+            }
             "ArrowRight" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek(current_time + 0.2);
+                let _ = video_player.fast_seek((current_time + 0.2).ceil());
             }
             "ArrowLeft" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek(current_time - 0.2);
+                let _ = video_player.fast_seek((current_time - 0.2).floor());
             }
-            num if ev.ctrl_key() && ("1"..="2").contains(&num) => {
-                let rate = num.parse::<f64>().unwrap();
-                video_player.set_playback_rate(rate);
+            "ArrowUp" => {
+                let current_time = video_player.current_time();
+                let _ = video_player.fast_seek((current_time + 5.).ceil());
+            }
+            "ArrowDown" => {
+                let current_time = video_player.current_time();
+                let _ = video_player.fast_seek((current_time - 5.).floor());
             }
             // --- open video
             open if ev.ctrl_key() && open == "o" => {
@@ -322,18 +331,18 @@ pub fn EventTagger() -> impl IntoView {
                         </Show>
                     </button>
                 </div>
-                <menu::MenuBar match_info open_video_action/>
+                <MenuBar match_info open_video_action/>
                 <div id="video_container" class="flex flex-col w-fit px-[10px] shrink-0">
                     <div class="relative flex flex-row w-fit h-fit">
-                        <pitch::Pitch set_coordinate/>
-                        <video::VideoPlayer video_src video_player_node_ref/>
+                        <Pitch set_coordinate/>
+                        <VideoPlayer video_src video_player_node_ref/>
                     </div>
                 </div>
                 <div id="info" class="flex flex-col items-center w-full grow-0 bg-slate-800/[.65] p-4 rounded-lg">
-                    <team_sheet::SelectTeamSheet match_info_resource set_match_info/>
+                    <SelectTeamSheet match_info_resource set_match_info/>
                     <div class="flex flex-row">
-                        <team_sheet::TeamSheet team_info_resource team_state="Home".to_string()/>
-                        <team_sheet::TeamSheet team_info_resource team_state="Away".to_string()/>
+                        <TeamSheet team_info_resource team_state="Home".to_string()/>
+                        <TeamSheet team_info_resource team_state="Away".to_string()/>
                     </div>
                 </div>
             </div>
@@ -372,7 +381,7 @@ pub fn EventTagger() -> impl IntoView {
                         </tbody>
                     </table>
                 </div>
-                <table_data::TableData video_player_node_ref register_event_action match_info/>
+                <TableData video_player_node_ref register_event_action match_info/>
             </div>
         </div>
     }

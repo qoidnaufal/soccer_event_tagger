@@ -3,7 +3,8 @@ use surrealdb::{
     engine::local::{Db, Mem},
     Surreal,
 };
-use tauri::{async_runtime::Mutex, Manager};
+use tauri::{async_runtime::Mutex, Manager, State};
+use types::{AppError, MatchInfo};
 
 pub mod event_register;
 pub mod match_register;
@@ -37,4 +38,16 @@ impl Database {
 
         Ok(())
     }
+}
+
+#[tauri::command]
+pub async fn clear_db(state: State<'_, Database>) -> Result<(), AppError> {
+    let db = state.db.lock().await;
+    let all_match = db
+        .select::<Vec<MatchInfo>>("match_info")
+        .await
+        .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+    log::info!("{:?}", all_match);
+
+    Ok(())
 }

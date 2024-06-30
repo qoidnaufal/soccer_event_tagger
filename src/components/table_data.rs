@@ -1,4 +1,4 @@
-use super::invoke;
+use crate::app::invoke;
 use leptos::*;
 use types::{AppError, MatchInfo, Payload, TaggedEvent};
 use wasm_bindgen::{JsValue, UnwrapThrowExt};

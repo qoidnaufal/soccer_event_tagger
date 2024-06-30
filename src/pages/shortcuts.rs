@@ -1,5 +1,5 @@
+use crate::components::HomeButton;
 use leptos::*;
-use leptos_router::A;
 
 const SOURCE_CODE: &str = include_str!("../../types/src/tagged_event.rs");
 const GUIDE: &str = "Command shortcuts are separated by \"/\".
@@ -54,15 +54,7 @@ pub fn Shortcuts() -> impl IntoView {
 
     view! {
         <div class="text-xs absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row">
-            <div>
-                <A href="/">
-                    <button
-                        class="bg-slate-600 rounded-r-lg size-[30px] pl-1"
-                    >
-                        <img src="public/buttons/home.svg" width="20" height="20"/>
-                    </button>
-                </A>
-            </div>
+            <HomeButton/>
             <div class="flex flex-col px-2 pb-2 w-full">
                 <div class="py-2 flex flex-col items-center text-xl bg-indigo-600 text-white">"SHORTCUTS"</div>
                 <div class="bg-green-300 w-fit rounded-lg px-2 py-1 mt-1">"GUIDES"</div>

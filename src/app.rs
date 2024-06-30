@@ -1,15 +1,8 @@
+use crate::pages::{EventTagger, RegisterMatchInfo, Shortcuts, UserManual};
+
 use leptos::*;
 use leptos_router::*;
 use wasm_bindgen::prelude::*;
-
-pub mod event_tagger;
-pub mod menu;
-pub mod pitch;
-pub mod register_match_info;
-pub mod shortcuts;
-pub mod table_data;
-pub mod team_sheet;
-pub mod video;
 
 #[wasm_bindgen]
 extern "C" {
@@ -22,10 +15,10 @@ extern "C" {
 
 #[derive(Clone)]
 pub struct CtxProvider {
-    register_match_info_action: Action<JsValue, JsValue>,
-    register_player_info_action: Action<JsValue, JsValue>,
-    register_event_action: Action<JsValue, JsValue>,
-    open_video_action: Action<JsValue, JsValue>,
+    pub register_match_info_action: Action<JsValue, JsValue>,
+    pub register_player_info_action: Action<JsValue, JsValue>,
+    pub register_event_action: Action<JsValue, JsValue>,
+    pub open_video_action: Action<JsValue, JsValue>,
 }
 
 #[component]
@@ -49,9 +42,10 @@ pub fn App() -> impl IntoView {
         <Router fallback=|| view! { <p>"Error"</p> }.into_view()>
             <main>
                 <Routes>
-                    <Route path="/" view=event_tagger::EventTagger/>
-                    <Route path="/team_sheet" view=register_match_info::RegisterMatchInfo/>
-                    <Route path="/shortcuts" view=shortcuts::Shortcuts/>
+                    <Route path="/" view=EventTagger/>
+                    <Route path="/team_sheet" view=RegisterMatchInfo/>
+                    <Route path="/shortcuts" view=Shortcuts/>
+                    <Route path="/user_manual" view=UserManual/>
                 </Routes>
             </main>
         </Router>

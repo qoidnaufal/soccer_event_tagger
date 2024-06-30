@@ -1,7 +1,8 @@
-use super::CtxProvider;
-use leptos::*;
-use leptos_router::A;
+use crate::app::CtxProvider;
+use crate::components::HomeButton;
 use types::{MatchInfo, Payload, PlayerInfo, TaggedEvent};
+
+use leptos::*;
 use wasm_bindgen::UnwrapThrowExt;
 
 const GUIDE_HOME: &str = "Check the guide -------->";
@@ -260,15 +261,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
         <div
             class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
         >
-            <div>
-                <A href="/">
-                    <button
-                        class="bg-slate-600 rounded-r-lg size-[30px] pl-1"
-                    >
-                        <img src="public/buttons/home.svg" width="20" height="20"/>
-                    </button>
-                </A>
-            </div>
+            <HomeButton/>
             <div class="bg-slate-600 p-4 rounded-lg block m-auto right-0 left-0 top-0 bottom-0 w-[800px] h-[500px]">
                 <form
                     on:submit=register
