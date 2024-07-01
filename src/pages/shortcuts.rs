@@ -1,4 +1,3 @@
-use crate::components::HomeButton;
 use leptos::*;
 
 const SOURCE_CODE: &str = include_str!("../../types/src/tagged_event.rs");
@@ -53,8 +52,7 @@ pub fn Shortcuts() -> impl IntoView {
     };
 
     view! {
-        <div class="text-xs absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row">
-            <HomeButton/>
+        <div class="block m-auto right-0 left-0 top-0 bottom-0 size-full text-xs flex flex-row">
             <div class="flex flex-col px-2 pb-2 w-full">
                 <div class="py-2 flex flex-col items-center text-xl bg-indigo-600 text-white">"SHORTCUTS"</div>
                 <div class="bg-green-300 w-fit rounded-lg px-2 py-1 mt-1">"GUIDES"</div>

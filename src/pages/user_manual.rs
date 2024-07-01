@@ -1,4 +1,3 @@
-use crate::components::HomeButton;
 use leptos::*;
 
 const USER_MANUAL: &str = include_str!("../../USER_MANUAL.md");
@@ -9,9 +8,8 @@ pub fn UserManual() -> impl IntoView {
 
     view! {
         <div
-            class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
+            class="block m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
         >
-            <HomeButton/>
             <div class="mx-auto p-4 overflow-y-scroll">
                 <article class="max-w-[1020px]">
                     {

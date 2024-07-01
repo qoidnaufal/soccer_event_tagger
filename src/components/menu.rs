@@ -1,19 +1,42 @@
 use crate::app::invoke;
-use leptos::*;
 use types::{MatchInfo, Payload};
+
+use leptos::*;
+use leptos_router::A;
 use wasm_bindgen::JsValue;
 
 const BUTTON_STYLE: &str = "border-none rounded-full bg-lime-400 px-4 hover:bg-indigo-600 h-[30px] w-[200px] text-xs text-black hover:text-white";
 const MENU_BAR: &str = "block absolute z-20 left-[35px] top-[10px] flex flex-col rounded-xl bg-slate-600/[.85] p-[10px] w-fit space-y-[10px] ease-in-out duration-300";
 
 #[component]
+pub fn MenuButton(show_menu: ReadSignal<bool>, set_show_menu: WriteSignal<bool>) -> impl IntoView {
+    let toggle_menu = move |ev: ev::MouseEvent| {
+        ev.prevent_default();
+        set_show_menu.update(|v| *v = !*v);
+    };
+
+    view! {
+        <div>
+            <button
+                on:click=toggle_menu
+                class="border-none bg-slate-300 hover:bg-lime-400 px-2 size-[30px] rounded-r-lg">
+                <Show
+                    when=move || !show_menu.get()
+                    fallback=move || view! { <img src="public/buttons/close.svg"/> }
+                >
+                    <img src="public/buttons/menu.svg"/>
+                </Show>
+            </button>
+        </div>
+    }
+}
+
+#[component]
 pub fn MenuBar(
     match_info: ReadSignal<MatchInfo>,
     open_video_action: Action<JsValue, JsValue>,
+    show_menu: ReadSignal<bool>,
 ) -> impl IntoView {
-    let show_menu = expect_context::<ReadSignal<bool>>();
-
-    // pls refer to this documentation: https://tauri.app/v1/api/js/tauri/#convertfilesrc
     let get_file_path = move |ev: ev::MouseEvent| {
         ev.prevent_default();
         open_video_action.dispatch(JsValue::null());
@@ -24,6 +47,7 @@ pub fn MenuBar(
             <div
                 class=MENU_BAR
             >
+                <Home/>
                 <OpenVideo get_file_path/>
                 <RegisterMatchInfo/>
                 <ExportData match_info/>
@@ -32,6 +56,17 @@ pub fn MenuBar(
                 <UserManual/>
             </div>
         </Show>
+    }
+}
+
+#[component]
+fn Home() -> impl IntoView {
+    view! {
+        <A href="/">
+            <button
+                class=BUTTON_STYLE
+            >"Home"</button>
+        </A>
     }
 }
 
@@ -47,16 +82,12 @@ fn OpenVideo<F: FnMut(ev::MouseEvent) + 'static>(get_file_path: F) -> impl IntoV
 
 #[component]
 fn RegisterMatchInfo() -> impl IntoView {
-    let navigate = move |_: ev::MouseEvent| {
-        let nav = leptos_router::use_navigate();
-        nav("/team_sheet", Default::default());
-    };
-
     view! {
-        <button
-            on:click=navigate
-            class=BUTTON_STYLE
-        >"Register Match Info"</button>
+        <A href="/team_sheet">
+            <button
+                class=BUTTON_STYLE
+            >"Register Match Info"</button>
+        </A>
     }
 }
 
@@ -82,45 +113,33 @@ fn ExportData(match_info: ReadSignal<MatchInfo>) -> impl IntoView {
 
 #[component]
 fn DataDashboard() -> impl IntoView {
-    let navigate = move |_: ev::MouseEvent| {
-        let nav = leptos_router::use_navigate();
-        nav("/dashboard", Default::default());
-    };
-
     view! {
-        <button
-            on:click=navigate
-            class=BUTTON_STYLE
-        >"Data Dashboard"</button>
+        <A href="/dashboard">
+            <button
+                class=BUTTON_STYLE
+            >"Data Dashboard"</button>
+        </A>
     }
 }
 
 #[component]
 fn ShortcutsInfo() -> impl IntoView {
-    let navigate = move |_: ev::MouseEvent| {
-        let nav = leptos_router::use_navigate();
-        nav("shortcuts", Default::default());
-    };
-
     view! {
-        <button
-            on:click=navigate
-            class=BUTTON_STYLE
-        >"Shortcuts Info"</button>
+        <A href="/shortcuts">
+            <button
+                class=BUTTON_STYLE
+            >"Shortcuts Info"</button>
+        </A>
     }
 }
 
 #[component]
 fn UserManual() -> impl IntoView {
-    let navigate = move |_: ev::MouseEvent| {
-        let nav = leptos_router::use_navigate();
-        nav("user_manual", Default::default());
-    };
-
     view! {
-        <button
-            on:click=navigate
-            class=BUTTON_STYLE
-        >"User Manual"</button>
+        <A href="/user_manual">
+            <button
+                class=BUTTON_STYLE
+            >"User Manual"</button>
+        </A>
     }
 }

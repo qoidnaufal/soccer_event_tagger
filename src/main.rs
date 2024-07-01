@@ -2,7 +2,7 @@ mod app;
 mod components;
 mod pages;
 
-use app::*;
+use app::App;
 use leptos::*;
 
 fn main() {

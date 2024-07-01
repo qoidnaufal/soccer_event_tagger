@@ -1,7 +1,7 @@
 use crate::app::{convertFileSrc, get_all_match, get_players_by_match_id, invoke, CtxProvider};
-use crate::components::{MenuBar, Pitch, SelectTeamSheet, TableData, TeamSheet, VideoPlayer};
+use crate::components::{Bullet, Pitch, SelectTeamSheet, TableData, TeamSheet, VideoPlayer};
 
-use types::{MatchInfo, Payload, PlayerInfo, Point, TaggedEvent, TeamInfoQuery};
+use types::{Payload, PlayerInfo, Point, TaggedEvent, TeamInfoQuery};
 
 use leptos::*;
 use wasm_bindgen::prelude::*;
@@ -9,12 +9,15 @@ use wasm_bindgen::prelude::*;
 #[component]
 pub fn EventTagger() -> impl IntoView {
     let (coordinate, set_coordinate) = create_signal(Point::default());
-    let (show_menu, set_show_menu) = create_signal(false);
     let (tagged_event, set_tagged_event) = create_signal(TaggedEvent::default());
     let (event_buffer, set_event_buffer) = create_signal(String::new());
     let (team_buffer, set_team_buffer) = create_signal(String::new());
     let (player_buffer, set_player_buffer) = create_signal(PlayerInfo::default());
-    let (match_info, set_match_info) = create_signal(MatchInfo::default());
+    let (latest_start, set_latest_start) = create_signal(Point::default());
+    let (latest_end, set_latest_end) = create_signal(Point::default());
+
+    let match_info = expect_context::<CtxProvider>().match_info;
+    let set_match_info = expect_context::<CtxProvider>().set_match_info;
 
     let video_player_node_ref = create_node_ref::<html::Video>();
 
@@ -292,36 +295,17 @@ pub fn EventTagger() -> impl IntoView {
         })
     });
 
-    let toggle_menu = move |ev: ev::MouseEvent| {
-        ev.prevent_default();
-        set_show_menu.update(|v| *v = !*v);
-    };
-
-    provide_context(show_menu);
-
     on_cleanup(move || {
         shortcuts.remove();
     });
 
     view! {
-        <div class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col pr-[40px]">
+        <div class="block m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-col pr-[40px]">
             <div class="flex flex-row">
-                <div>
-                    <button
-                        on:click=toggle_menu
-                        class="border-none bg-slate-300 hover:bg-lime-400 px-2 size-[30px] rounded-r-lg">
-                        <Show
-                            when=move || !show_menu.get()
-                            fallback=move || view! { <img src="public/buttons/close.svg"/> }
-                        >
-                            <img src="public/buttons/menu.svg"/>
-                        </Show>
-                    </button>
-                </div>
-                <MenuBar match_info open_video_action/>
                 <div id="video_container" class="flex flex-col w-fit px-[10px] shrink-0">
                     <div class="relative flex flex-row w-fit h-fit">
                         <Pitch set_coordinate/>
+                        <Bullet latest_start latest_end/>
                         <VideoPlayer video_src video_player_node_ref/>
                     </div>
                 </div>
@@ -339,7 +323,7 @@ pub fn EventTagger() -> impl IntoView {
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col ml-[40px]">
+            <div class="flex flex-col">
                 <div class="w-full bg-green-50 rounded-lg px-2 py-1 mt-1">
                     <table class="table-fixed w-full">
                         <tbody>
@@ -380,6 +364,8 @@ pub fn EventTagger() -> impl IntoView {
                     delete_match_info_action
                     delete_all_row_action
                     match_info
+                    set_latest_start
+                    set_latest_end
                 />
             </div>
         </div>

@@ -1,3 +1,4 @@
+use crate::components::{MenuBar, MenuButton};
 use crate::pages::{DataDashboard, EventTagger, RegisterMatchInfo, Shortcuts, UserManual};
 use types::{AppError, MatchInfo, Payload, PlayerInfo, TaggedEvent};
 
@@ -11,6 +12,8 @@ pub struct CtxProvider {
     pub register_player_info_action: Action<JsValue, JsValue>,
     pub register_event_action: Action<JsValue, JsValue>,
     pub open_video_action: Action<JsValue, JsValue>,
+    pub match_info: ReadSignal<MatchInfo>,
+    pub set_match_info: WriteSignal<MatchInfo>,
 }
 
 #[wasm_bindgen]
@@ -23,7 +26,7 @@ extern "C" {
 }
 
 pub async fn get_players_by_match_id(match_id: String) -> Result<Vec<PlayerInfo>, AppError> {
-    logging::log!("{}", match_id);
+    logging::log!("{:?}", match_id);
     let match_id = Payload { payload: match_id };
     let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
     let team_info = invoke("get_all_players_from_match_id", match_id).await;
@@ -67,16 +70,23 @@ pub fn App() -> impl IntoView {
         create_action(|payload: &JsValue| invoke("insert_data", payload.clone()));
     let open_video_action = create_action(|payload: &JsValue| invoke("open", payload.clone()));
 
+    let (show_menu, set_show_menu) = create_signal(false);
+    let (match_info, set_match_info) = create_signal(MatchInfo::default());
+
     provide_context(CtxProvider {
         register_match_info_action,
         register_player_info_action,
         register_event_action,
         open_video_action,
+        match_info,
+        set_match_info,
     });
 
     view! {
         <Router fallback=|| view! { <p>"Error"</p> }.into_view()>
-            <main>
+            <main class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row">
+                <MenuButton show_menu set_show_menu/>
+                <MenuBar match_info open_video_action show_menu/>
                 <Routes>
                     <Route path="/" view=EventTagger/>
                     <Route path="/team_sheet" view=RegisterMatchInfo/>

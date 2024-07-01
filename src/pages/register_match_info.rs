@@ -1,5 +1,4 @@
 use crate::app::CtxProvider;
-use crate::components::HomeButton;
 use types::{MatchInfo, Payload, PlayerInfo, TaggedEvent};
 
 use leptos::*;
@@ -259,9 +258,8 @@ pub fn RegisterMatchInfo() -> impl IntoView {
 
     view! {
         <div
-            class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
+            class="block m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
         >
-            <HomeButton/>
             <div class="bg-slate-600 p-4 rounded-lg block m-auto right-0 left-0 top-0 bottom-0 w-[800px] h-[500px]">
                 <form
                     on:submit=register

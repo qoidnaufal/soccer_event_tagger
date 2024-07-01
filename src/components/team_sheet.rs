@@ -1,8 +1,8 @@
+use crate::app::invoke;
+
 use leptos::*;
 use types::{AppError, MatchInfo, Payload, PlayerInfo};
 use wasm_bindgen::JsValue;
-
-use crate::invoke;
 
 #[component]
 pub fn SelectTeamSheet(
@@ -18,8 +18,8 @@ pub fn SelectTeamSheet(
 
     let select_match_info = move |ev: ev::Event| {
         let value = event_target_value(&ev);
-        let match_info = serde_json::from_str::<MatchInfo>(value.as_str()).unwrap_or_default();
-        set_match_info.set(match_info);
+        let m_info = serde_json::from_str::<MatchInfo>(value.as_str()).unwrap_or_default();
+        set_match_info.set(m_info);
     };
 
     let delete_match_info = move |ev: ev::MouseEvent| {
@@ -34,6 +34,8 @@ pub fn SelectTeamSheet(
         delete_all_row_action.dispatch(payload);
     };
 
+    on_cleanup(move || set_match_info.set(MatchInfo::default()));
+
     view! {
         <div class="flex flex-row w-full mb-3 text-xs">
             <select class="w-full" on:change=select_match_info>
@@ -41,15 +43,15 @@ pub fn SelectTeamSheet(
                 <Suspense>
                     <For
                         each=move || match_info_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
-                        key=|match_info| (match_info.match_date.clone(), match_info.match_id.clone())
-                        children=move |match_info| {
-                            let match_info = create_rw_signal(match_info).read_only();
+                        key=|m_info| (m_info.match_date.clone(), m_info.match_id.clone())
+                        children=move |m_info| {
+                            let m_info = create_rw_signal(m_info).read_only();
 
                             view! {
-                                <option value=move || serde_json::to_string(&match_info.get()).unwrap_or_default()>
-                                    { move || match_info.get().match_date } ": "
-                                    { move || match_info.get().team_home } " vs "
-                                    { move || match_info.get().team_away }
+                                <option value=move || serde_json::to_string(&m_info.get()).unwrap_or_default()>
+                                    { move || m_info.get().match_date } ": "
+                                    { move || m_info.get().team_home } " vs "
+                                    { move || m_info.get().team_away }
                                 </option>
                             }
                         }
@@ -79,20 +81,22 @@ pub fn TeamSheet(
     team_state: String,
 ) -> impl IntoView {
     let team_state = create_rw_signal(team_state).read_only();
+    let (team_info, set_team_info) = create_signal::<Vec<PlayerInfo>>(Vec::new());
 
     view! {
         <div class="flex flex-col p-2 text-xs w-[280px] grow-0">
             <Suspense>
                 { move || {
-                    let team_info = create_memo(move |_| {
+                    let t =
                         team_info_resource.and_then(|t| {
                             match team_state.get().as_str() {
                                 "Home" => t.iter().filter(|v| v.team_state.as_str() == "Home").cloned().collect::<Vec<_>>(),
                                 "Away" => t.iter().filter(|v| v.team_state.as_str() == "Away").cloned().collect::<Vec<_>>(),
                                 _ => t.iter().filter(|v| v.team_state.as_str() == "Neutral").cloned().collect::<Vec<_>>()
                             }
-                        }).unwrap_or(Ok(Vec::new())).unwrap_or_default()
-                    });
+                        }).unwrap_or(Ok(Vec::new())).unwrap_or_default();
+
+                    set_team_info.set(t);
 
                     view! {
                         <p class="text-white mb-1 font-bold">

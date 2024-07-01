@@ -1,5 +1,4 @@
 use crate::app::{get_all_data, invoke};
-use crate::components::HomeButton;
 
 use leptos::*;
 use wasm_bindgen::JsValue;
@@ -34,11 +33,9 @@ pub fn DataDashboard() -> impl IntoView {
 
     view! {
         <div
-            class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
+            class="block m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
         >
-            <HomeButton/>
             <div class="m-auto right-0 left-0 top-0 bottom-0 p-2 block w-full h-full">
-                // --- match info
                 <div class="text-xs">
                     <Suspense>
                         { move || {
@@ -203,7 +200,6 @@ pub fn DataDashboard() -> impl IntoView {
                         }}
                     </Suspense>
                 </div>
-                // --- player info
             </div>
         </div>
     }

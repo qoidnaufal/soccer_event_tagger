@@ -1,6 +1,7 @@
 use crate::app::{get_table_data, invoke};
+use types::{MatchInfo, Payload, Point};
+
 use leptos::*;
-use types::{MatchInfo, Payload};
 use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 #[component]
@@ -10,6 +11,8 @@ pub fn TableData(
     delete_match_info_action: Action<JsValue, JsValue>,
     delete_all_row_action: Action<JsValue, JsValue>,
     match_info: ReadSignal<MatchInfo>,
+    set_latest_start: WriteSignal<Point>,
+    set_latest_end: WriteSignal<Point>,
 ) -> impl IntoView {
     let delete_row_action =
         create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
@@ -44,6 +47,16 @@ pub fn TableData(
                 {move || {
                     let memoized_data = create_memo(move |_| {
                         data_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
+                    });
+
+                    let latest_event = memoized_data.get().last().cloned().unwrap_or_default();
+                    set_latest_start.update(|p| {
+                        p.x = latest_event.x_start;
+                        p.y = latest_event.y_start;
+                    });
+                    set_latest_end.update(|p| {
+                        p.x = latest_event.x_end;
+                        p.y = latest_event.y_end;
                     });
 
                     view! {
