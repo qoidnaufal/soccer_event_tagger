@@ -2,36 +2,32 @@ use leptos::*;
 use types::Point;
 use wasm_bindgen::{JsCast, JsValue};
 
-#[component]
-pub fn Pitch(set_coordinate: WriteSignal<Point>) -> impl IntoView {
-    let image_node = create_node_ref::<html::Img>();
+const WIDTH: &str = "500";
+const HEIGHT: &str = "332";
 
-    let handle_pitch_click = move |ev: ev::MouseEvent| {
+#[component]
+pub fn Pitch(
+    set_coordinate: WriteSignal<Point>,
+    latest_start: ReadSignal<Point>,
+    latest_end: ReadSignal<Point>,
+) -> impl IntoView {
+    let canvas_ref = create_node_ref::<html::Canvas>();
+
+    let handle_click = move |ev: ev::MouseEvent| {
         ev.prevent_default();
-        let image = image_node.get().unwrap();
+        let canvas = canvas_ref.get().unwrap();
+
         set_coordinate.update(|point| {
             point.reset();
-            point.x = Some(ev.offset_x() * 100 / image.width() as i32);
-            point.y = Some(ev.offset_y() * 100 / image.height() as i32);
+            point.x = Some(ev.offset_x() * 100 / canvas.width() as i32);
+            point.y = Some(ev.offset_y() * 100 / canvas.height() as i32);
         });
     };
 
-    view! {
-        <img
-            _ref=image_node
-            on:mousedown=handle_pitch_click
-            src="public/pitch.svg"
-            draggable="false"
-            width="500"
-            class="absolute cursor-copy z-10 top-0 bottom-0 left-0 right-0 m-auto"/>
-    }
-}
-
-#[component]
-pub fn Bullet(latest_start: ReadSignal<Point>, latest_end: ReadSignal<Point>) -> impl IntoView {
-    let canvas_ref = create_node_ref::<html::Canvas>();
-
     create_effect(move |_| {
+        latest_start.track();
+        latest_end.track();
+
         let canvas = canvas_ref.get().unwrap();
 
         let width = canvas.width() as f64;
@@ -40,7 +36,7 @@ pub fn Bullet(latest_start: ReadSignal<Point>, latest_end: ReadSignal<Point>) ->
         let ctx = canvas.get_context("2d").unwrap().unwrap();
         let ctx = ctx.unchecked_into::<web_sys::CanvasRenderingContext2d>();
 
-        ctx.reset();
+        ctx.clear_rect(0., 0., width, height);
 
         if latest_start.get().x.is_some() {
             let x_start = latest_start.get().x.unwrap_or_default() as f64 * width / 100.;
@@ -70,10 +66,15 @@ pub fn Bullet(latest_start: ReadSignal<Point>, latest_end: ReadSignal<Point>) ->
     view! {
         <canvas
             _ref=canvas_ref
-            width="500"
-            height="332"
-            class="absolute z-5 top-0 bottom-0 left-0 right-0 m-auto bg-slate-200/[.40]"
-        >
-        </canvas>
+            on:mousedown=handle_click
+            width=WIDTH
+            height=HEIGHT
+            class="absolute z-10 top-0 bottom-0 left-0 right-0 m-auto cursor-pointer"
+        ></canvas>
+        <img
+            src="public/pitch.svg"
+            draggable="false"
+            width=WIDTH
+            class="absolute z-5 top-0 bottom-0 left-0 right-0 m-auto"/>
     }
 }

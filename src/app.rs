@@ -26,7 +26,6 @@ extern "C" {
 }
 
 pub async fn get_players_by_match_id(match_id: String) -> Result<Vec<PlayerInfo>, AppError> {
-    logging::log!("{:?}", match_id);
     let match_id = Payload { payload: match_id };
     let match_id = serde_wasm_bindgen::to_value(&match_id).unwrap();
     let team_info = invoke("get_all_players_from_match_id", match_id).await;

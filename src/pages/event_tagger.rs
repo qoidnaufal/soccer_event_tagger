@@ -1,5 +1,5 @@
 use crate::app::{convertFileSrc, get_all_match, get_players_by_match_id, invoke, CtxProvider};
-use crate::components::{Bullet, Pitch, SelectTeamSheet, TableData, TeamSheet, VideoPlayer};
+use crate::components::{Pitch, SelectTeamSheet, TableData, TeamSheet, VideoPlayer};
 
 use types::{Payload, PlayerInfo, Point, TaggedEvent, TeamInfoQuery};
 
@@ -304,8 +304,11 @@ pub fn EventTagger() -> impl IntoView {
             <div class="flex flex-row">
                 <div id="video_container" class="flex flex-col w-fit px-[10px] shrink-0">
                     <div class="relative flex flex-row w-fit h-fit">
-                        <Pitch set_coordinate/>
-                        <Bullet latest_start latest_end/>
+                        <Pitch
+                            set_coordinate
+                            latest_start
+                            latest_end
+                        />
                         <VideoPlayer video_src video_player_node_ref/>
                     </div>
                 </div>
