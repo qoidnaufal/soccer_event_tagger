@@ -6,7 +6,7 @@ use types::{AppError, MatchInfo, PlayerInfo, TeamInfoQuery};
 pub async fn register_match_info(
     payload: MatchInfo,
     state: State<'_, Database>,
-) -> Result<String, AppError> {
+) -> Result<MatchInfo, AppError> {
     let db = state.db.lock().await;
 
     match db
@@ -18,7 +18,7 @@ pub async fn register_match_info(
         Ok(created) => {
             if let Some(match_info) = created {
                 log::info!("Registered match: {:?}", match_info.match_id);
-                Ok(match_info.match_id)
+                Ok(match_info)
             } else {
                 let response = format!(
                     "Failed to register match info: match id {} already exist",
@@ -113,37 +113,24 @@ pub async fn query_team_info(
 }
 
 #[tauri::command]
-pub async fn delete_all_players_from_match_id(
-    payload: String,
-    state: State<'_, Database>,
-) -> Result<(), AppError> {
-    let db = state.db.lock().await;
-
-    match db
-        .delete::<Vec<PlayerInfo>>(payload)
-        .await
-        .map_err(|err| AppError::DatabaseError(err.to_string()))
-    {
-        Ok(_) => Ok(()),
-        Err(err) => Err(err),
-    }
-}
-
-#[tauri::command]
 pub async fn delete_match_info_by_id(
     payload: String,
     state: State<'_, Database>,
 ) -> Result<(), AppError> {
     let db = state.db.lock().await;
 
-    match db
+    let to_delete = db
         .delete::<Option<MatchInfo>>(("match_info", payload))
         .await
-        .map_err(|err| AppError::DatabaseError(err.to_string()))
-    {
-        Ok(_) => Ok(()),
-        Err(err) => Err(err),
+        .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+
+    if let Some(match_info) = to_delete {
+        db.delete::<Vec<PlayerInfo>>(match_info.match_id)
+            .await
+            .map_err(|err| AppError::DatabaseError(err.to_string()))?;
     }
+
+    Ok(())
 }
 
 #[tauri::command]

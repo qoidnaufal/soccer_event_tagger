@@ -1,6 +1,3 @@
-use crate::app::invoke;
-use types::{MatchInfo, Payload};
-
 use leptos::*;
 use leptos_router::A;
 use wasm_bindgen::JsValue;
@@ -33,7 +30,6 @@ pub fn MenuButton(show_menu: ReadSignal<bool>, set_show_menu: WriteSignal<bool>)
 
 #[component]
 pub fn MenuBar(
-    match_info: ReadSignal<MatchInfo>,
     open_video_action: Action<JsValue, JsValue>,
     show_menu: ReadSignal<bool>,
 ) -> impl IntoView {
@@ -50,7 +46,6 @@ pub fn MenuBar(
                 <Home/>
                 <OpenVideo get_file_path/>
                 <RegisterMatchInfo/>
-                <ExportData match_info/>
                 <DataDashboard/>
                 <ShortcutsInfo/>
                 <UserManual/>
@@ -88,26 +83,6 @@ fn RegisterMatchInfo() -> impl IntoView {
                 class=BUTTON_STYLE
             >"Register Match Info"</button>
         </A>
-    }
-}
-
-#[component]
-fn ExportData(match_info: ReadSignal<MatchInfo>) -> impl IntoView {
-    let export_data = move |ev: ev::MouseEvent| {
-        ev.prevent_default();
-        spawn_local(async move {
-            let payload = match_info.get_untracked();
-            let payload = Payload { payload };
-            let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
-            invoke("export_tagged_events_from_match_id", payload).await;
-        });
-    };
-
-    view! {
-        <button
-            on:click=export_data
-            class=BUTTON_STYLE
-        >"Export Data [*.csv]"</button>
     }
 }
 

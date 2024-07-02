@@ -12,10 +12,6 @@ pub fn SelectTeamSheet(
     delete_match_info_action: Action<JsValue, JsValue>,
     delete_all_row_action: Action<JsValue, JsValue>,
 ) -> impl IntoView {
-    let delete_player_info_action = create_action(|payload: &JsValue| {
-        invoke("delete_all_players_from_match_id", payload.clone())
-    });
-
     let select_match_info = move |ev: ev::Event| {
         let value = event_target_value(&ev);
         let m_info = serde_json::from_str::<MatchInfo>(value.as_str()).unwrap_or_default();
@@ -30,8 +26,18 @@ pub fn SelectTeamSheet(
         let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
 
         delete_match_info_action.dispatch(payload.clone());
-        delete_player_info_action.dispatch(payload.clone());
         delete_all_row_action.dispatch(payload);
+    };
+
+    let export_data = move |ev: ev::MouseEvent| {
+        ev.prevent_default();
+        spawn_local(async move {
+            let payload = Payload {
+                payload: match_info.get_untracked(),
+            };
+            let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+            invoke("export_tagged_events_from_match_id", payload).await;
+        });
     };
 
     on_cleanup(move || set_match_info.set(MatchInfo::default()));
@@ -58,16 +64,17 @@ pub fn SelectTeamSheet(
                     />
                 </Suspense>
             </select>
-            // <button
-            //     type="button"
-            //     class="text-xs bg-lime-400 border-none rounded-xl w-[50px] py-1 ml-2 flex flex-row justify-center hover:bg-green-400"
-            // >
-            //     "edit"
-            // </button>
+            <button
+                on:click=export_data
+                type="button"
+                class="text-xs bg-lime-400 border-none rounded-xl w-[50px] py-1 px-2 ml-2 flex flex-row justify-center hover:bg-lime-500"
+            >
+                "export"
+            </button>
             <button
                 on:click=delete_match_info
                 type="button"
-                class="text-xs bg-lime-400 border-none rounded-xl w-[50px] py-1 ml-2 flex flex-row justify-center hover:bg-red-500"
+                class="text-xs bg-red-500 border-none rounded-xl w-[50px] py-1 ml-2 flex flex-row justify-center hover:bg-red-600"
             >
                 <img src="/public/buttons/delete.svg" width="15" height="15"/>
             </button>

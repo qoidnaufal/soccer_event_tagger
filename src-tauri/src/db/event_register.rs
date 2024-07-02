@@ -80,6 +80,42 @@ pub async fn export_tagged_events_from_match_id(
 }
 
 #[tauri::command]
+pub async fn export_all_tagged_events(state: State<'_, Database>) -> Result<(), AppError> {
+    let maybe_file = rfd::AsyncFileDialog::new()
+        .set_file_name("ALL_DATA.csv")
+        .save_file()
+        .await;
+
+    if let Some(file) = maybe_file {
+        let path = file.path();
+        log::info!("path: {:?}", path);
+
+        let db = state.db.lock().await;
+
+        let data = db
+            .select::<Vec<TaggedEvent>>("tagged_events")
+            .await
+            .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+
+        let mut writer = csv::Writer::from_path(path).map_err(|err| {
+            log::error!("csv error: {}", err);
+            AppError::CsvWriteError(err.to_string())
+        })?;
+
+        for d in data.iter() {
+            writer
+                .serialize(d)
+                .map_err(|err| AppError::CsvWriteError(err.to_string()))?;
+        }
+        writer
+            .flush()
+            .map_err(|err| AppError::CsvWriteError(err.to_string()))?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn get_events_by_match_id(
     payload: String,
     state: State<'_, Database>,

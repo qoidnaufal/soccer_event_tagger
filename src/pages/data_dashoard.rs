@@ -1,27 +1,37 @@
-use crate::app::{get_all_data, invoke};
+use crate::app::{get_all_match, invoke};
 
 use leptos::*;
+use types::Payload;
 use wasm_bindgen::JsValue;
 
 #[component]
 pub fn DataDashboard() -> impl IntoView {
-    let delete_row_action =
-        create_action(|payload: &JsValue| invoke("delete_by_id", payload.clone()));
-
     let delete_all_events_action =
         create_action(|payload: &JsValue| invoke("delete_all_data", payload.clone()));
+
+    let delete_all_row_action = create_action(|payload: &JsValue| {
+        invoke("delete_all_records_by_match_id", payload.clone())
+    });
 
     let delete_all_match_info_action =
         create_action(|payload: &JsValue| invoke("delete_all_match_info", payload.clone()));
 
+    let delete_match_info_action =
+        create_action(|payload: &JsValue| invoke("delete_match_info_by_id", payload.clone()));
+
+    let export_all_data_action =
+        create_action(|payload: &JsValue| invoke("export_all_tagged_events", payload.clone()));
+
     let data_resource = create_resource(
         move || {
             (
-                delete_row_action.version().get(),
+                delete_all_match_info_action.version().get(),
                 delete_all_events_action.version().get(),
+                delete_all_row_action.version().get(),
+                delete_match_info_action.version().get(),
             )
         },
-        move |_| get_all_data(),
+        move |_| get_all_match(),
     );
 
     let delete_all = move |ev: ev::MouseEvent| {
@@ -31,173 +41,91 @@ pub fn DataDashboard() -> impl IntoView {
         delete_all_match_info_action.dispatch(JsValue::null());
     };
 
+    let export_all = move |ev: ev::MouseEvent| {
+        ev.prevent_default();
+
+        export_all_data_action.dispatch(JsValue::null());
+    };
+
     view! {
         <div
             class="block m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row"
         >
-            <div class="m-auto right-0 left-0 top-0 bottom-0 p-2 block w-full h-full">
-                <div class="text-xs">
+            <div class="bg-slate-600 p-4 rounded-lg block m-auto right-0 left-0 top-0 bottom-0 w-[800px] h-[500px] text-xs">
+                <div class="flex flex-row">
+                    <button
+                        on:click=export_all
+                        type="button"
+                        class="bg-lime-300 rounded-full px-2 py-1 hover:bg-indigo-500 hover:text-white"
+                    >
+                        "Export All"
+                    </button>
+                    <button
+                        on:click=delete_all
+                        type="button"
+                        class="bg-red-500 rounded-full px-2 py-1 hover:bg-red-600 ml-2"
+                    >
+                        "Delete All"
+                    </button>
+                </div>
+                <div class="my-2 h-[480px] overflow-y-scroll">
                     <Suspense>
-                        { move || {
-                            let memoized_data = create_memo(move |_| {
-                                data_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
-                            });
+                        <ul>
+                            <For
+                                each=move || data_resource.get().unwrap_or(Ok(Vec::new())).unwrap_or_default()
+                                key=|m| m.match_id.clone()
+                                children=move |m| {
+                                    let match_info = create_rw_signal(m);
 
-                            view! {
-                                <div class="w-full">
-                                    <table class="table-fixed w-full">
-                                        <thead class="w-full">
-                                            <tr class="w-full">
-                                                <th scope="col" class=" text-left w-[10px]">
-                                                    <button
-                                                        on:click=delete_all
-                                                        class="hover:bg-red-600 px-2 py-1 rounded-md"
-                                                    >
-                                                        <img src="/public/buttons/delete.svg" width="15" height="15"/>
-                                                    </button>
-                                                </th>
-                                                <th scope="col" class="text-left w-[30px]">
-                                                    "match date"
-                                                </th>
-                                                <th scope="col" class="text-left w-[15px]">
-                                                    "time start"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "location start"
-                                                </th>
-                                                <th scope="col" class="text-left w-[15px]">
-                                                    "time end"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "location end"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "opponent"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "team name"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "player name"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "position"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "event name"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "event type"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "event source"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "outcome"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "team end"
-                                                </th>
-                                                <th scope="col" class="text-left w-[20px]">
-                                                    "player end"
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                    </table>
-                                </div>
-                                <div
-                                    class="w-full grow-0 h-[900px] overflow-y-scroll flex flex-col"
-                                >
-                                    <table class="table-fixed w-full">
-                                        <tbody class="w-full">
-                                            <For
-                                                each=move || memoized_data.get()
-                                                key=|event| event.uuid.clone()
-                                                children=move |event| {
-                                                    let event = create_rw_signal(event).read_only();
+                                    let export_data = move |ev: ev::MouseEvent| {
+                                        ev.prevent_default();
+                                        spawn_local(async move {
+                                            let payload = Payload {
+                                                payload: match_info.get_untracked(),
+                                            };
+                                            let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
+                                            invoke("export_tagged_events_from_match_id", payload).await;
+                                        });
+                                    };
 
-                                                    let delete = move |ev: ev::MouseEvent| {
-                                                        ev.stop_immediate_propagation();
-                                                        let to_delete = event.get_untracked().uuid;
-                                                        let payload = types::Payload {
-                                                            payload: to_delete,
-                                                        };
-                                                        let payload = serde_wasm_bindgen::to_value(&payload)
-                                                            .unwrap_or_default();
-                                                        delete_row_action.dispatch(payload);
-                                                        event.dispose();
-                                                    };
+                                    let delete_match_info = move |ev: ev::MouseEvent| {
+                                        ev.prevent_default();
+                                        let payload = Payload {
+                                            payload: match_info.get_untracked().match_id,
+                                        };
+                                        let payload = serde_wasm_bindgen::to_value(&payload).unwrap_or_default();
 
-                                                    view! {
-                                                        <tr
-                                                            class="w-full h-fit py-2 odd:bg-slate-200 even:bg-white hover:bg-green-300 hover:cursor-pointer"
-                                                        >
-                                                            <td class="w-[10px]">
-                                                                <button
-                                                                    on:click=delete
-                                                                    class="bg-blue-300 hover:bg-red-600 hover:text-white rounded-md w-fit px-2 py-1 m-1  z-10"
-                                                                >
-                                                                    "X"
-                                                                </button>
-                                                            </td>
-                                                            <td class=" w-[30px]">
-                                                                {move || event.get().match_date}
-                                                            </td>
-                                                            <td class=" w-[15px]">
-                                                                {move || format!("{:02}", (event.get().time_start / 60.) as u8)} ":"
-                                                                {move || format!("{:02}", (event.get().time_start % 60.) as u8)}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                "x: "{move || event.get().x_start.unwrap_or_default()}
-                                                                ", y: "{move || event.get().y_start.unwrap_or_default()}
-                                                            </td>
-                                                            <td class=" w-[15px]">
-                                                                {move || format!("{:02}", (event.get().time_end.unwrap_or_default() / 60.) as u8)} ":"
-                                                                {move || format!("{:02}", (event.get().time_end.unwrap_or_default() % 60.) as u8)}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                "x: "{move || event.get().x_end.unwrap_or_default()}
-                                                                ", y: "{move || event.get().y_end.unwrap_or_default()}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().opponent_team}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().team_name}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().player_name}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().play_position}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().event_name}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().event_type}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().event_source}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().outcome}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().team_end}
-                                                            </td>
-                                                            <td class=" w-[20px]">
-                                                                {move || event.get().player_end}
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                }
-                                            />
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                        }}
+                                        delete_match_info_action.dispatch(payload.clone());
+                                        delete_all_row_action.dispatch(payload);
+                                    };
+
+                                    view! {
+                                        <li class="px-2 py-1 mb-1 even:bg-white odd:bg-slate-200 hover:bg-green-300 flex flex-row items-center">
+                                            <div class="w-full">
+                                                { move || match_info.get().match_date } ": "
+                                                { move || match_info.get().team_home } " vs "
+                                                { move || match_info.get().team_away }
+                                            </div>
+                                            <button
+                                                on:click=export_data
+                                                type="button"
+                                                class="bg-blue-300 hover:bg-blue-400 rounded-md px-2 py-1"
+                                            >
+                                                "export"
+                                            </button>
+                                            <button
+                                                on:click=delete_match_info
+                                                type="button"
+                                                class="bg-red-500 hover:bg-red-600 rounded-md px-2 py-1 ml-2"
+                                            >
+                                                "delete"
+                                            </button>
+                                        </li>
+
+                                    }
+                                }
+                            />
+                        </ul>
                     </Suspense>
                 </div>
             </div>

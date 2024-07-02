@@ -1,13 +1,19 @@
-use crate::app::CtxProvider;
-use types::{MatchInfo, Payload, PlayerInfo, TaggedEvent};
+use crate::app::{invoke, CtxProvider};
+use types::{AppError, MatchInfo, Payload, PlayerInfo, TaggedEvent};
 
 use leptos::*;
-use wasm_bindgen::UnwrapThrowExt;
+use wasm_bindgen::{JsValue, UnwrapThrowExt};
 
 const GUIDE_HOME: &str = "Check the guide -------->";
 const GUIDE_AWAY: &str = "Use \")\" after the number, \"/position\" after starting 11 player's name, and \",\" to separate each players. Example: 1) Toldo /gk, 2) D. Alves /rfb, 3) Zlatan Ibrahimovic, ... Toldo & D. Alves will be registered as starting xi while Zlatan Ibrahimovic isn't";
 
-// todo: move the parsing to the backend
+async fn get_latest_registered() -> Result<MatchInfo, AppError> {
+    let response = invoke("get_all_match_info", JsValue::null()).await;
+    let response = serde_wasm_bindgen::from_value::<Vec<MatchInfo>>(response).unwrap_or_default();
+    let response = response.last().cloned().unwrap_or_default();
+
+    Ok(response)
+}
 
 #[component]
 pub fn RegisterMatchInfo() -> impl IntoView {
@@ -17,6 +23,7 @@ pub fn RegisterMatchInfo() -> impl IntoView {
     let input_date_ref = create_node_ref::<html::Input>();
     let team_home_name_ref = create_node_ref::<html::Input>();
     let team_away_name_ref = create_node_ref::<html::Input>();
+    let submit_button_ref = create_node_ref::<html::Button>();
 
     let register_match_info_action = expect_context::<CtxProvider>().register_match_info_action;
     let register_player_info_action = expect_context::<CtxProvider>().register_player_info_action;
@@ -246,15 +253,10 @@ pub fn RegisterMatchInfo() -> impl IntoView {
         }
     };
 
-    let submit_button_ref = create_node_ref::<html::Button>();
-
-    create_effect(move |_| {
-        submit_button_ref.on_load(|b| {
-            if b.inner_text() != "Submit" {
-                b.set_inner_text("Submit");
-            }
-        });
-    });
+    let response = create_resource(
+        move || register_match_info_action.version().get(),
+        move |_| get_latest_registered(),
+    );
 
     view! {
         <div
@@ -272,12 +274,6 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                     <input
                         required
                         _ref=input_date_ref
-                        on:change=move |_| {
-                            let submit_button = submit_button_ref.get().unwrap();
-                            if submit_button.inner_text() != "Submit" {
-                                submit_button.set_inner_text("Submit")
-                            }
-                        }
                         type="datetime-local"
                         class="rounded-full h-[30px] w-[150px] mb-2 text-xs justify-center self-center"
                     />
@@ -294,23 +290,11 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 spellcheck="false"
                                 placeholder="Team name..."
                                 _ref=team_home_name_ref
-                                on:input=move |_| {
-                                    let submit_button = submit_button_ref.get().unwrap();
-                                    if submit_button.inner_text() != "Submit" {
-                                        submit_button.set_inner_text("Submit")
-                                    }
-                                }
                             />
                             <div
                                 required
                                 on:focusin=handle_focus_in_home
                                 on:focusout=handle_focus_out_home
-                                on:input=move |_| {
-                                    let button = submit_button_ref.get().unwrap();
-                                    if button.inner_text() != "Submit" {
-                                        button.set_inner_text("Submit")
-                                    }
-                                }
                                 role="textbox"
                                 aria-multiline="true"
                                 contenteditable="true"
@@ -336,23 +320,11 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                                 spellcheck="false"
                                 placeholder="Team name..."
                                 _ref=team_away_name_ref
-                                on:input=move |_| {
-                                    let button = submit_button_ref.get().unwrap();
-                                    if button.inner_text() != "Submit" {
-                                        button.set_inner_text("Submit")
-                                    }
-                                }
                             />
                             <div
                                 required
                                 on:focusin=handle_focus_in_away
                                 on:focusout=handle_focus_out_away
-                                on:input=move |_| {
-                                    let button = submit_button_ref.get().unwrap();
-                                    if button.inner_text() != "Submit" {
-                                        button.set_inner_text("Submit")
-                                    }
-                                }
                                 role="textbox"
                                 aria-multiline="true"
                                 contenteditable="true"
@@ -369,13 +341,25 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                     </div>
                     <button
                         _ref=submit_button_ref
-                        class="bg-lime-400 hover:bg-indigo-600 rounded-full hover:cursor-pointer text-xs text-black hover:text-white w-[150px] h-[30px] self-center"
+                        class="bg-lime-400 hover:bg-indigo-600 rounded-full hover:cursor-pointer text-xs text-black hover:text-white w-[150px] h-[30px] mb-2 self-center"
                         type="submit"
                     >
-                        { move || if register_match_info_action.value().get().is_some() {
-                            "Success"
-                        } else { "Submit" } }
+                        "Submit"
                     </button>
+                    <Suspense>
+                        <p class="text-xs text-white self-center">
+                            { move || {
+                                let match_info = response.get().unwrap_or(Ok(MatchInfo::default())).unwrap_or_default();
+                                if !match_info.match_date.is_empty() {
+                                    format!("Latest registered: {}: {} vs {}",
+                                        match_info.match_date,
+                                        match_info.team_home,
+                                        match_info.team_away
+                                    )
+                                } else { "".to_string() }
+                            }}
+                        </p>
+                    </Suspense>
                 </form>
             </div>
         </div>

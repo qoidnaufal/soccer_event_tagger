@@ -52,13 +52,6 @@ pub async fn get_table_data(match_id: String) -> Result<Vec<TaggedEvent>, AppErr
     Ok(vec_data)
 }
 
-pub async fn get_all_data() -> Result<Vec<TaggedEvent>, AppError> {
-    let data = invoke("get_all_data", JsValue::null()).await;
-    let data = serde_wasm_bindgen::from_value::<Vec<TaggedEvent>>(data).unwrap_or_default();
-
-    Ok(data)
-}
-
 #[component]
 pub fn App() -> impl IntoView {
     let register_match_info_action =
@@ -85,7 +78,7 @@ pub fn App() -> impl IntoView {
         <Router fallback=|| view! { <p>"Error"</p> }.into_view()>
             <main class="absolute m-auto right-0 left-0 top-0 bottom-0 size-full flex flex-row">
                 <MenuButton show_menu set_show_menu/>
-                <MenuBar match_info open_video_action show_menu/>
+                <MenuBar open_video_action show_menu/>
                 <Routes>
                     <Route path="/" view=EventTagger/>
                     <Route path="/team_sheet" view=RegisterMatchInfo/>
