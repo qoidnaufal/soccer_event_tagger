@@ -58,6 +58,10 @@ pub fn Pitch(
                     .unwrap();
                 ctx.set_fill_style(&JsValue::from_str("red"));
                 ctx.fill();
+
+                ctx.move_to(x_start, y_start);
+                ctx.line_to(x_end, y_end);
+
                 ctx.stroke();
             }
         }

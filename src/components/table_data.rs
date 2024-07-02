@@ -131,12 +131,30 @@ pub fn TableData(
                                                 if let Some(video_player) = video_player_node_ref.get() {
                                                     let _ = video_player.fast_seek(event.get().time_start);
                                                 }
+
+                                                set_latest_start.update(|p| {
+                                                    p.x = event.get_untracked().x_start;
+                                                    p.y = event.get_untracked().y_start;
+                                                });
+                                                set_latest_end.update(|p| {
+                                                    p.x = event.get_untracked().x_end;
+                                                    p.y = event.get_untracked().y_end;
+                                                });
                                             };
                                             let seek_end = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
                                                 if let Some(video_player) = video_player_node_ref.get() {
                                                     let _ = video_player.fast_seek(event.get().time_end.unwrap_or_default());
                                                 }
+
+                                                set_latest_start.update(|p| {
+                                                    p.x = event.get_untracked().x_start;
+                                                    p.y = event.get_untracked().y_start;
+                                                });
+                                                set_latest_end.update(|p| {
+                                                    p.x = event.get_untracked().x_end;
+                                                    p.y = event.get_untracked().y_end;
+                                                });
                                             };
                                             let delete = move |ev: ev::MouseEvent| {
                                                 ev.stop_immediate_propagation();
