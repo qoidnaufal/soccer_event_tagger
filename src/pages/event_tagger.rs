@@ -40,9 +40,10 @@ pub fn EventTagger() -> impl IntoView {
             (
                 match_info.get().match_id,
                 delete_match_info_action.version().get(),
+                register_event_action.version().get(),
             )
         },
-        move |(match_id, _)| get_players_by_match_id(match_id),
+        move |(match_id, _, _)| get_players_by_match_id(match_id),
     );
 
     let match_info_resource = create_resource(
@@ -81,19 +82,19 @@ pub fn EventTagger() -> impl IntoView {
             }
             "ArrowRight" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek((current_time + 0.2).ceil());
+                let _ = video_player.fast_seek(current_time + 1.);
             }
             "ArrowLeft" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek((current_time - 0.2).floor());
+                let _ = video_player.fast_seek(current_time - 1.);
             }
             "ArrowUp" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek((current_time + 5.).ceil());
+                let _ = video_player.fast_seek(current_time + 0.01);
             }
             "ArrowDown" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek((current_time - 5.).floor());
+                let _ = video_player.fast_seek(current_time - 0.01);
             }
             // --- open video
             open if ev.ctrl_key() && open == "o" => {
@@ -126,6 +127,7 @@ pub fn EventTagger() -> impl IntoView {
             "Enter" => {
                 // --- dump the data to the table
                 set_tagged_event.update(|tag| {
+                    logging::log!("{:?}", player_buffer.get_untracked());
                     tag.player_name = player_buffer.get_untracked().player_name;
                     tag.play_position = player_buffer.get_untracked().play_position.last().cloned();
                     tag.team_name = team_buffer.get_untracked();

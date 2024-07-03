@@ -1,6 +1,7 @@
 use super::Database;
+use surrealdb::opt::PatchOp;
 use tauri::State;
-use types::{AppError, MatchInfo, TaggedEvent};
+use types::{AppError, MatchInfo, PlayerInfo, TaggedEvent};
 
 #[tauri::command]
 pub async fn insert_data(
@@ -10,13 +11,60 @@ pub async fn insert_data(
     payload.assign_uuid();
 
     let db = state.db.lock().await;
+
     match db
         .create::<Option<TaggedEvent>>(("tagged_events", &payload.uuid))
-        .content(payload)
+        .content(payload.clone())
         .await
         .map_err(|err| AppError::DatabaseError(err.to_string()))
     {
-        Ok(_) => Ok(()),
+        Ok(created) => {
+            if let Some(tagged_event) = created {
+                if tagged_event.event_name == "Subs Out" {
+                    db.update::<Option<PlayerInfo>>((
+                        &tagged_event.match_id,
+                        &tagged_event.player_id,
+                    ))
+                    .patch(PatchOp::replace("/play", false))
+                    .await
+                    .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+
+                    let player_in = db.query("SELECT * FROM type::table($match_id) WHERE team_name = $team_name AND player_name = $player_name")
+                        .bind(("match_id", &tagged_event.match_id))
+                        .bind(("team_name", &tagged_event.team_end))
+                        .bind(("player_name", &tagged_event.player_end))
+                        .await
+                        .map_err(|err| AppError::DatabaseError(err.to_string()))?
+                        .take::<Option<PlayerInfo>>(0)
+                        .map_err(|err| AppError::DatabaseError(err.to_string()))?
+                        .unwrap_or_default();
+
+                    db.update::<Option<PlayerInfo>>((&tagged_event.match_id, &player_in.player_id))
+                        .patch(PatchOp::replace("/play", true))
+                        .patch(PatchOp::add(
+                            "/play_position",
+                            payload.play_position.as_ref().unwrap(),
+                        ))
+                        .await
+                        .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+                }
+
+                if tagged_event.event_name == "Change Position" {
+                    db.update::<Option<PlayerInfo>>((
+                        &tagged_event.match_id,
+                        &tagged_event.player_id,
+                    ))
+                    .patch(PatchOp::add(
+                        "/play_position",
+                        payload.play_position.as_ref().unwrap(),
+                    ))
+                    .await
+                    .map_err(|err| AppError::DatabaseError(err.to_string()))?;
+                }
+            }
+
+            Ok(())
+        }
         Err(err) => {
             log::error!("[INS]: {}", err);
             Err(err)

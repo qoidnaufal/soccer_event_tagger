@@ -87,8 +87,8 @@ impl TaggedEvent {
                 self.event_type = Some("Open Play".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "pc" => {
                 self.event_name = "Pass".to_string();
@@ -136,8 +136,8 @@ impl TaggedEvent {
                 self.event_type = Some("Goal Kick".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "gkc" => {
                 self.event_name = "Pass".to_string();
@@ -177,8 +177,8 @@ impl TaggedEvent {
                 self.event_type = Some("Open Play".to_string());
                 self.event_source = None;
                 self.outcome = Some("Off Target".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "sb" => {
                 self.event_name = "Shot".to_string();
@@ -196,13 +196,22 @@ impl TaggedEvent {
                 self.team_end = team_args;
                 self.player_end = player_args;
             }
-            "og" => {
+            // --- own goal
+            "ogop" => {
                 self.event_name = "Own Goal".to_string();
-                self.event_type = Some("Own Goal".to_string());
-                self.event_source = None;
+                self.event_type = None;
+                self.event_source = Some("Open Play".to_string());
                 self.outcome = Some("Own Goal".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
+            }
+            "ogsp" => {
+                self.event_name = "Own Goal".to_string();
+                self.event_type = None;
+                self.event_source = Some("Set Piece".to_string());
+                self.outcome = Some("Own Goal".to_string());
+                self.team_end = None;
+                self.player_end = None;
             }
             // --- penalty kick pass
             "pkps" => {
@@ -226,8 +235,8 @@ impl TaggedEvent {
                 self.event_type = Some("Penalty Kick".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "pkpc" => {
                 self.event_name = "Pass".to_string();
@@ -259,8 +268,8 @@ impl TaggedEvent {
                 self.event_type = Some("Penalty Kick".to_string());
                 self.event_source = None;
                 self.outcome = Some("Off Target".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "pkg" => {
                 self.event_name = "Shot".to_string();
@@ -276,32 +285,32 @@ impl TaggedEvent {
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = Some("Pass".to_string());
-                self.player_end = player_args;
-                self.team_end = team_args;
+                self.player_end = None;
+                self.team_end = None;
             }
             "drs" => {
                 self.event_name = "Dribble".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = Some("Shot".to_string());
-                self.player_end = player_args;
-                self.team_end = team_args;
+                self.player_end = None;
+                self.team_end = None;
             }
             "drlb" => {
                 self.event_name = "Dribble".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = Some("Lost Ball".to_string());
-                self.player_end = player_args;
-                self.team_end = team_args;
+                self.player_end = None;
+                self.team_end = None;
             }
             "drfw" => {
                 self.event_name = "Dribble".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = Some("Foul Won".to_string());
-                self.player_end = player_args;
-                self.team_end = team_args;
+                self.player_end = None;
+                self.team_end = None;
             }
             // --- crossing
             "crs" => {
@@ -341,8 +350,8 @@ impl TaggedEvent {
                 self.event_type = Some("Crossing".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "crp" => {
                 self.event_name = "Pass".to_string();
@@ -390,8 +399,8 @@ impl TaggedEvent {
                 self.event_type = Some("Throw In".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "tip" => {
                 self.event_name = "Pass".to_string();
@@ -439,8 +448,8 @@ impl TaggedEvent {
                 self.event_type = Some("Corner Kick".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "ckp" => {
                 self.event_name = "Pass".to_string();
@@ -463,6 +472,8 @@ impl TaggedEvent {
                 self.event_type = Some("Corner Kick".to_string());
                 self.event_source = None;
                 self.outcome = Some("Goal".to_string());
+                self.team_end = team_args;
+                self.player_end = player_args;
             }
             // --- direct free kick
             "fkon" => {
@@ -478,8 +489,8 @@ impl TaggedEvent {
                 self.event_type = Some("Free Kick".to_string());
                 self.event_source = None;
                 self.outcome = Some("Off Target".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "fkb" => {
                 self.event_name = "Shot".to_string();
@@ -519,8 +530,8 @@ impl TaggedEvent {
                 self.event_type = Some("Free Kick".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "fkpc" => {
                 self.event_name = "Pass".to_string();
@@ -570,32 +581,32 @@ impl TaggedEvent {
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "fw" => {
                 self.event_name = "Foul Won".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "ofsop" => {
                 self.event_name = "Offside".to_string();
                 self.event_type = Some("Open Play".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "ofsfk" => {
                 self.event_name = "Offside".to_string();
                 self.event_type = Some("Free Kick".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             // --- tackle
             "tw" => {
@@ -603,16 +614,16 @@ impl TaggedEvent {
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = Some("Won".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "tl" => {
                 self.event_name = "Tackle".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = Some("Lost".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             // --- duel
             "daw" => {
@@ -620,65 +631,41 @@ impl TaggedEvent {
                 self.event_type = Some("Aerial".to_string());
                 self.event_source = None;
                 self.outcome = Some("Won".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "dal" => {
                 self.event_name = "Duel".to_string();
                 self.event_type = Some("Aerial".to_string());
                 self.event_source = None;
                 self.outcome = Some("Lose".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "dgw" => {
                 self.event_name = "Duel".to_string();
                 self.event_type = Some("Ground".to_string());
                 self.event_source = None;
                 self.outcome = Some("Won".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "dgl" => {
                 self.event_name = "Duel".to_string();
                 self.event_type = Some("Ground".to_string());
                 self.event_source = None;
                 self.outcome = Some("Lose".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             // --- clearance
-            "clrop" => {
+            "clr" => {
                 self.event_name = "Clearance".to_string();
                 self.event_type = None;
                 self.event_source = Some("Open Play".to_string());
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
-            }
-            "clrfk" => {
-                self.event_name = "Clearance".to_string();
-                self.event_type = None;
-                self.event_source = Some("Freekick".to_string());
-                self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
-            }
-            "clrck" => {
-                self.event_name = "Clearance".to_string();
-                self.event_type = None;
-                self.event_source = Some("Cornerkick".to_string());
-                self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
-            }
-            "clrti" => {
-                self.event_name = "Clearance".to_string();
-                self.event_type = None;
-                self.event_source = Some("Throw In".to_string());
-                self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             // --- pressure
             "prs" => {
@@ -686,49 +673,90 @@ impl TaggedEvent {
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
-            // --- goalkeeper save
-            "svs" => {
+            // --- save
+            "svop" => {
                 self.event_name = "Save".to_string();
                 self.event_type = None;
-                self.event_source = Some("Shot".to_string());
+                self.event_source = Some("Open Play".to_string());
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "svpk" => {
                 self.event_name = "Save".to_string();
                 self.event_type = None;
                 self.event_source = Some("Penalty".to_string());
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "svfk" => {
                 self.event_name = "Save".to_string();
                 self.event_type = None;
                 self.event_source = Some("Freekick".to_string());
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "svck" => {
                 self.event_name = "Save".to_string();
                 self.event_type = None;
                 self.event_source = Some("Cornerkick".to_string());
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
-            "svo" => {
+            "svot" => {
                 self.event_name = "Save".to_string();
                 self.event_type = None;
                 self.event_source = Some("Other".to_string());
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
+            }
+            // --- conceded
+            "cdop" => {
+                self.event_name = "Conceded".to_string();
+                self.event_type = None;
+                self.event_source = Some("Open Play".to_string());
+                self.outcome = None;
+                self.team_end = None;
+                self.player_end = None;
+            }
+            "cdpk" => {
+                self.event_name = "Conceded".to_string();
+                self.event_type = None;
+                self.event_source = Some("Penalty".to_string());
+                self.outcome = None;
+                self.team_end = None;
+                self.player_end = None;
+            }
+            "cdfk" => {
+                self.event_name = "Conceded".to_string();
+                self.event_type = None;
+                self.event_source = Some("Freekick".to_string());
+                self.outcome = None;
+                self.team_end = None;
+                self.player_end = None;
+            }
+            "cdck" => {
+                self.event_name = "Conceded".to_string();
+                self.event_type = None;
+                self.event_source = Some("Cornerkick".to_string());
+                self.outcome = None;
+                self.team_end = None;
+                self.player_end = None;
+            }
+            "cdot" => {
+                self.event_name = "Conceded".to_string();
+                self.event_type = None;
+                self.event_source = Some("Other".to_string());
+                self.outcome = None;
+                self.team_end = None;
+                self.player_end = None;
             }
             // --- kickoff first half
             "kofhps" => {
@@ -768,8 +796,8 @@ impl TaggedEvent {
                 self.event_type = Some("Kick Off First Half".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "kofhr" => {
                 self.event_name = "Pass".to_string();
@@ -825,8 +853,8 @@ impl TaggedEvent {
                 self.event_type = Some("Kick Off Second Half".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "koshr" => {
                 self.event_name = "Pass".to_string();
@@ -882,8 +910,8 @@ impl TaggedEvent {
                 self.event_type = Some("Kick Off Extra Time First Half".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "koefhr" => {
                 self.event_name = "Pass".to_string();
@@ -939,8 +967,8 @@ impl TaggedEvent {
                 self.event_type = Some("Kick Off Extra Time Second Half".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "koeshr" => {
                 self.event_name = "Pass".to_string();
@@ -996,8 +1024,8 @@ impl TaggedEvent {
                 self.event_type = Some("Kick Off Restart".to_string());
                 self.event_source = None;
                 self.outcome = Some("Out of Play".to_string());
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "korr" => {
                 self.event_name = "Pass".to_string();
@@ -1021,181 +1049,181 @@ impl TaggedEvent {
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "eosh" => {
                 self.event_name = "End of Second Half".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "eoefh" => {
                 self.event_name = "End of Extra Time First Half".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "eoesh" => {
                 self.event_name = "End of Extra Time Second Half".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "eom" => {
                 self.event_name = "End of Match".to_string();
                 self.event_type = None;
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             // --- change position
             "cpgk" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Change Position".to_string());
+                self.event_name = "Change Position".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("GK".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "cprfb" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Change Position".to_string());
+                self.event_name = "Change Position".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("RFB".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "cplfb" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Change Position".to_string());
+                self.event_name = "Change Position".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("LFB".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "cpcb" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Change Position".to_string());
+                self.event_name = "Change Position".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("CB".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "cpmf" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Change Position".to_string());
+                self.event_name = "Change Position".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("MF".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "cprwg" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Change Position".to_string());
+                self.event_name = "Change Position".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("RWG".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "cplwf" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Change Position".to_string());
+                self.event_name = "Change Position".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("LWG".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             "cpcf" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Change Position".to_string());
+                self.event_name = "Change Position".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("CF".to_string());
                 self.event_source = None;
                 self.outcome = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
             }
             // --- subs
-            "sigk" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Subs In".to_string());
+            "subsgk" => {
+                self.event_name = "Subs Out".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("GK".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
                 self.event_source = None;
                 self.outcome = None;
             }
-            "sirfb" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Subs In".to_string());
+            "subsrfb" => {
+                self.event_name = "Subs Out".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("RFB".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
                 self.event_source = None;
                 self.outcome = None;
             }
-            "silfb" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Subs In".to_string());
+            "subslfb" => {
+                self.event_name = "Subs Out".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("LFB".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
                 self.event_source = None;
                 self.outcome = None;
             }
-            "sicb" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Subs In".to_string());
+            "subscb" => {
+                self.event_name = "Subs Out".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("CB".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
                 self.event_source = None;
                 self.outcome = None;
             }
-            "simf" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Subs In".to_string());
+            "subsmf" => {
+                self.event_name = "Subs Out".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("MF".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
                 self.event_source = None;
                 self.outcome = None;
             }
-            "sirwg" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Subs In".to_string());
+            "subsrwg" => {
+                self.event_name = "Subs Out".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("RWG".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
                 self.event_source = None;
                 self.outcome = None;
             }
-            "silwg" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Subs In".to_string());
+            "subslwg" => {
+                self.event_name = "Subs Out".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("LWG".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
                 self.event_source = None;
                 self.outcome = None;
             }
-            "sicf" => {
-                self.event_name = "Play".to_string();
-                self.event_type = Some("Subs In".to_string());
+            "subscf" => {
+                self.event_name = "Subs Out".to_string();
+                self.event_type = Some("Play".to_string());
                 self.play_position = Some("CF".to_string());
                 self.team_end = team_args;
                 self.player_end = player_args;
@@ -1207,8 +1235,8 @@ impl TaggedEvent {
                 self.event_name = "Yellow Card".to_string();
                 self.event_type = None;
                 self.play_position = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
                 self.event_source = None;
                 self.outcome = None;
             }
@@ -1216,8 +1244,8 @@ impl TaggedEvent {
                 self.event_name = "Second Yellow Card".to_string();
                 self.event_type = None;
                 self.play_position = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
                 self.event_source = None;
                 self.outcome = None;
             }
@@ -1225,8 +1253,8 @@ impl TaggedEvent {
                 self.event_name = "Red Card".to_string();
                 self.event_type = None;
                 self.play_position = None;
-                self.team_end = team_args;
-                self.player_end = player_args;
+                self.team_end = None;
+                self.player_end = None;
                 self.event_source = None;
                 self.outcome = None;
             }

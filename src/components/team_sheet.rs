@@ -84,7 +84,7 @@ pub fn SelectTeamSheet(
 
 #[component]
 pub fn TeamSheet(
-    team_info_resource: Resource<(String, usize), Result<Vec<PlayerInfo>, AppError>>,
+    team_info_resource: Resource<(String, usize, usize), Result<Vec<PlayerInfo>, AppError>>,
     team_state: String,
 ) -> impl IntoView {
     let team_state = create_rw_signal(team_state).read_only();

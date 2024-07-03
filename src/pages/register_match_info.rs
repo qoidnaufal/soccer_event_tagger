@@ -126,8 +126,8 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                         play_position: player_info.play_position.first().cloned(),
                         player_name: player_info.player_name,
                         team_name: match_info.get_untracked().team_home,
-                        event_name: "Play".to_string(),
-                        event_type: Some("Start".to_string()),
+                        event_name: "Start".to_string(),
+                        event_type: Some("Play".to_string()),
                         ..Default::default()
                     };
 
@@ -205,8 +205,8 @@ pub fn RegisterMatchInfo() -> impl IntoView {
                         play_position: player_info.play_position.first().cloned(),
                         player_name: player_info.player_name,
                         team_name: match_info.get_untracked().team_away,
-                        event_name: "Play".to_string(),
-                        event_type: Some("Start".to_string()),
+                        event_name: "Start".to_string(),
+                        event_type: Some("Play".to_string()),
                         ..Default::default()
                     };
 
