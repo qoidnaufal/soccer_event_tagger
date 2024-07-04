@@ -127,7 +127,6 @@ pub fn EventTagger() -> impl IntoView {
             "Enter" => {
                 // --- dump the data to the table
                 set_tagged_event.update(|tag| {
-                    logging::log!("{:?}", player_buffer.get_untracked());
                     tag.player_name = player_buffer.get_untracked().player_name;
                     if tag.event_name != "Change Position" {
                         tag.play_position =
