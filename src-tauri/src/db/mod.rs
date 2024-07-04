@@ -1,10 +1,9 @@
 use std::sync::Arc;
 use surrealdb::{
-    engine::local::{Db, Mem},
+    engine::local::{Db, /* File, Mem, */ RocksDb},
     Surreal,
 };
-use tauri::{async_runtime::Mutex, Manager, State};
-use types::{AppError, MatchInfo};
+use tauri::{async_runtime::Mutex, Manager};
 
 pub mod event_register;
 pub mod match_register;
@@ -17,13 +16,18 @@ impl Database {
     pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         let app_handle = app.app_handle();
         tauri::async_runtime::spawn(async move {
-            let app_data_dir = app_handle
+            let mut app_data_dir = app_handle
                 .path_resolver()
                 .app_data_dir()
                 .unwrap_or_default();
+
+            app_data_dir.push("db");
+
             log::info!("App data dir: {}", app_data_dir.display());
 
-            let db = Surreal::new::<Mem>(()).await?;
+            // let db = Surreal::new::<Mem>(()).await?;
+            let db =
+                Surreal::new::<RocksDb>(format!("{}", app_data_dir.display()).as_str()).await?;
 
             db.use_ns("soccer_event_tagger")
                 .use_db("match_data")
@@ -38,16 +42,4 @@ impl Database {
 
         Ok(())
     }
-}
-
-#[tauri::command]
-pub async fn clear_db(state: State<'_, Database>) -> Result<(), AppError> {
-    let db = state.db.lock().await;
-    let all_match = db
-        .select::<Vec<MatchInfo>>("match_info")
-        .await
-        .map_err(|err| AppError::DatabaseError(err.to_string()))?;
-    log::info!("{:?}", all_match);
-
-    Ok(())
 }

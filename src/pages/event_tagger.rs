@@ -82,11 +82,11 @@ pub fn EventTagger() -> impl IntoView {
             }
             "ArrowRight" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek(current_time + 1.);
+                let _ = video_player.fast_seek((current_time + 0.5).ceil());
             }
             "ArrowLeft" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek(current_time - 1.);
+                let _ = video_player.fast_seek((current_time - 0.5).floor());
             }
             "ArrowUp" => {
                 let current_time = video_player.current_time();
