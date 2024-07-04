@@ -108,16 +108,13 @@ For now, only *.csv is available.
 I also suggest to periodically clean up the data (make sure you have exported them), since i haven't tested yet whether this app can be a full fledged database app.
 Although i bet it will be just fine :)
 
-
-
-
 ## TODO:
 There are various features which i think i need to add, but pretty much the skeleton of the app is pretty stable. In the upcoming version, i will try to add these:
   * prevent auto video resizing [done]
   * stabilize window size accross different platform [done]
   * caching video src [done]
   * data dashboard [done]
-  * switch to file based db
+  * switch to file based db [done]
   * move some heavy-parsing on the front-end to the back-end
   * video clipping and exporting (perhaps this is included in db management page, idk)
   * show latest tagged event as dot on the pitch [done]
