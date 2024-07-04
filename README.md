@@ -34,7 +34,7 @@ You will see this on the screen:
 ### Tagging the events
 
 Before you start tagging the events, click on the menu and select `Open Video`. The currently supported video format is *.mp4 only.
-You can play / pause the video by pressing `space` on your keyboard. You can also navigate forward / backward per 1 secs by pressing `ArrwoRight` or `ArrowLeft` on your keyboard, or gradually per frame by pressing `ArrowUp` or `ArrowDown`.
+You can play / pause the video by pressing `space` on your keyboard. You can also navigate forward / backward per 1 secs by pressing `ArrowRight` or `ArrowLeft` on your keyboard, or gradually per frame by pressing `ArrowUp` or `ArrowDown`.
 You can also speed up the video by pressing `Ctrl =` (additively increase speed by 0.25x), `Ctrl 2` or `Ctrl 3` (directly increase speed by the respective number), reduce the playback speed by pressing `Ctrl -` (additively reduce speed by 0.25x), or return to normal speed by pressing `Ctrl 1`.
 
 ![buffer1](public/screenshots/buffer1.jpg)
