@@ -109,7 +109,7 @@ pub fn DataDashboard() -> impl IntoView {
                                             <button
                                                 on:click=export_data
                                                 type="button"
-                                                class="bg-blue-300 hover:bg-blue-400 rounded-md px-2 py-1"
+                                                class="bg-blue-300 hover:bg-blue-400 rounded-md px-2 py-1 ml-2"
                                             >
                                                 "export"
                                             </button>

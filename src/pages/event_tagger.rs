@@ -90,11 +90,11 @@ pub fn EventTagger() -> impl IntoView {
             }
             "ArrowUp" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek(current_time + 0.01);
+                let _ = video_player.fast_seek(current_time + 0.05);
             }
             "ArrowDown" => {
                 let current_time = video_player.current_time();
-                let _ = video_player.fast_seek(current_time - 0.01);
+                let _ = video_player.fast_seek(current_time - 0.1);
             }
             // --- open video
             open if ev.ctrl_key() && open == "o" => {
@@ -129,7 +129,10 @@ pub fn EventTagger() -> impl IntoView {
                 set_tagged_event.update(|tag| {
                     logging::log!("{:?}", player_buffer.get_untracked());
                     tag.player_name = player_buffer.get_untracked().player_name;
-                    tag.play_position = player_buffer.get_untracked().play_position.last().cloned();
+                    if tag.event_name != "Change Position" {
+                        tag.play_position =
+                            player_buffer.get_untracked().play_position.last().cloned();
+                    }
                     tag.team_name = team_buffer.get_untracked();
                     tag.match_id = match_info.get_untracked().match_id;
                     tag.match_date = match_info.get_untracked().match_date;

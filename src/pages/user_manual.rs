@@ -7,10 +7,7 @@ const USER_MANUAL: &str = include_str!("../../USER_MANUAL.md");
 pub fn UserManual() -> impl IntoView {
     let mut user_manual = String::new();
     let parser = Parser::new(USER_MANUAL);
-
     html::push_html(&mut user_manual, parser);
-
-    logging::log!("{}", user_manual);
 
     let user_manual = move || user_manual.clone();
 
