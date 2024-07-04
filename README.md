@@ -2,7 +2,7 @@
 
 # Soccer Event Tagger
 
-WIP
+An app to tag football event data. Latest release check [here](https://github.com/qoidnaufal/soccer_event_tagger/releases/latest/).
 
 ## User Manual
 
